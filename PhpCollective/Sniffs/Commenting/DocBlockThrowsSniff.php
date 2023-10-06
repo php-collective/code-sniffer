@@ -10,7 +10,7 @@ namespace PhpCollective\Sniffs\Commenting;
 use Exception;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\UseStatementsTrait;
 
 /**
@@ -23,7 +23,7 @@ use PhpCollective\Traits\UseStatementsTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockThrowsSniff extends AbstractSprykerSniff
+class DocBlockThrowsSniff extends AbstractSniff
 {
     use UseStatementsTrait;
 

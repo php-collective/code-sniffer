@@ -8,10 +8,10 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Verifies that a `@return` tag description does not start with $ sign to avoid accidental variable copy-and-paste.
@@ -19,7 +19,7 @@ use PhpCollective\Traits\CommentingTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockReturnTagSniff extends AbstractSprykerSniff
+class DocBlockReturnTagSniff extends AbstractSniff
 {
     use CommentingTrait;
 

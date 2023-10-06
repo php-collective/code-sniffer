@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * No empty phpdoc blocks and no empty @ tag.
  */
-class DocBlockNoEmptySniff extends AbstractSprykerSniff
+class DocBlockNoEmptySniff extends AbstractSniff
 {
     /**
      * @inheritDoc

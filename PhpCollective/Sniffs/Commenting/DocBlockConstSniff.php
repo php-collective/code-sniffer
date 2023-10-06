@@ -9,10 +9,10 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Ensures Doc Blocks for constants exist and are correct.
@@ -20,7 +20,7 @@ use PhpCollective\Traits\CommentingTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockConstSniff extends AbstractSprykerSniff
+class DocBlockConstSniff extends AbstractSniff
 {
     use CommentingTrait;
 

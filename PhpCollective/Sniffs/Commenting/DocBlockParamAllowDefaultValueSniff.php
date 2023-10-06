@@ -8,11 +8,11 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 use PhpCollective\Traits\SignatureTrait;
+use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 
 /**
  * Makes sure doc block param types allow `|null`, `|array` etc, when those are used
@@ -21,7 +21,7 @@ use PhpCollective\Traits\SignatureTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockParamAllowDefaultValueSniff extends AbstractSprykerSniff
+class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
 {
     use CommentingTrait;
     use SignatureTrait;

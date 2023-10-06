@@ -10,10 +10,10 @@ namespace PhpCollective\Sniffs\Commenting;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
-use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 use PhpCollective\Traits\BasicsTrait;
 use PhpCollective\Traits\CommentingTrait;
+use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 
 /**
  * Doc blocks should type-hint returning null for nullable return values (if null is used besides other return values).

@@ -10,8 +10,8 @@ namespace PhpCollective\Sniffs\Namespaces;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
-use RuntimeException;
 use PhpCollective\Traits\BasicsTrait;
+use RuntimeException;
 
 /**
  * "Inline FQCN" must be moved to use statements.

@@ -9,12 +9,12 @@ namespace PhpCollective\Sniffs\ControlStructures;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Inline/conditional assignment is not allowed. Extract into an own line above.
  */
-class NoInlineAssignmentSniff extends AbstractSprykerSniff
+class NoInlineAssignmentSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

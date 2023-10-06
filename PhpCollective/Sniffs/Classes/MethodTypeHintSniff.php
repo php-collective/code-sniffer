@@ -9,14 +9,14 @@ namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * In method return types the own class or interface must be references as self.
  *
  * @author Mark Scherer
  */
-class MethodTypeHintSniff extends AbstractSprykerSniff
+class MethodTypeHintSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

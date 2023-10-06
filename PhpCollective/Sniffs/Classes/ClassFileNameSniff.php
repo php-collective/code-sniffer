@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Squiz_Sniffs_Classes_ClassFileNameSniff.
@@ -25,7 +25,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @version Release: @package_version@
  * @link http://pear.php.net/package/PHP_CodeSniffer
  */
-class ClassFileNameSniff extends AbstractSprykerSniff
+class ClassFileNameSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

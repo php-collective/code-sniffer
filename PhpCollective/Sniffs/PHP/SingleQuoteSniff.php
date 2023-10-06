@@ -19,7 +19,7 @@ namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Converts double quotes to single quotes for simple strings.
@@ -27,7 +27,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Gregor Harlan <gharlan@web.de>
  * @author Mark Scherer
  */
-class SingleQuoteSniff extends AbstractSprykerSniff
+class SingleQuoteSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

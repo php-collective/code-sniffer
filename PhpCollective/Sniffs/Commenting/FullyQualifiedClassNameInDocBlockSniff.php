@@ -9,10 +9,10 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * All doc blocks must use FQCN for class names. Extends the dependency

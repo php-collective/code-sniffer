@@ -19,6 +19,8 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
@@ -30,13 +32,11 @@ use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Verifies order of types in type hints. Also removes duplicates.
  */
-class TypeHintSniff extends AbstractSprykerSniff
+class TypeHintSniff extends AbstractSniff
 {
     use CommentingTrait;
 

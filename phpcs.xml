@@ -6,24 +6,15 @@
     <arg name="tab-width" value="4"/>
     <arg value="nps"/>
 
-    <file>Spryker/</file>
-    <file>SprykerStrict/</file>
-    <file>GlueStreamSpecific/</file>
-    <file>tests/Spryker/</file>
+    <file>PhpCollective/</file>
+    <file>PhpCollectiveStrict/</file>
+    <file>tests/PhpCollective/</file>
     <file>tests/TestCase.php</file>
     <file>docs/</file>
     <file>bin/</file>
 
-    <rule ref="SprykerStrict"/>
+    <rule ref="PhpCollectiveStrict"/>
 
-    <rule ref="Spryker.Namespaces.SprykerNamespace">
-        <properties>
-            <property name="namespace" value="Spryker"/>
-            <property name="rootDir" value="Spryker"/>
-            <property name="isRoot" value="true"/>
-        </properties>
-    </rule>
-
-    <exclude-pattern>/Spryker/tests/files/</exclude-pattern>
+    <exclude-pattern>/PhpCollective/tests/files/</exclude-pattern>
 
 </ruleset>

@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 227 sniffs
+The PhpCollectiveStrict standard contains 216 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -76,7 +76,7 @@ PSR2 (12 sniffs)
 - PSR2.Namespaces.NamespaceDeclaration
 - PSR2.Namespaces.UseDeclaration
 
-PhpCollective (89 sniffs)
+PhpCollective (78 sniffs)
 -------------------------
 - PhpCollective.Arrays.DisallowImplicitArrayCreation
 - PhpCollective.Classes.ClassFileName
@@ -88,7 +88,6 @@ PhpCollective (89 sniffs)
 - PhpCollective.Classes.SelfAccessor
 - PhpCollective.Commenting.Attributes
 - PhpCollective.Commenting.DocBlock
-- PhpCollective.Commenting.DocBlockApiAnnotation
 - PhpCollective.Commenting.DocBlockConst
 - PhpCollective.Commenting.DocBlockConstructor
 - PhpCollective.Commenting.DocBlockInherit
@@ -125,19 +124,9 @@ PhpCollective (89 sniffs)
 - PhpCollective.ControlStructures.DisallowCloakingCheck
 - PhpCollective.ControlStructures.ElseIfDeclaration
 - PhpCollective.ControlStructures.NoInlineAssignment
-- PhpCollective.DependencyProvider.FacadeNotInBridgeReturned
-- PhpCollective.Factory.CreateVsGetMethods
-- PhpCollective.Factory.NoPrivateMethods
-- PhpCollective.Factory.OneNewPerMethod
 - PhpCollective.Formatting.ArrayDeclaration
 - PhpCollective.Formatting.MethodSignatureParametersLineBreakMethod
 - PhpCollective.Internal.DisallowFunctions
-- PhpCollective.MethodAnnotation.ConfigMethodAnnotation
-- PhpCollective.MethodAnnotation.EntityManagerMethodAnnotation
-- PhpCollective.MethodAnnotation.FacadeMethodAnnotation
-- PhpCollective.MethodAnnotation.FactoryMethodAnnotation
-- PhpCollective.MethodAnnotation.QueryContainerMethodAnnotation
-- PhpCollective.MethodAnnotation.RepositoryMethodAnnotation
 - PhpCollective.Namespaces.FunctionNamespace
 - PhpCollective.Namespaces.UseStatement
 - PhpCollective.Namespaces.UseWithAliasing

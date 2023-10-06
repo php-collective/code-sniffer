@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * There should be no empty newline at the beginning of each body.
  */
-class EmptyEnclosingLineSniff extends AbstractSprykerSniff
+class EmptyEnclosingLineSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

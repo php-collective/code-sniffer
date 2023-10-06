@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Always use simple casts instead of method invocation.
  */
-class PreferCastOverFunctionSniff extends AbstractSprykerSniff
+class PreferCastOverFunctionSniff extends AbstractSniff
 {
     /**
      * @var array<string>

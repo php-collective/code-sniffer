@@ -9,14 +9,14 @@ namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * In method return types self for chaining methods is disallowed as it is poorly supported by the language.
  *
  * @author Mark Scherer
  */
-class ReturnTypeHintSniff extends AbstractSprykerSniff
+class ReturnTypeHintSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

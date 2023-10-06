@@ -9,12 +9,12 @@ namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * There should always be newlines around functions/methods.
  */
-class FunctionSpacingSniff extends AbstractSprykerSniff
+class FunctionSpacingSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

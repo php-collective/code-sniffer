@@ -8,18 +8,18 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 use RuntimeException;
 use SlevomatCodingStandard\Helpers\DocCommentHelper;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Checks for missing/superfluous `|null` in docblock return annotations.
  */
-class DocBlockReturnNullableTypeSniff extends AbstractSprykerSniff
+class DocBlockReturnNullableTypeSniff extends AbstractSniff
 {
     use CommentingTrait;
 

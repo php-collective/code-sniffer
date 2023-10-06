@@ -10,14 +10,14 @@ namespace PhpCollective\Sniffs\AbstractSniffs;
 use PHP_CodeSniffer\Exceptions\DeepExitException;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PhpCollective\Traits\BasicsTrait;
 use SlevomatCodingStandard\Helpers\ClassHelper;
 use SlevomatCodingStandard\Helpers\DocCommentHelper;
 use SlevomatCodingStandard\Helpers\EmptyFileException;
 use SlevomatCodingStandard\Helpers\NamespaceHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
-use PhpCollective\Traits\BasicsTrait;
 
-abstract class AbstractSprykerSniff implements Sniff
+abstract class AbstractSniff implements Sniff
 {
     use BasicsTrait;
 
@@ -106,52 +106,6 @@ abstract class AbstractSprykerSniff implements Sniff
         $classNameParts = explode('\\', $className);
 
         return $classNameParts[0];
-    }
-
-    /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return bool
-     */
-    protected function isCore(File $phpCsFile): bool
-    {
-        $namespace = $this->getNamespace($phpCsFile);
-
-        return strpos($namespace, static::NAMESPACE_SPRYKER) === 0;
-    }
-
-    /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return string
-     */
-    protected function getModule(File $phpCsFile): string
-    {
-        $className = $this->getClassName($phpCsFile);
-        $classNameParts = explode('\\', $className);
-
-        if (count($classNameParts) < 3) {
-            return '';
-        }
-
-        return $classNameParts[2];
-    }
-
-    /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return string
-     */
-    protected function getLayer(File $phpCsFile): string
-    {
-        $className = $this->getClassName($phpCsFile);
-        $classNameParts = explode('\\', $className);
-
-        if (count($classNameParts) < 4) {
-            return '';
-        }
-
-        return $classNameParts[3];
     }
 
     /**

@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Ensures doc blocks follow basic formatting.
@@ -19,7 +19,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @version Release: @package_version@
  * @link http://pear.php.net/package/PHP_CodeSniffer
  */
-class DocCommentSniff extends AbstractSprykerSniff
+class DocCommentSniff extends AbstractSniff
 {
     /**
      * @var array<string>

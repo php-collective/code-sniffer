@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Verifies that short ternary operators have valid spacing surrounding them.
@@ -16,7 +16,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class TernarySpacingSniff extends AbstractSprykerSniff
+class TernarySpacingSniff extends AbstractSniff
 {
     /**
      * @var array<string>

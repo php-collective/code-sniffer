@@ -8,10 +8,10 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
+use PhpCollective\Traits\CommentingTrait;
 use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
-use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Makes sure doc block param type array is only used once.
@@ -20,7 +20,7 @@ use PhpCollective\Traits\CommentingTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockParamArraySniff extends AbstractSprykerSniff
+class DocBlockParamArraySniff extends AbstractSniff
 {
     use CommentingTrait;
 

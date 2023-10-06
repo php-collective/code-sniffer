@@ -8,14 +8,14 @@
 namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * In class properties, a default null argument can be removed.
  *
  * @author Mark Scherer
  */
-class PropertyDefaultValueSniff extends AbstractSprykerSniff
+class PropertyDefaultValueSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

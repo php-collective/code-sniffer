@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Ensures Doc Blocks for variables are not just type null, but always another type and optionally nullable on top.
@@ -17,7 +17,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockVarNotJustNullSniff extends AbstractSprykerSniff
+class DocBlockVarNotJustNullSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

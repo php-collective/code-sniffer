@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 
 /**
@@ -18,7 +18,7 @@ use PhpCollective\Traits\CommentingTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockVarSniff extends AbstractSprykerSniff
+class DocBlockVarSniff extends AbstractSniff
 {
     use CommentingTrait;
 

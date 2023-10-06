@@ -8,9 +8,9 @@
 namespace PhpCollective\Sniffs\Testing;
 
 use PHP_CodeSniffer\Files\File;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
 use SlevomatCodingStandard\Helpers\TypeHint;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
 
 /**
  * Ensures no wrong usage of MockObject return typehint or docblock return annotation.
@@ -18,7 +18,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class MockSniff extends AbstractSprykerSniff
+class MockSniff extends AbstractSniff
 {
     /**
      * @var string

@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * In method arguments there must not be arguments with default values before non-default ones.
@@ -18,7 +18,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Lucas Manzke <lmanzke@outlook.com>
  * @author Gregor Harlan <gharlan@web.de>
  */
-class MethodArgumentDefaultValueSniff extends AbstractSprykerSniff
+class MethodArgumentDefaultValueSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

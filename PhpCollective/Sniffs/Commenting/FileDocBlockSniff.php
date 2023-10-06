@@ -8,13 +8,13 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Checks if PHP class file has file doc block comment and has the expected content.
  * Use an empty .license file in your ROOT to remove all license doc blocks.
  */
-class FileDocBlockSniff extends AbstractSprykerSniff
+class FileDocBlockSniff extends AbstractSniff
 {
     /**
      * This property can be filled within the ruleset configuration file
@@ -31,8 +31,8 @@ class FileDocBlockSniff extends AbstractSprykerSniff
      * @var array<string>
      */
     protected static $defaultLicense = [
-        'Copyright © 2016-present Spryker Systems GmbH. All rights reserved.',
-        'Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.',
+        'MIT License',
+        'For full license information, please view the LICENSE file that was distributed with this source code.',
     ];
 
     /**
@@ -57,10 +57,6 @@ class FileDocBlockSniff extends AbstractSprykerSniff
      */
     public function process(File $phpCsFile, $stackPointer): void
     {
-        if ($this->isIgnorableModule($phpCsFile)) {
-            return;
-        }
-
         $license = $this->getLicense($phpCsFile);
 
         $fileDocBlockPointer = $this->fileDocBlockPointer($phpCsFile, $stackPointer);
@@ -118,16 +114,6 @@ class FileDocBlockSniff extends AbstractSprykerSniff
 
     /**
      * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return bool
-     */
-    protected function isIgnorableModule(File $phpCsFile): bool
-    {
-        return (in_array($this->getModule($phpCsFile), $this->ignorableModules, true));
-    }
-
-    /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
      * @param int $fileDocBlockStartPointer
      *
      * @return bool
@@ -141,7 +127,7 @@ class FileDocBlockSniff extends AbstractSprykerSniff
 
         $firstLineComment = array_shift($fileDockBlockLines);
 
-        if (strpos($firstLineComment, 'modified by Spryker Systems GmbH') !== false) {
+        if (strpos($firstLineComment, 'modified by ') !== false) {
             return false;
         }
 
@@ -170,76 +156,12 @@ class FileDocBlockSniff extends AbstractSprykerSniff
      */
     protected function findLicense(File $phpCsFile): ?string
     {
-        $currentPath = getcwd();
-        if ($currentPath === false) {
-            return null;
-        }
-        $path = str_replace($currentPath, '', $phpCsFile->getFilename());
-
-        if (strpos($path, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'spryker' . DIRECTORY_SEPARATOR . 'spryker' . DIRECTORY_SEPARATOR) === 0) {
-            $pathArray = explode(DIRECTORY_SEPARATOR, substr($path, 8));
-            array_shift($pathArray);
-            array_shift($pathArray);
-            array_shift($pathArray);
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-                . 'spryker' . DIRECTORY_SEPARATOR . 'spryker' . DIRECTORY_SEPARATOR
-                . 'Bundles' . DIRECTORY_SEPARATOR . array_shift($pathArray) . DIRECTORY_SEPARATOR;
-
-            $customLicense = $this->findCustomLicense($path) ?: null;
-            if ($customLicense) {
-                return $customLicense;
-            }
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-                . 'spryker' . DIRECTORY_SEPARATOR . 'spryker' . DIRECTORY_SEPARATOR;
-
-            return $this->findCustomLicense($path) ?: null;
+        $currentPath = getcwd() ?: '';
+        if ($currentPath) {
+            $currentPath .= DIRECTORY_SEPARATOR;
         }
 
-        if (strpos($path, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'spryker' . DIRECTORY_SEPARATOR . 'spryker-shop' . DIRECTORY_SEPARATOR) === 0) {
-            $pathArray = explode(DIRECTORY_SEPARATOR, substr($path, 8));
-            array_shift($pathArray);
-            array_shift($pathArray);
-            array_shift($pathArray);
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-                . 'spryker' . DIRECTORY_SEPARATOR . 'spryker-shop' . DIRECTORY_SEPARATOR
-                . 'Bundles' . DIRECTORY_SEPARATOR . array_shift($pathArray) . DIRECTORY_SEPARATOR;
-
-            $customLicense = $this->findCustomLicense($path) ?: null;
-            if ($customLicense) {
-                return $customLicense;
-            }
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-                . 'spryker' . DIRECTORY_SEPARATOR . 'spryker-shop' . DIRECTORY_SEPARATOR;
-
-            return $this->findCustomLicense($path) ?: null;
-        }
-
-        if (strpos($path, DIRECTORY_SEPARATOR . 'Bundles' . DIRECTORY_SEPARATOR) === 0) {
-            $pathArray = explode(DIRECTORY_SEPARATOR, substr($path, 8));
-            array_shift($pathArray);
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'Bundles' . DIRECTORY_SEPARATOR . array_shift($pathArray) . DIRECTORY_SEPARATOR;
-
-            $customLicense = $this->findCustomLicense($path) ?: null;
-            if ($customLicense) {
-                return $customLicense;
-            }
-        }
-
-        if (strpos($path, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR) === 0) {
-            $pathArray = explode(DIRECTORY_SEPARATOR, substr($path, 8));
-
-            $path = getcwd() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR
-                . array_shift($pathArray) . DIRECTORY_SEPARATOR . array_shift($pathArray) . DIRECTORY_SEPARATOR;
-        } else {
-            $path = getcwd() . DIRECTORY_SEPARATOR;
-        }
-
-        return $this->findCustomLicense($path) ?: null;
+        return $this->findCustomLicense($currentPath) ?: null;
     }
 
     /**
@@ -272,7 +194,7 @@ class FileDocBlockSniff extends AbstractSprykerSniff
     }
 
     /**
-     * Gets default license if the class file is a Spryker namespaced one.
+     * Gets default license
      *
      * @param \PHP_CodeSniffer\Files\File $phpCsFile
      *
@@ -280,10 +202,6 @@ class FileDocBlockSniff extends AbstractSprykerSniff
      */
     protected function getDefaultLicense(File $phpCsFile): string
     {
-        if (!$this->isSprykerNamespace($phpCsFile)) {
-            return '';
-        }
-
         return $this->buildLicense(static::$defaultLicense);
     }
 

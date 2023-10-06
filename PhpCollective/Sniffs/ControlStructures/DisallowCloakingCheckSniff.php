@@ -9,13 +9,13 @@ namespace PhpCollective\Sniffs\ControlStructures;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Cloaking checks are only valid for cases where the key can be undefined.
  * It is not allowed on variables (define them first) or functions/methods (use *exists check).
  */
-class DisallowCloakingCheckSniff extends AbstractSprykerSniff
+class DisallowCloakingCheckSniff extends AbstractSniff
 {
     /**
      * Use this to make this sniff more strict regarding object var references.

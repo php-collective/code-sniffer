@@ -7,23 +7,8 @@
 
 namespace PhpCollectiveStrict\Sniffs\TypeHints;
 
-use PHP_CodeSniffer\Files\File;
 use SlevomatCodingStandard\Sniffs\TypeHints\ParameterTypeHintSniff as SlevomatParameterTypeHintSniff;
-use PhpCollective\Traits\BridgeTrait;
 
 class ParameterTypeHintSniff extends SlevomatParameterTypeHintSniff
 {
-    use BridgeTrait;
-
-    /**
-     * @inheritDoc
-     */
-    public function process(File $phpcsFile, $pointer): void
-    {
-        if ($this->isSprykerBridgeConstructor($phpcsFile, $pointer)) {
-            return;
-        }
-
-        parent::process($phpcsFile, $pointer);
-    }
 }

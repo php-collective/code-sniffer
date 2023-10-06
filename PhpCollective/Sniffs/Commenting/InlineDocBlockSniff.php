@@ -9,12 +9,12 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Checks if inline doc blocks have the correct order and format.
  */
-class InlineDocBlockSniff extends AbstractSprykerSniff
+class InlineDocBlockSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

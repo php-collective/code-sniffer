@@ -9,12 +9,12 @@ namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Always use strict null check instead if is_null() method invocation.
  */
-class NoIsNullSniff extends AbstractSprykerSniff
+class NoIsNullSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

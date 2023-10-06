@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\AbstractSniffs;
 
 use PHP_CodeSniffer\Files\File;
 
-abstract class AbstractApiClassDetectionSprykerSniff extends AbstractSprykerSniff
+abstract class AbstractApiClassDetectionSniff extends AbstractSniff
 {
     /**
      * @var string

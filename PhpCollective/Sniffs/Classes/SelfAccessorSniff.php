@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\Classes;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Verifies that self:: is used inside the own class.
@@ -19,7 +19,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class SelfAccessorSniff extends AbstractSprykerSniff
+class SelfAccessorSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

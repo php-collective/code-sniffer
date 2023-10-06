@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Testing;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Ensures no assert*() usage after expectException() calls, as those are no-op.
@@ -16,7 +16,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class ExpectExceptionSniff extends AbstractSprykerSniff
+class ExpectExceptionSniff extends AbstractSniff
 {
     /**
      * @var string

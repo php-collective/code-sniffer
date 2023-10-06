@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 use PhpCollective\Traits\SignatureTrait;
 
@@ -18,7 +18,7 @@ use PhpCollective\Traits\SignatureTrait;
  * @author Mark Scherer
  * @license MIT
  */
-class DocBlockTypeOrderSniff extends AbstractSprykerSniff
+class DocBlockTypeOrderSniff extends AbstractSniff
 {
     use CommentingTrait;
     use SignatureTrait;

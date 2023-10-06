@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Internal;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Do not use functions that are not available for lowest version supported.
@@ -23,7 +23,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  *     </properties>
  * </rule>
  */
-class DisallowFunctionsSniff extends AbstractSprykerSniff
+class DisallowFunctionsSniff extends AbstractSniff
 {
     /**
      * @var string
@@ -141,7 +141,7 @@ class DisallowFunctionsSniff extends AbstractSprykerSniff
             return static::$enabled;
         }
 
-        if ($version === null && $this->isCore($phpcsFile)) {
+        if ($version === null) {
             $version = static::PHP_MIN;
         }
 

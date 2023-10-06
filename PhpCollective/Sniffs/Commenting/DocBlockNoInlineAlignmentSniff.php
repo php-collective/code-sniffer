@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * No inline alignment or additional whitespace for phpdoc tags.
  */
-class DocBlockNoInlineAlignmentSniff extends AbstractSprykerSniff
+class DocBlockNoInlineAlignmentSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

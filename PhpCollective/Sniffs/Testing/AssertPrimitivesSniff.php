@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\Testing;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Ensures no assertSame() usage for primitives that have their own method.
@@ -16,7 +16,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class AssertPrimitivesSniff extends AbstractSprykerSniff
+class AssertPrimitivesSniff extends AbstractSniff
 {
     /**
      * @var string

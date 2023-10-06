@@ -9,14 +9,14 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 
 /**
  * Methods that may not return anything need to be declared as `@return void`.
  * Constructor and destructor may not have this addition, as they cannot return by definition.
  */
-class DocBlockReturnVoidSniff extends AbstractSprykerSniff
+class DocBlockReturnVoidSniff extends AbstractSniff
 {
     use CommentingTrait;
 

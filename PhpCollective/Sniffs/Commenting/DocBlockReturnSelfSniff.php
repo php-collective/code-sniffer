@@ -9,14 +9,14 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
 
 /**
  * Doc blocks should type-hint returning itself as $this for fluent interface to work.
  * Chainable methods declared as such must not have any other return type in code.
  */
-class DocBlockReturnSelfSniff extends AbstractSprykerSniff
+class DocBlockReturnSelfSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

@@ -9,7 +9,7 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 use PhpCollective\Traits\SignatureTrait;
 
@@ -17,7 +17,7 @@ use PhpCollective\Traits\SignatureTrait;
  * Methods always need doc blocks.
  * Constructor and destructor may not have one if they do not have arguments.
  */
-class DocBlockSniff extends AbstractSprykerSniff
+class DocBlockSniff extends AbstractSniff
 {
     use CommentingTrait;
     use SignatureTrait;

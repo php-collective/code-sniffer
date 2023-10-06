@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Checks that the namespace declaration and body has correct spacing.
@@ -16,7 +16,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class NamespaceSpacingSniff extends AbstractSprykerSniff
+class NamespaceSpacingSniff extends AbstractSniff
 {
     /**
      * @inheritDoc

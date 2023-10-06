@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\Formatting;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Prevent the usage of multiline for short method signatures and single lines for long ones.
  */
-class MethodSignatureParametersLineBreakMethodSniff extends AbstractSprykerSniff
+class MethodSignatureParametersLineBreakMethodSniff extends AbstractSniff
 {
     /**
      * @var int

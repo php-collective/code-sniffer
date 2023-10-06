@@ -14,44 +14,14 @@ For MIT repositories we recommend (having a `LICENSE` file provided in your root
 ```
 The 2nd sentence can be customized to your needs.
 
-## Custom repositories
-If you want to check the namespaces for your own custom repositories, you might have to adjust
-the namespace sniff config:
-```xml
-    <rule ref="Spryker.Namespaces.SprykerNamespace">
-        <properties>
-            <property name="namespace" value="App"/>
-            <property name="isRoot" value="true"/>
-        </properties>
-    </rule>
-```
-It would then validate your class files within `src/`:
-- file name expected to be `src/Some/Sub/MyClass.php`
-- FQCN to be `App\\Some\\Sub\\MyClass`
-
-If you do not customize anything here, this sniff will only run through Spryker namespaces/folders,
-and will be ignored for any other repository structure.
-
-In some rare cases, you might also need `rootDir` config, e.g. when `src/` is not your
-default root directory:
-```xml
-        <properties>
-            <property name="rootDir" value="custom"/>
-        </properties>
-```
-
 ## Integrating into CI testing and PRs
 The following is an example for CircleCI but will also be compatible with any other CI system:
 ```
   override:
     ...
-    - vendor/bin/console application:integration-check
-    - vendor/bin/console code:sniff:style
-    - vendor/bin/console code:sniff:architecture
+    - vendor/bin/phpcs
 ```
-You basically just add `- vendor/bin/console code:sniff:style` the the list.
-
-Please see the [Spryker Suite](https://github.com/spryker-shop/suite) project repository for details. It is used there.
+You basically just add `- vendor/bin/phpcs` to the list.
 
 ## Migration tips
 
@@ -85,7 +55,7 @@ See CS sniffer docs for details, but in general using `severity` of `0` can sile
 You can also completely exclude certain sniffs, e.g. if you are on a PHP 8+ project and
 want to use all the new language features:
 ```xml
-<rule ref="vendor/spryker/code-sniffer/Spryker/ruleset.xml">
+<rule ref="vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml">
     <exclude name="SlevomatCodingStandard.Functions.DisallowNamedArguments"/>
     <exclude name="SlevomatCodingStandard.Functions.DisallowTrailingCommaInDeclaration"/>
     <exclude name="SlevomatCodingStandard.Classes.DisallowConstructorPropertyPromotion"/>
@@ -95,46 +65,11 @@ want to use all the new language features:
 ```
 They are shipped by default to avoid PHP8-creep into PHP7.4+ code.
 
-## Configure custom namespaces
-Certain sniffs rely on a list of namespaces, which defaults to `Pyz,SprykerEco,SprykerMiddleware,SprykerSdk,Spryker`, but can be customized like so:
-```xml
-    <rule ref="Spryker.MethodAnnotation.ConfigMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-    <rule ref="Spryker.MethodAnnotation.EntityManagerMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-    <rule ref="Spryker.MethodAnnotation.FacadeMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-    <rule ref="Spryker.MethodAnnotation.FactoryMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-    <rule ref="Spryker.MethodAnnotation.QueryContainerMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-    <rule ref="Spryker.MethodAnnotation.RepositoryMethodAnnotation">
-        <properties>
-            <property name="namespaces" value="MyCustomPyz,SprykerEco,Spryker" />
-        </properties>
-    </rule>
-```
-
 ## Customize PHP version safety
 
-If you want to enable `Spryker.Internal.SprykerDisallowFunctions` for your project level, set this into your `phpcs.xml` file:
+If you want to enable `PhpCollective.Internal.DisallowFunctions` for your project level, set this into your `phpcs.xml` file:
 ```xml
-    <rule ref="Spryker.Internal.SprykerDisallowFunctions">
+    <rule ref="PhpCollective.Internal.DisallowFunctions">
         <properties>
             <property name="phpVersion" value="7.4"/>
         </properties>
@@ -146,7 +81,7 @@ If you already require certain polyfills, you can raise this version or complete
 ## Enabling `strict_types`
 Projects can - at their own discretion - enable strict mode for PHP files:
 ```xml
-    <rule ref="Spryker.PHP.DeclareStrictTypesAfterFileDoc">
+    <rule ref="PhpCollective.PHP.DeclareStrictTypesAfterFileDoc">
         <properties>
             <property name="strictTypesMandatory" value="true"/>
         </properties>

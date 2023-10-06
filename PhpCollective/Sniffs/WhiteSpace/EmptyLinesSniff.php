@@ -8,7 +8,7 @@
 namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Always remove more than two empty lines.
@@ -16,7 +16,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * @author Mark Scherer
  * @license MIT
  */
-class EmptyLinesSniff extends AbstractSprykerSniff
+class EmptyLinesSniff extends AbstractSniff
 {
     /**
      * @var array<string>

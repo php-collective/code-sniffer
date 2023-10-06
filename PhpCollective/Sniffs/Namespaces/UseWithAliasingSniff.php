@@ -8,13 +8,13 @@
 namespace PhpCollective\Sniffs\Namespaces;
 
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\UseStatementsTrait;
 
 /**
  * Ensures all use statements with aliasing have lowercase "as"
  */
-class UseWithAliasingSniff extends AbstractSprykerSniff
+class UseWithAliasingSniff extends AbstractSniff
 {
     use UseStatementsTrait;
 

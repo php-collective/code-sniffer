@@ -9,12 +9,12 @@ namespace PhpCollective\Sniffs\Commenting;
 
 use Exception;
 use PHP_CodeSniffer\Files\File;
-use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Checks if doc blocks of Spryker test classes contain @group annotations.
  */
-class DocBlockTestGroupAnnotationSniff extends AbstractSprykerSniff
+class DocBlockTestGroupAnnotationSniff extends AbstractSniff
 {
     /**
      * @inheritDoc
