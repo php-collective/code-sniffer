@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 216 sniffs
+The PhpCollectiveStrict standard contains 215 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -76,7 +76,7 @@ PSR2 (12 sniffs)
 - PSR2.Namespaces.NamespaceDeclaration
 - PSR2.Namespaces.UseDeclaration
 
-PhpCollective (78 sniffs)
+PhpCollective (77 sniffs)
 -------------------------
 - PhpCollective.Arrays.DisallowImplicitArrayCreation
 - PhpCollective.Classes.ClassFileName
@@ -90,7 +90,6 @@ PhpCollective (78 sniffs)
 - PhpCollective.Commenting.DocBlock
 - PhpCollective.Commenting.DocBlockConst
 - PhpCollective.Commenting.DocBlockConstructor
-- PhpCollective.Commenting.DocBlockInherit
 - PhpCollective.Commenting.DocBlockNoEmpty
 - PhpCollective.Commenting.DocBlockNoInlineAlignment
 - PhpCollective.Commenting.DocBlockParam
