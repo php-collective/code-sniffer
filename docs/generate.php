@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-$command = 'vendor/bin/phpcs -e --standard=SprykerStrict/ruleset.xml';
+$command = 'vendor/bin/phpcs -e --standard=PhpCollectiveStrict/ruleset.xml';
 
 exec($command, $output, $ret);
 if ($ret !== 0) {
@@ -17,7 +17,7 @@ unset($row);
 $content = implode(PHP_EOL, $output);
 
 $content = <<<TEXT
-# Spryker Code Sniffer
+# PhpCollective Code Sniffer
 
 $content
 

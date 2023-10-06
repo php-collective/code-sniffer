@@ -1,7 +1,7 @@
-# Spryker Code Sniffer
+# PhpCollective Code Sniffer
 
 
-The SprykerStrict standard contains 237 sniffs
+The PhpCollectiveStrict standard contains 227 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -76,6 +76,104 @@ PSR2 (12 sniffs)
 - PSR2.Namespaces.NamespaceDeclaration
 - PSR2.Namespaces.UseDeclaration
 
+PhpCollective (89 sniffs)
+-------------------------
+- PhpCollective.Arrays.DisallowImplicitArrayCreation
+- PhpCollective.Classes.ClassFileName
+- PhpCollective.Classes.MethodArgumentDefaultValue
+- PhpCollective.Classes.MethodDeclaration
+- PhpCollective.Classes.MethodTypeHint
+- PhpCollective.Classes.PropertyDefaultValue
+- PhpCollective.Classes.ReturnTypeHint
+- PhpCollective.Classes.SelfAccessor
+- PhpCollective.Commenting.Attributes
+- PhpCollective.Commenting.DocBlock
+- PhpCollective.Commenting.DocBlockApiAnnotation
+- PhpCollective.Commenting.DocBlockConst
+- PhpCollective.Commenting.DocBlockConstructor
+- PhpCollective.Commenting.DocBlockInherit
+- PhpCollective.Commenting.DocBlockNoEmpty
+- PhpCollective.Commenting.DocBlockNoInlineAlignment
+- PhpCollective.Commenting.DocBlockParam
+- PhpCollective.Commenting.DocBlockParamAllowDefaultValue
+- PhpCollective.Commenting.DocBlockParamArray
+- PhpCollective.Commenting.DocBlockParamNotJustNull
+- PhpCollective.Commenting.DocBlockPipeSpacing
+- PhpCollective.Commenting.DocBlockReturnNull
+- PhpCollective.Commenting.DocBlockReturnNullableType
+- PhpCollective.Commenting.DocBlockReturnSelf
+- PhpCollective.Commenting.DocBlockReturnTag
+- PhpCollective.Commenting.DocBlockReturnVoid
+- PhpCollective.Commenting.DocBlockStructure
+- PhpCollective.Commenting.DocBlockTag
+- PhpCollective.Commenting.DocBlockTagGrouping
+- PhpCollective.Commenting.DocBlockTagIterable
+- PhpCollective.Commenting.DocBlockTagOrder
+- PhpCollective.Commenting.DocBlockTestGroupAnnotation
+- PhpCollective.Commenting.DocBlockTestGroupAnnotation2
+- PhpCollective.Commenting.DocBlockThrows
+- PhpCollective.Commenting.DocBlockTypeOrder
+- PhpCollective.Commenting.DocBlockVar
+- PhpCollective.Commenting.DocBlockVarNotJustNull
+- PhpCollective.Commenting.DocComment
+- PhpCollective.Commenting.FileDocBlock
+- PhpCollective.Commenting.FullyQualifiedClassNameInDocBlock
+- PhpCollective.Commenting.InlineDocBlock
+- PhpCollective.Commenting.TypeHint
+- PhpCollective.ControlStructures.ConditionalExpressionOrder
+- PhpCollective.ControlStructures.ControlStructureSpacing
+- PhpCollective.ControlStructures.DisallowCloakingCheck
+- PhpCollective.ControlStructures.ElseIfDeclaration
+- PhpCollective.ControlStructures.NoInlineAssignment
+- PhpCollective.DependencyProvider.FacadeNotInBridgeReturned
+- PhpCollective.Factory.CreateVsGetMethods
+- PhpCollective.Factory.NoPrivateMethods
+- PhpCollective.Factory.OneNewPerMethod
+- PhpCollective.Formatting.ArrayDeclaration
+- PhpCollective.Formatting.MethodSignatureParametersLineBreakMethod
+- PhpCollective.Internal.DisallowFunctions
+- PhpCollective.MethodAnnotation.ConfigMethodAnnotation
+- PhpCollective.MethodAnnotation.EntityManagerMethodAnnotation
+- PhpCollective.MethodAnnotation.FacadeMethodAnnotation
+- PhpCollective.MethodAnnotation.FactoryMethodAnnotation
+- PhpCollective.MethodAnnotation.QueryContainerMethodAnnotation
+- PhpCollective.MethodAnnotation.RepositoryMethodAnnotation
+- PhpCollective.Namespaces.FunctionNamespace
+- PhpCollective.Namespaces.UseStatement
+- PhpCollective.Namespaces.UseWithAliasing
+- PhpCollective.PHP.DeclareStrictTypesAfterFileDoc
+- PhpCollective.PHP.DisallowFunctions
+- PhpCollective.PHP.DisallowTrailingCommaInSingleLine
+- PhpCollective.PHP.Exit
+- PhpCollective.PHP.NoIsNull
+- PhpCollective.PHP.NotEqual
+- PhpCollective.PHP.PhpSapiConstant
+- PhpCollective.PHP.PreferCastOverFunction
+- PhpCollective.PHP.RemoveFunctionAlias
+- PhpCollective.PHP.ShortCast
+- PhpCollective.PHP.SingleQuote
+- PhpCollective.Testing.AssertPrimitives
+- PhpCollective.Testing.ExpectException
+- PhpCollective.Testing.Mock
+- PhpCollective.WhiteSpace.CommaSpacing
+- PhpCollective.WhiteSpace.ConcatenationSpacing
+- PhpCollective.WhiteSpace.DocBlockSpacing
+- PhpCollective.WhiteSpace.EmptyEnclosingLine
+- PhpCollective.WhiteSpace.EmptyLines
+- PhpCollective.WhiteSpace.FunctionSpacing
+- PhpCollective.WhiteSpace.ImplicitCastSpacing
+- PhpCollective.WhiteSpace.MemberVarSpacing
+- PhpCollective.WhiteSpace.MethodSpacing
+- PhpCollective.WhiteSpace.NamespaceSpacing
+- PhpCollective.WhiteSpace.ObjectAttributeSpacing
+- PhpCollective.WhiteSpace.TernarySpacing
+
+PhpCollectiveStrict (3 sniffs)
+------------------------------
+- PhpCollectiveStrict.TypeHints.ParameterTypeHint
+- PhpCollectiveStrict.TypeHints.PropertyTypeHint
+- PhpCollectiveStrict.TypeHints.ReturnTypeHint
+
 SlevomatCodingStandard (49 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
@@ -127,114 +225,6 @@ SlevomatCodingStandard (49 sniffs)
 - SlevomatCodingStandard.TypeHints.UnionTypeHintFormat
 - SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable
 - SlevomatCodingStandard.Whitespaces.DuplicateSpaces
-
-Spryker (99 sniffs)
--------------------
-- Spryker.Arrays.DisallowImplicitArrayCreation
-- Spryker.Classes.ClassFileName
-- Spryker.Classes.MethodArgumentDefaultValue
-- Spryker.Classes.MethodDeclaration
-- Spryker.Classes.MethodTypeHint
-- Spryker.Classes.PropertyDefaultValue
-- Spryker.Classes.ReturnTypeHint
-- Spryker.Classes.SelfAccessor
-- Spryker.Commenting.Attributes
-- Spryker.Commenting.DisallowArrayTypeHintSyntax
-- Spryker.Commenting.DocBlock
-- Spryker.Commenting.DocBlockApiAnnotation
-- Spryker.Commenting.DocBlockConst
-- Spryker.Commenting.DocBlockConstructor
-- Spryker.Commenting.DocBlockInherit
-- Spryker.Commenting.DocBlockNoEmpty
-- Spryker.Commenting.DocBlockNoInlineAlignment
-- Spryker.Commenting.DocBlockParam
-- Spryker.Commenting.DocBlockParamAllowDefaultValue
-- Spryker.Commenting.DocBlockParamArray
-- Spryker.Commenting.DocBlockParamNotJustNull
-- Spryker.Commenting.DocBlockPipeSpacing
-- Spryker.Commenting.DocBlockReturnNull
-- Spryker.Commenting.DocBlockReturnNullableType
-- Spryker.Commenting.DocBlockReturnSelf
-- Spryker.Commenting.DocBlockReturnTag
-- Spryker.Commenting.DocBlockReturnVoid
-- Spryker.Commenting.DocBlockStructure
-- Spryker.Commenting.DocBlockTag
-- Spryker.Commenting.DocBlockTagGrouping
-- Spryker.Commenting.DocBlockTagIterable
-- Spryker.Commenting.DocBlockTagOrder
-- Spryker.Commenting.DocBlockTestGroupAnnotation
-- Spryker.Commenting.DocBlockTestGroupAnnotation2
-- Spryker.Commenting.DocBlockThrows
-- Spryker.Commenting.DocBlockTypeOrder
-- Spryker.Commenting.DocBlockVar
-- Spryker.Commenting.DocBlockVarNotJustNull
-- Spryker.Commenting.DocComment
-- Spryker.Commenting.FileDocBlock
-- Spryker.Commenting.FullyQualifiedClassNameInDocBlock
-- Spryker.Commenting.InlineDocBlock
-- Spryker.Commenting.SprykerAnnotation
-- Spryker.Commenting.SprykerConstants
-- Spryker.Commenting.TypeHint
-- Spryker.ControlStructures.ConditionalExpressionOrder
-- Spryker.ControlStructures.ControlStructureSpacing
-- Spryker.ControlStructures.DisallowCloakingCheck
-- Spryker.ControlStructures.ElseIfDeclaration
-- Spryker.ControlStructures.NoInlineAssignment
-- Spryker.DependencyProvider.FacadeNotInBridgeReturned
-- Spryker.Factory.CreateVsGetMethods
-- Spryker.Factory.NoPrivateMethods
-- Spryker.Factory.OneNewPerMethod
-- Spryker.Formatting.ArrayDeclaration
-- Spryker.Formatting.MethodSignatureParametersLineBreakMethod
-- Spryker.Internal.SprykerBridge
-- Spryker.Internal.SprykerDisallowFunctions
-- Spryker.Internal.SprykerFacade
-- Spryker.Internal.SprykerNoDemoshop
-- Spryker.Internal.SprykerPreferStaticOverSelf
-- Spryker.MethodAnnotation.ConfigMethodAnnotation
-- Spryker.MethodAnnotation.EntityManagerMethodAnnotation
-- Spryker.MethodAnnotation.FacadeMethodAnnotation
-- Spryker.MethodAnnotation.FactoryMethodAnnotation
-- Spryker.MethodAnnotation.QueryContainerMethodAnnotation
-- Spryker.MethodAnnotation.RepositoryMethodAnnotation
-- Spryker.Namespaces.FunctionNamespace
-- Spryker.Namespaces.SprykerNamespace
-- Spryker.Namespaces.SprykerNoCrossNamespace
-- Spryker.Namespaces.SprykerNoPyz
-- Spryker.Namespaces.UseStatement
-- Spryker.Namespaces.UseWithAliasing
-- Spryker.PHP.DeclareStrictTypesAfterFileDoc
-- Spryker.PHP.DisallowFunctions
-- Spryker.PHP.DisallowTrailingCommaInSingleLine
-- Spryker.PHP.Exit
-- Spryker.PHP.NoIsNull
-- Spryker.PHP.NotEqual
-- Spryker.PHP.PhpSapiConstant
-- Spryker.PHP.PreferCastOverFunction
-- Spryker.PHP.RemoveFunctionAlias
-- Spryker.PHP.ShortCast
-- Spryker.PHP.SingleQuote
-- Spryker.Testing.AssertPrimitives
-- Spryker.Testing.ExpectException
-- Spryker.Testing.Mock
-- Spryker.WhiteSpace.CommaSpacing
-- Spryker.WhiteSpace.ConcatenationSpacing
-- Spryker.WhiteSpace.DocBlockSpacing
-- Spryker.WhiteSpace.EmptyEnclosingLine
-- Spryker.WhiteSpace.EmptyLines
-- Spryker.WhiteSpace.FunctionSpacing
-- Spryker.WhiteSpace.ImplicitCastSpacing
-- Spryker.WhiteSpace.MemberVarSpacing
-- Spryker.WhiteSpace.MethodSpacing
-- Spryker.WhiteSpace.NamespaceSpacing
-- Spryker.WhiteSpace.ObjectAttributeSpacing
-- Spryker.WhiteSpace.TernarySpacing
-
-SprykerStrict (3 sniffs)
-------------------------
-- SprykerStrict.TypeHints.ParameterTypeHint
-- SprykerStrict.TypeHints.PropertyTypeHint
-- SprykerStrict.TypeHints.ReturnTypeHint
 
 Squiz (27 sniffs)
 -----------------

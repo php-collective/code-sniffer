@@ -17,13 +17,13 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSprykerSniff;
  * Can be removed/disabled with use of symfony polyfills. Thus the $phpVersion config.
  * If you use PHP 8+ on project level and do not need this additional check:
  *
- * <rule ref="Spryker.Internal.SprykerDisallowFunctions">
+ * <rule ref="PhpCollective.Internal.DisallowFunctions">
  *     <properties>
  *         <property name="phpVersion" value="off"/> // Instead of 7.4/8.0/...
  *     </properties>
  * </rule>
  */
-class SprykerDisallowFunctionsSniff extends AbstractSprykerSniff
+class DisallowFunctionsSniff extends AbstractSprykerSniff
 {
     /**
      * @var string
