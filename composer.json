@@ -1,6 +1,6 @@
 {
-    "name": "spryker/code-sniffer",
-    "description": "Spryker Code Sniffer Standards",
+    "name": "php-collective/code-sniffer",
+    "description": "PhpCollective Code Sniffer Standards",
     "type": "phpcodesniffer-standard",
     "license": "MIT",
     "keywords": [
@@ -10,8 +10,12 @@
         "static analysis",
         "standards"
     ],
-    "homepage": "https://spryker.com",
+    "homepage": "https://github.com/php-collective/code-sniffer",
     "authors": [
+        {
+            "name": "The PHP Collective",
+            "homepage": "https://github.com/php-collective"
+        },
         {
             "name": "Spryker",
             "homepage": "https://spryker.com"
@@ -28,13 +32,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Spryker\\": "Spryker/",
-            "SprykerStrict\\": "SprykerStrict/"
+            "PhpCollective\\": "PhpCollective/",
+            "PhpCollectiveStrict\\": "PhpCollectiveStrict/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Spryker\\Test\\": "tests/"
+            "PhpCollective\\Test\\": "tests/"
         },
         "files": [
             "vendor/squizlabs/php_codesniffer/autoload.php"
@@ -59,7 +63,7 @@
         "bin/tokenize"
     ],
     "support": {
-        "source": "https://github.com/spryker/code-sniffer"
+        "source": "https://github.com/php-collective/code-sniffer"
     },
     "config": {
         "sort-packages": true,

@@ -5,7 +5,7 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\Bundle\Business\Foo;
+namespace PhpCollective\Zed\Bundle\Business\Foo;
 
 class DocBlockApiIgnoreClassPass
 {

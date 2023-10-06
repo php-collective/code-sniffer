@@ -9,7 +9,7 @@ if (empty($_SERVER['argv'][1])) {
     echo 'No sniff passed. Make sure to run as `php tests/generate.php MyNamespace.MyType.MySniffName` or use `"FQCN"`. It must be a sniff from this package.'
         . PHP_EOL . PHP_EOL;
 
-    $sniffs = (new \Spryker\Tools\SniffsAndTests())->untested(dirname(__DIR__));
+    $sniffs = (new \PhpCollective\Tools\SniffsAndTests())->untested(dirname(__DIR__));
 
     if ($sniffs) {
         echo 'The following sniffs are untested:' . PHP_EOL;
@@ -61,9 +61,9 @@ $testClassContent = <<<TEXT
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-namespace Spryker\\Test\\{$org}\\Sniffs\\{$type};
+namespace PhpCollective\\Test\\{$org}\\Sniffs\\{$type};
 
-use Spryker\\Test\\TestCase;
+use PhpCollective\\Test\\TestCase;
 use {$org}\\Sniffs\\{$type}\\{$name}Sniff;
 
 class {$name}SniffTest extends TestCase

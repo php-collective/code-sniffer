@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Spryker\Test;
+namespace PhpCollective\Test;
 
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Files\LocalFile;
@@ -91,7 +91,7 @@ class TestCase extends PHPUnitTestCase
     ): array {
         $codeSniffer = new Runner();
         $codeSniffer->config = new Config([
-            '--standard=Spryker',
+            '--standard=PhpCollective',
             '-s',
         ]);
         $codeSniffer->init();

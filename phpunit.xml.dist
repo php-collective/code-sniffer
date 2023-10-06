@@ -6,14 +6,13 @@
 >
     <testsuites>
         <testsuite name="spryker-code-sniffer">
-            <directory>tests/Spryker/</directory>
+            <directory>tests/PhpCollective/</directory>
         </testsuite>
     </testsuites>
     <coverage>
         <include>
-            <directory suffix=".php">Spryker/Sniffs/</directory>
-            <directory suffix=".php">SprykerStrict/Sniffs/</directory>
-            <directory suffix=".php">GlueStreamSpecific/Sniffs/</directory>
+            <directory suffix=".php">PhpCollective/Sniffs/</directory>
+            <directory suffix=".php">PhpCollectiveStrict/Sniffs/</directory>
         </include>
     </coverage>
 </phpunit>

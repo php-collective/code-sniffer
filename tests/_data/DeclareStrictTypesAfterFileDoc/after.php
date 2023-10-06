@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Spryker;
+namespace PhpCollective;
 
 class FixMe
 {

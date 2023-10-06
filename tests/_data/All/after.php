@@ -6,7 +6,7 @@
  */
 
 
-namespace Spryker;
+namespace PhpCollective;
 
 class FixMe
 {

@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker;
+namespace PhpCollective;
 
 class FixMe
 {

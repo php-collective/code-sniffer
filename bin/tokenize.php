@@ -1,7 +1,7 @@
 #!/usr/bin/php -q
 <?php
 
-use Spryker\Tools\Tokenizer;
+use PhpCollective\Tools\Tokenizer;
 
 $options = [
     __DIR__ . '/../vendor/autoload.php',

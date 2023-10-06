@@ -5,12 +5,12 @@
  * Use of this software requires acceptance of the Evaluation License Agreement. See LICENSE file.
  */
 
-namespace Spryker\Zed\Bundle\Business\Foo;
+namespace PhpCollective\Zed\Bundle\Business\Foo;
 
-use Spryker\Zed\Bundle\Business\Foo\Bar\Baz\Foo;
-use Spryker\Zed\Bundle\Business\Foo\BarBaz;
-use Spryker\Zed\Bundle\Business\FooBar\Bar;
-use Spryker\Zed\Bundle\Business\FooBarBaz;
+use PhpCollective\Zed\Bundle\Business\Foo\Bar\Baz\Foo;
+use PhpCollective\Zed\Bundle\Business\Foo\BarBaz;
+use PhpCollective\Zed\Bundle\Business\FooBar\Bar;
+use PhpCollective\Zed\Bundle\Business\FooBarBaz;
 
 class UseInAlphabeticalOrderPass
 {
