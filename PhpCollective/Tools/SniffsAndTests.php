@@ -18,9 +18,8 @@ class SniffsAndTests
      * @var array<string>
      */
     protected static $orgs = [
-        'Spryker',
-        'SprykerStrict',
-        //'GlueStreamSpecific',
+        'PhpCollective',
+        'PhpCollectiveStrict',
     ];
 
     /**

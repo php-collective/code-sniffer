@@ -22,11 +22,6 @@ abstract class AbstractSniff implements Sniff
     use BasicsTrait;
 
     /**
-     * @var string
-     */
-    protected const NAMESPACE_SPRYKER = 'Spryker';
-
-    /**
      * @var array<string> These markers must remain as inline comments
      */
     protected static $phpStormMarkers = [
@@ -57,18 +52,6 @@ abstract class AbstractSniff implements Sniff
         }
 
         return false;
-    }
-
-    /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return bool
-     */
-    protected function isSprykerNamespace(File $phpCsFile): bool
-    {
-        $namespace = $this->getNamespace($phpCsFile);
-
-        return strpos($namespace, static::NAMESPACE_SPRYKER) === 0;
     }
 
     /**

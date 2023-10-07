@@ -24,7 +24,7 @@ class FileDocBlockSniff extends AbstractSniff
     public $ignorableModules = [];
 
     /**
-     * Spryker default license text.
+     * Default license text.
      *
      * Overwrite by adding a custom .license file to the repository root.
      *

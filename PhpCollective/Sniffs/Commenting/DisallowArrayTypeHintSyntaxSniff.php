@@ -75,6 +75,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     /**
      * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
      *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docCommentOpenPointer
      *
      * @return void
@@ -347,6 +348,8 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     }
 
     /**
+     * @param \PHPStan\PhpDocParser\Ast\Node $node
+     *
      * @return list<\PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode>
      */
     public function getArrayTypeNodes(Node $node): array
@@ -362,6 +365,8 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 private $nodes = [];
 
                 /**
+                 * @param \PHPStan\PhpDocParser\Ast\Node $node
+                 *
                  * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser::*|null
                  */
                 public function enterNode(Node $node)
@@ -406,6 +411,11 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         return $visitor->getNodes();
     }
 
+    /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $node
+     *
+     * @return \PHPStan\PhpDocParser\Ast\Type\TypeNode
+     */
     private function fixArrayNode(TypeNode $node): TypeNode
     {
         if (!$node instanceof ArrayTypeNode) {
@@ -416,7 +426,10 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     }
 
     /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode $arrayTypeNode
      * @param list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes
+     *
+     * @return \PHPStan\PhpDocParser\Ast\Type\UnionTypeNode|null
      */
     private function findUnionTypeThatContainsArrayType(ArrayTypeNode $arrayTypeNode, array $unionTypeNodes): ?UnionTypeNode
     {
@@ -429,6 +442,14 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         return null;
     }
 
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $docCommentOpenPointer
+     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
+     * @param \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode $annotationValue
+     *
+     * @return string|null
+     */
     private function findGenericIdentifier(
         File $phpcsFile,
         int $docCommentOpenPointer,
@@ -489,6 +510,11 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         return null;
     }
 
+    /**
+     * @param string $type
+     *
+     * @return bool
+     */
     private function isTraversableType(string $type): bool
     {
         return TypeHintHelper::isSimpleIterableTypeHint($type) || array_key_exists($type, $this->getNormalizedTraversableTypeHints());
