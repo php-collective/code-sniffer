@@ -5,7 +5,7 @@
     xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
 >
     <testsuites>
-        <testsuite name="spryker-code-sniffer">
+        <testsuite name="php-collective-code-sniffer">
             <directory>tests/PhpCollective/</directory>
         </testsuite>
     </testsuites>

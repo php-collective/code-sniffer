@@ -90,6 +90,9 @@ jobs:
           composer update --prefer-dist --no-interaction --prefer-lowest --prefer-stable
           composer require --dev dereuromark/composer-prefer-lowest
 
+      - name: Run tests
+        run: composer test
+
       - name: Validate lowest
         run: vendor/bin/validate-prefer-lowest
 
