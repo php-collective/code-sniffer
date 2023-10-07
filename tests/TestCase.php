@@ -173,15 +173,13 @@ class TestCase extends PHPUnitTestCase
         if ($fixableErrorCount !== null) {
             $this->assertEquals($fixableErrorCount, $file->getFixableCount());
         }
-
         if ($fix) {
             $diff = $file->fixer->generateDiff($this->getDummyFileAfter($sniffer));
             $this->assertSame('', $diff, $diff);
         }
 
-        $file->cleanUp();
-
         $errors = $file->getErrors();
+        $file->cleanUp();
 
         if (!$fix && $this->isDebug()) {
             $error = $this->getFormattedErrors($errors);
