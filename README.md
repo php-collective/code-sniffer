@@ -24,34 +24,35 @@ Make sure you include the sniffer as `require-dev` dependency:
 composer require --dev php-collective/code-sniffer
 ```
 
-The Development module provides a convenience command:
-```
-console code:sniff:style
-```
-(or `console c:s:s` as shortcut)
+Then set up a `phpcs.xml` file in your project ROOT, e.g.:
+```xml
+<?xml version="1.0"?>
+<ruleset name="your-app-name">
+    <file>src/</file>
+    <file>tests/</file>
 
-To automatically fix fixable errors, use
-```
-console code:sniff:style -f
-```
+    <rule ref="vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml"/>
 
-`-v` is useful for more info output.
-To run only a specific sniff, use the `-s` option. See `-h` for help.
-
-You can also sniff a specific project level module or path:
-```
-console code:sniff:style [-m ModuleName] [optional-sub-path] -v
+    <!-- Here you can add more or also silent existing ones -->
+</ruleset>
 ```
 
 ### How to use in any project
-You can also manually invoke the phpcs/phpcbf commands:
+You can manually invoke the phpcs/phpcbf commands:
 ```
-vendor/bin/phpcs --standard=vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml ./
-vendor/bin/phpcbf --standard=vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml ./
+vendor/bin/phpcs
+vendor/bin/phpcbf
 ```
 The command `phpcs` just sniffs, `phpcbf` fixes.
 
-You probably want to ignore some folders, e.g. `--ignore=vendor/` or some of your test fixture folders.
+It is recommended to set up composer scripts to have shortcuts:
+```
+"scripts": {
+    "cs-check": "phpcs -nps",
+    "cs-fix": "phpcbf -nps"
+}
+```
+Then you can run `composer cs-c` and `composer cs-f` and don't have to worry about the acronyms.
 
 ### Standards
 You can always switch the standard to the stricter one named `PhpCollectiveStrict`.
@@ -87,26 +88,6 @@ vendor/bin/phpcs --config-set default_standard PhpCollective
 ```
 
 You might need to specify full directory path. Now the tools can be used without `--standard` switch.
-
-## Using own project standard
-You can exchange or extend the PhpCollective coding standard by providing your own ruleset.xml.
-This can be configured in the Development module config:
-
-```php
-// DevelopmentConfig.php
-
-    /**
-     * Either a relative or full path to the ruleset.xml or a name of an installed
-     * standard (see `phpcs -i` for a list of available ones).
-     *
-     * @return string
-     */
-    public function getCodingStandard()
-    {
-        return '/path/to/your/ruleset.xml';
-    }
-```
-If you use it for custom projects, just use `--standard` to point to your ruleset file.
 
 Make sure that you include the PhpCollective core standard ruleset in your custom one, e.g.:
 ```xml
