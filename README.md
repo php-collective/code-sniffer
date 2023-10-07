@@ -33,7 +33,7 @@ Then set up a `phpcs.xml` file in your project ROOT, e.g.:
 
     <rule ref="vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml"/>
 
-    <!-- Here you can add more or also silent existing ones -->
+    <!-- Here you can add more or also silence existing ones -->
 </ruleset>
 ```
 
