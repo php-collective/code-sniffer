@@ -5,9 +5,8 @@
 # BASH-VERSION  :4.2+
 # DEPENDS       :apt-get install wget libxml2-utils
 
-RULESET1="GlueStreamSpecific/ruleset.xml"
-RULESET2="Spryker/ruleset.xml"
-RULESET3="SprykerStrict/ruleset.xml"
+RULESET2="PhpCollective/ruleset.xml"
+RULESET3="PhpCollectiveStrict/ruleset.xml"
 
 set -e
 
