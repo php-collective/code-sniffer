@@ -28,7 +28,7 @@ class DisallowFunctionsSniff extends AbstractSniff
     /**
      * @var string
      */
-    protected const PHP_MIN = '7.4';
+    protected const PHP_MIN = '8.1';
 
     /**
      * This property can be filled with the current PHP version in use.
@@ -43,20 +43,6 @@ class DisallowFunctionsSniff extends AbstractSniff
      * @var array<string, array<string>>
      */
     protected static $methods = [
-        // https://github.com/symfony/polyfill-php80
-        '8.0' => [
-            'str_contains',
-            'str_starts_with',
-            'str_ends_with',
-            'get_debug_type',
-            'get_resource_id',
-            'fdiv',
-            'preg_last_error_msg',
-        ],
-        // https://github.com/symfony/polyfill-php81
-        '8.1' => [
-            'array_is_list',
-        ],
     ];
 
     /**
