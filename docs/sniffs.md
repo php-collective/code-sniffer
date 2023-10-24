@@ -128,7 +128,7 @@ PhpCollective (76 sniffs)
 - PhpCollective.Namespaces.FunctionNamespace
 - PhpCollective.Namespaces.UseStatement
 - PhpCollective.Namespaces.UseWithAliasing
-- PhpCollective.PHP.DeclareStrictTypesAfterFileDoc
+- PhpCollective.PHP.DeclareStrictTypes
 - PhpCollective.PHP.DisallowFunctions
 - PhpCollective.PHP.DisallowTrailingCommaInSingleLine
 - PhpCollective.PHP.Exit

@@ -39,6 +39,9 @@ class FileDocBlockSniff extends AbstractSniff
     public function process(File $phpCsFile, $stackPointer): void
     {
         $license = $this->getLicense($phpCsFile);
+        if ($license === '') {
+            return;
+        }
 
         $fileDocBlockPointer = $this->fileDocBlockPointer($phpCsFile, $stackPointer);
         if ($fileDocBlockPointer === null) {

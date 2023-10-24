@@ -5,8 +5,6 @@
  * For full license information, please view the LICENSE file that was distributed with this source code.
  */
 
-declare(strict_types=1);
-
 namespace PhpCollective\Sniffs\Commenting;
 
 use PHP_CodeSniffer\Files\File;
@@ -102,6 +100,9 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 }
 
                 $parsedDocComment = DocCommentHelper::parseDocComment($phpcsFile, $docCommentOpenPointer);
+                if ($parsedDocComment === null) {
+                    continue;
+                }
 
                 /** @var list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes */
                 $unionTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), UnionTypeNode::class);
@@ -194,6 +195,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function fixGenericObjectCollection(File $phpcsFile, Annotation $annotation): void
     {
+        //@phpstan-ignore-next-line
         $typeNode = AnnotationHelper::getAnnotationTypes($annotation)[0];
 
         $genericType = null;
@@ -215,6 +217,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 continue;
             }
 
+            //@phpstan-ignore-next-line
             if ($this->isArrayTypeNode($type)) {
                 if ($arrayType !== null) {
                     return;
@@ -236,7 +239,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         $fix = $phpcsFile->addFixableError(
             sprintf(
                 'Usage of old type hint syntax for generic in `%s` is disallowed, use generic type hint syntax instead.',
-                AnnotationTypeHelper::export($typeNode),
+                AnnotationTypeHelper::print($typeNode),
             ),
             $annotation->getStartPointer(),
             static::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX . 'Union',
@@ -256,6 +259,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 
         $fixedType = implode('|', $unionTypes);
 
+        //@phpstan-ignore-next-line
         $content = $annotation->getContent() ?? '';
         $spacePosition = strpos($content, ' ');
         if ($spacePosition !== false) {

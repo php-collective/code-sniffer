@@ -5,4 +5,5 @@ parameters:
         - PhpCollectiveStrict/
     bootstrapFiles:
         - '%rootDir%/../../../tests/bootstrap.php'
+    checkGenericClassInNonGenericObjectType: false
     ignoreErrors:
