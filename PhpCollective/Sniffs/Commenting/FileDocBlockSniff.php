@@ -17,25 +17,6 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 class FileDocBlockSniff extends AbstractSniff
 {
     /**
-     * This property can be filled within the ruleset configuration file
-     *
-     * @var array<string>
-     */
-    public $ignorableModules = [];
-
-    /**
-     * Default license text.
-     *
-     * Overwrite by adding a custom .license file to the repository root.
-     *
-     * @var array<string>
-     */
-    protected static $defaultLicense = [
-        'MIT License',
-        'For full license information, please view the LICENSE file that was distributed with this source code.',
-    ];
-
-    /**
      * Cache of licenses to avoid file lookups.
      *
      * @var array<string>
@@ -143,7 +124,7 @@ class FileDocBlockSniff extends AbstractSniff
     {
         $customLicense = $this->findLicense($phpCsFile);
         if (!$customLicense) {
-            return $this->getDefaultLicense($phpCsFile);
+            return '';
         }
 
         return $customLicense === 'none' ? '' : $customLicense;
@@ -191,18 +172,6 @@ class FileDocBlockSniff extends AbstractSniff
         $this->licenseMap[$path] = $license;
 
         return $license;
-    }
-
-    /**
-     * Gets default license
-     *
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
-     *
-     * @return string
-     */
-    protected function getDefaultLicense(File $phpCsFile): string
-    {
-        return $this->buildLicense(static::$defaultLicense);
     }
 
     /**
