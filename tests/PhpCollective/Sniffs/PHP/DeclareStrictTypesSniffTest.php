@@ -7,17 +7,17 @@
 
 namespace PhpCollective\Test\PhpCollective\Sniffs\PHP;
 
-use PhpCollective\Sniffs\PHP\DeclareStrictTypesAfterFileDocSniff;
+use PhpCollective\Sniffs\PHP\DeclareStrictTypesSniff;
 use PhpCollective\Test\TestCase;
 
-class DeclareStrictTypesAfterFileDocSniffTest extends TestCase
+class DeclareStrictTypesSniffTest extends TestCase
 {
     /**
      * @return void
      */
     public function testDeclareStrictTypesSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new DeclareStrictTypesAfterFileDocSniff(), 2);
+        $this->assertSnifferFindsErrors(new DeclareStrictTypesSniff(), 1);
     }
 
     /**
@@ -25,6 +25,6 @@ class DeclareStrictTypesAfterFileDocSniffTest extends TestCase
      */
     public function testEmptyEnclosingLineFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new DeclareStrictTypesAfterFileDocSniff());
+        $this->assertSnifferCanFixErrors(new DeclareStrictTypesSniff());
     }
 }
