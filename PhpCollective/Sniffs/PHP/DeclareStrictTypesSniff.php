@@ -15,11 +15,6 @@ use SlevomatCodingStandard\Helpers\TokenHelper;
 class DeclareStrictTypesSniff implements Sniff
 {
     /**
-     * @var string
-     */
-    public const CODE_DECLARE_STRICT_TYPES_WRONG_POSITION = 'DeclareStrictTypesWrongPosition';
-
-    /**
      * @var array<int|string>
      */
     protected const TOKEN_CODES_TO_CHECK = [
@@ -27,11 +22,11 @@ class DeclareStrictTypesSniff implements Sniff
     ];
 
     /**
-     * If declare statement should always be on first line after PHP open tag.
+     * If declare statement should always be on first line together with PHP open tag.
      *
      * @var bool
      */
-    public $declareOnFirstLine = true;
+    public $declareOnFirstLine = false;
 
     /**
      * Only in effect if $declareOnFirstLine is false, e.g. a file docblock is between.
@@ -80,13 +75,8 @@ class DeclareStrictTypesSniff implements Sniff
         }
 
         if ($this->declareOnFirstLine && $this->hasNonEmptyTokensInBetween($tokens, $stackPtr, $openTagPointer)) {
-            $phpcsFile->addError('declare() statement should always be on the top', $stackPtr, static::CODE_DECLARE_STRICT_TYPES_WRONG_POSITION);
+            $phpcsFile->addError('declare() statement should always be on the top', $stackPtr, 'DeclareStrictTypesWrongPosition');
 
-            return;
-        }
-
-        $openTagPointer = TokenHelper::findPrevious($phpcsFile, T_OPEN_TAG, $stackPtr - 1);
-        if ($openTagPointer === null) {
             return;
         }
 
@@ -104,9 +94,44 @@ class DeclareStrictTypesSniff implements Sniff
             $whitespaceBefore .= TokenHelper::getContent($phpcsFile, $pointerBeforeDeclare + 1, $stackPtr - 1);
         }
 
-        $declareOnFirstLine = $tokens[$stackPtr]['line'] === $tokens[$openTagPointer]['line'];
-        $linesCountBefore = $declareOnFirstLine ? 0 : substr_count($whitespaceBefore, $phpcsFile->eolChar) - 1;
-        if ($declareOnFirstLine || $linesCountBefore !== $this->linesCountBeforeDeclare) {
+        $isDeclaredOnFirstLine = $tokens[$stackPtr]['line'] === $tokens[$openTagPointer]['line'];
+        $linesCountBefore = $isDeclaredOnFirstLine ? 0 : substr_count($whitespaceBefore, $phpcsFile->eolChar) - 1;
+
+        if ($this->declareOnFirstLine) {
+            if ($tokens[$openTagPointer]['line'] !== $tokens[$stackPtr]['line']) {
+                $linesCountBefore++;
+            }
+
+            if ($linesCountBefore !== 0) {
+                $fix = $phpcsFile->addFixableError(
+                    sprintf(
+                        'Expected %d line%s between opening tag and declare statement, found %d.',
+                        $this->linesCountBeforeDeclare,
+                        $this->linesCountBeforeDeclare === 1 ? '' : 's',
+                        $linesCountBefore,
+                    ),
+                    $stackPtr,
+                    'DeclareStrictTypesTooManyNewlines',
+                );
+                if ($fix) {
+                    $phpcsFile->fixer->beginChangeset();
+
+                    if ($pointerBeforeDeclare === $openTagPointer) {
+                        $phpcsFile->fixer->replaceToken($openTagPointer, '<?php ');
+                    }
+
+                    for ($i = $openTagPointer + 1; $i < $stackPtr; $i++) {
+                        $phpcsFile->fixer->replaceToken($i, '');
+                    }
+
+                    $phpcsFile->fixer->endChangeset();
+                }
+            }
+
+            return;
+        }
+
+        if ($linesCountBefore !== $this->linesCountBeforeDeclare) {
             $fix = $phpcsFile->addFixableError(
                 sprintf(
                     'Expected %d line%s before declare statement, found %d.',
@@ -115,7 +140,7 @@ class DeclareStrictTypesSniff implements Sniff
                     $linesCountBefore,
                 ),
                 $stackPtr,
-                self::CODE_DECLARE_STRICT_TYPES_WRONG_POSITION,
+                'DeclareStrictTypesWrongNewlines',
             );
             if ($fix) {
                 $phpcsFile->fixer->beginChangeset();
