@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 215 sniffs
+The PhpCollectiveStrict standard contains 210 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -162,7 +162,7 @@ PhpCollectiveStrict (3 sniffs)
 - PhpCollectiveStrict.TypeHints.PropertyTypeHint
 - PhpCollectiveStrict.TypeHints.ReturnTypeHint
 
-SlevomatCodingStandard (49 sniffs)
+SlevomatCodingStandard (44 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
 - SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace
@@ -170,7 +170,6 @@ SlevomatCodingStandard (49 sniffs)
 - SlevomatCodingStandard.Classes.ClassConstantVisibility
 - SlevomatCodingStandard.Classes.ClassMemberSpacing
 - SlevomatCodingStandard.Classes.ConstantSpacing
-- SlevomatCodingStandard.Classes.DisallowConstructorPropertyPromotion
 - SlevomatCodingStandard.Classes.ModernClassNameReference
 - SlevomatCodingStandard.Commenting.DeprecatedAnnotationDeclaration
 - SlevomatCodingStandard.Commenting.DisallowOneLinePropertyDocComment
@@ -178,7 +177,6 @@ SlevomatCodingStandard (49 sniffs)
 - SlevomatCodingStandard.Commenting.InlineDocCommentDeclaration
 - SlevomatCodingStandard.ControlStructures.AssignmentInCondition
 - SlevomatCodingStandard.ControlStructures.DisallowContinueWithoutIntegerOperandInSwitch
-- SlevomatCodingStandard.ControlStructures.DisallowNullSafeObjectOperator
 - SlevomatCodingStandard.ControlStructures.DisallowYodaComparison
 - SlevomatCodingStandard.ControlStructures.JumpStatementsSpacing
 - SlevomatCodingStandard.ControlStructures.NewWithParentheses
@@ -186,9 +184,6 @@ SlevomatCodingStandard (49 sniffs)
 - SlevomatCodingStandard.ControlStructures.RequireShortTernaryOperator
 - SlevomatCodingStandard.Exceptions.DeadCatch
 - SlevomatCodingStandard.Functions.ArrowFunctionDeclaration
-- SlevomatCodingStandard.Functions.DisallowNamedArguments
-- SlevomatCodingStandard.Functions.DisallowTrailingCommaInClosureUse
-- SlevomatCodingStandard.Functions.DisallowTrailingCommaInDeclaration
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInCall
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInClosureUse
 - SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses
