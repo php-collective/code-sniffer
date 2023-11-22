@@ -30,18 +30,11 @@ use SlevomatCodingStandard\Helpers\NamespaceHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\TypeHintHelper;
-use function array_flip;
-use function array_key_exists;
-use function array_map;
-use function count;
-use function in_array;
-use function sprintf;
-use const T_DOC_COMMENT_OPEN_TAG;
-use const T_FUNCTION;
 
 /**
- * Copy of original SlevomatCodingStandard.TypeHints.DisallowArrayTypeHintSyntax
- * for fixes (touching collection objects the right way).
+ * Fixed version of Slevomatic, touching collection objects the right way.
+ *
+ * @see https://github.com/slevomat/coding-standard/issues/1296
  */
 class DisallowArrayTypeHintSyntaxSniff implements Sniff
 {
@@ -51,17 +44,17 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     public const CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX = 'DisallowedArrayTypeHintSyntax';
 
     /**
-     * @var list<string>
+     * @var array<string>
      */
     public $traversableTypeHints = [];
 
     /**
      * @var array<string, int>|null
      */
-    private $normalizedTraversableTypeHints;
+    protected $normalizedTraversableTypeHints;
 
     /**
-     * @return array<int, (int|string)>
+     * @inheritDoc
      */
     public function register(): array
     {
@@ -71,12 +64,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     }
 
     /**
-     * @phpcsSuppress SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint
-     *
-     * @param \PHP_CodeSniffer\Files\File $phpcsFile
-     * @param int $docCommentOpenPointer
-     *
-     * @return void
+     * @inheritDoc
      */
     public function process(File $phpcsFile, $docCommentOpenPointer): void
     {
@@ -92,35 +80,40 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                         AnnotationTypeHelper::print($arrayTypeNode),
                     ),
                     $annotation->getStartPointer(),
-                    self::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX . 'Array',
+                    static::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX,
                 );
 
                 if (!$fix) {
                     continue;
                 }
 
+                /** @var \SlevomatCodingStandard\Helpers\ParsedDocComment $parsedDocComment */
                 $parsedDocComment = DocCommentHelper::parseDocComment($phpcsFile, $docCommentOpenPointer);
-                if ($parsedDocComment === null) {
-                    continue;
-                }
 
                 /** @var list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes */
                 $unionTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), UnionTypeNode::class);
-
                 $unionTypeNode = $this->findUnionTypeThatContainsArrayType($arrayTypeNode, $unionTypeNodes);
 
                 if ($unionTypeNode !== null) {
+                    if ($this->isUnionTypeGenericObjectCollection($unionTypeNodes[0])) {
+                        $this->fixGenericObjectCollection($phpcsFile, $annotation, $docCommentOpenPointer, $arrayTypeNode, $unionTypeNodes);
+
+                        continue;
+                    }
+
                     $genericIdentifier = $this->findGenericIdentifier(
                         $phpcsFile,
                         $docCommentOpenPointer,
                         $unionTypeNode,
                         $annotation->getValue(),
                     );
+
                     if ($genericIdentifier !== null) {
                         $genericTypeNode = new GenericTypeNode(
                             new IdentifierTypeNode($genericIdentifier),
                             [$this->fixArrayNode($arrayTypeNode->type)],
                         );
+
                         $fixedDocComment = AnnotationHelper::fixAnnotation(
                             $parsedDocComment,
                             $annotation,
@@ -132,6 +125,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                             new IdentifierTypeNode('array'),
                             [$this->fixArrayNode($arrayTypeNode->type)],
                         );
+
                         $fixedDocComment = AnnotationHelper::fixAnnotation(
                             $parsedDocComment,
                             $annotation,
@@ -151,204 +145,48 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                         new IdentifierTypeNode($genericIdentifier),
                         [$this->fixArrayNode($arrayTypeNode->type)],
                     );
-                    $fixedDocComment = AnnotationHelper::fixAnnotation($parsedDocComment, $annotation, $arrayTypeNode, $genericTypeNode);
+
+                    $this->fixAnnotation($phpcsFile, $annotation, $genericTypeNode);
+
+                    continue;
                 }
 
                 $phpcsFile->fixer->beginChangeset();
-
                 FixerHelper::change(
                     $phpcsFile,
                     $parsedDocComment->getOpenPointer(),
                     $parsedDocComment->getClosePointer(),
                     $fixedDocComment,
                 );
-
                 $phpcsFile->fixer->endChangeset();
             }
         }
     }
 
     /**
-     * @param \SlevomatCodingStandard\Helpers\Annotation $annotation
-     *
-     * @return bool
-     */
-    protected function isGenericObjectCollection(Annotation $annotation): bool
-    {
-        //@phpstan-ignore-next-line
-        foreach (AnnotationHelper::getAnnotationTypes($annotation) as $annotationType) {
-            if ($annotationType instanceof UnionTypeNode) {
-                if ($this->isUnionTypeGenericObjectCollection($annotationType)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param \SlevomatCodingStandard\Helpers\Annotation $annotation
+     * @param string $fixedAnnotation
      *
      * @return void
      */
-    protected function fixGenericObjectCollection(File $phpcsFile, Annotation $annotation): void
+    protected function fixAnnotation(File $phpcsFile, Annotation $annotation, string $fixedAnnotation): void
     {
-        //@phpstan-ignore-next-line
-        $typeNode = AnnotationHelper::getAnnotationTypes($annotation)[0];
+        $parameterName = $annotation->getNode()->value->parameterName ?? '';
+        $variableName = $annotation->getNode()->value->variableName ?? '';
+        $description = $annotation->getNode()->value->description ?? '';
 
-        $genericType = null;
-        $arrayType = null;
-        $unionTypes = [];
-
-        if (!$typeNode instanceof UnionTypeNode) {
-            return;
-        }
-
-        foreach ($typeNode->types as $type) {
-            if ($this->isGenericObject($type)) {
-                if ($genericType !== null) {
-                    return;
-                }
-
-                $genericType = (string)$type;
-
-                continue;
-            }
-
-            //@phpstan-ignore-next-line
-            if ($this->isArrayTypeNode($type)) {
-                if ($arrayType !== null) {
-                    return;
-                }
-                /** @var \PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode $arrayTypeNode */
-                $arrayTypeNode = $type;
-                $arrayType = $this->convertTypeToString($arrayTypeNode->type);
-
-                continue;
-            }
-
-            $unionTypes[] = (string)$type;
-        }
-
-        if (!$genericType || !$arrayType) {
-            return;
-        }
-
-        $fix = $phpcsFile->addFixableError(
-            sprintf(
-                'Usage of old type hint syntax for generic in `%s` is disallowed, use generic type hint syntax instead.',
-                AnnotationTypeHelper::print($typeNode),
-            ),
-            $annotation->getStartPointer(),
-            static::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX . 'Union',
-        );
-
-        if (!$fix) {
-            return;
-        }
-
-        $fixedType = sprintf(
-            '%s<%s>',
-            $genericType,
-            $arrayType,
-        );
-
-        array_unshift($unionTypes, $fixedType);
-
-        $fixedType = implode('|', $unionTypes);
-
-        //@phpstan-ignore-next-line
-        $content = $annotation->getContent() ?? '';
-        $spacePosition = strpos($content, ' ');
-        if ($spacePosition !== false) {
-            $fixedType .= substr($content, $spacePosition);
-        }
+        $fixedAnnotation = sprintf('%s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description);
+        /** @var string $fixedAnnotation */
+        $fixedAnnotation = preg_replace('/\s+/', ' ', trim($fixedAnnotation));
 
         $nextToken = $phpcsFile->fixer->getTokenContent($annotation->getEndPointer() + 1);
 
         if ($nextToken === '*/') {
-            $fixedType .= ' ';
+            $fixedAnnotation .= ' ';
         }
 
-        $phpcsFile->fixer->replaceToken($annotation->getStartPointer() + 2, $fixedType);
-    }
-
-    /**
-     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
-     *
-     * @return string
-     */
-    protected function convertTypeToString(TypeNode $typeNode): string
-    {
-        if ($typeNode instanceof ArrayTypeNode) {
-            return sprintf('array<%s>', $this->convertTypeToString($typeNode->type));
-        }
-
-        return (string)$typeNode;
-    }
-
-    /**
-     * @param \PHPStan\PhpDocParser\Ast\Type\UnionTypeNode $unionTypeNode
-     *
-     * @return bool
-     */
-    protected function isUnionTypeGenericObjectCollection(UnionTypeNode $unionTypeNode): bool
-    {
-        return $this->hasGenericObject($unionTypeNode->types)
-            && $this->containsArrayTypeNode($unionTypeNode->types);
-    }
-
-    /**
-     * These generic object collections are not yet understood by IDEs like PHPStorm.
-     *
-     * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode> $types
-     *
-     * @return bool
-     */
-    protected function hasGenericObject(array $types): bool
-    {
-        foreach ($types as $type) {
-            if (!$type instanceof IdentifierTypeNode) {
-                continue;
-            }
-
-            if (strpos((string)$type, '\\') === 0) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
-     *
-     * @return bool
-     */
-    protected function isGenericObject(TypeNode $typeNode): bool
-    {
-        return $typeNode instanceof IdentifierTypeNode && strpos((string)$typeNode, '\\') === 0;
-    }
-
-    /**
-     * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode> $types
-     *
-     * @return bool
-     */
-    protected function containsArrayTypeNode(array $types): bool
-    {
-        foreach ($types as $type) {
-            if (!$type instanceof ArrayTypeNode) {
-                continue;
-            }
-            if ($type->type instanceof IdentifierTypeNode || $type->type instanceof ArrayTypeNode) {
-                return true;
-            }
-        }
-
-        return false;
+        $phpcsFile->fixer->replaceToken($annotation->getStartPointer() + 2, $fixedAnnotation);
     }
 
     /**
@@ -371,7 +209,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 /**
                  * @param \PHPStan\PhpDocParser\Ast\Node $node
                  *
-                 * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser::*|null
+                 * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
                  */
                 public function enterNode(Node $node)
                 {
@@ -420,7 +258,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      *
      * @return \PHPStan\PhpDocParser\Ast\Type\TypeNode
      */
-    private function fixArrayNode(TypeNode $node): TypeNode
+    protected function fixArrayNode(TypeNode $node): TypeNode
     {
         if (!$node instanceof ArrayTypeNode) {
             return $node;
@@ -431,11 +269,11 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 
     /**
      * @param \PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode $arrayTypeNode
-     * @param list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes
+     * @param array<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes
      *
      * @return \PHPStan\PhpDocParser\Ast\Type\UnionTypeNode|null
      */
-    private function findUnionTypeThatContainsArrayType(ArrayTypeNode $arrayTypeNode, array $unionTypeNodes): ?UnionTypeNode
+    protected function findUnionTypeThatContainsArrayType(ArrayTypeNode $arrayTypeNode, array $unionTypeNodes): ?UnionTypeNode
     {
         foreach ($unionTypeNodes as $unionTypeNode) {
             if (in_array($arrayTypeNode, $unionTypeNode->types, true)) {
@@ -454,7 +292,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      *
      * @return string|null
      */
-    private function findGenericIdentifier(
+    protected function findGenericIdentifier(
         File $phpcsFile,
         int $docCommentOpenPointer,
         TypeNode $typeNode,
@@ -519,7 +357,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      *
      * @return bool
      */
-    private function isTraversableType(string $type): bool
+    protected function isTraversableType(string $type): bool
     {
         return TypeHintHelper::isSimpleIterableTypeHint($type) || array_key_exists($type, $this->getNormalizedTraversableTypeHints());
     }
@@ -527,7 +365,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     /**
      * @return array<string, int>
      */
-    private function getNormalizedTraversableTypeHints(): array
+    protected function getNormalizedTraversableTypeHints(): array
     {
         if ($this->normalizedTraversableTypeHints === null) {
             $this->normalizedTraversableTypeHints = array_flip(array_map(static function (string $typeHint): string {
@@ -538,5 +376,187 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         }
 
         return $this->normalizedTraversableTypeHints;
+    }
+
+    /**
+     * @param \SlevomatCodingStandard\Helpers\Annotation $annotation
+     *
+     * @return bool
+     */
+    protected function isGenericObjectCollection(Annotation $annotation): bool
+    {
+        $arrayTypeNodes = $this->getArrayTypeNodes($annotation->getValue());
+
+        foreach ($arrayTypeNodes as $arrayTypeNode) {
+            /** @var list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes */
+            $unionTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), UnionTypeNode::class);
+            $unionTypeNode = $this->findUnionTypeThatContainsArrayType($arrayTypeNode, $unionTypeNodes);
+
+            if ($unionTypeNode !== null) {
+                if ($this->isUnionTypeGenericObjectCollection($unionTypeNodes[0])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\UnionTypeNode $unionTypeNode
+     *
+     * @return bool
+     */
+    protected function isUnionTypeGenericObjectCollection(UnionTypeNode $unionTypeNode): bool
+    {
+        return $this->hasGenericObject($unionTypeNode->types)
+            && $this->containsArrayTypeNode($unionTypeNode->types);
+    }
+
+    /**
+     * These generic object collections are not yet understood by IDEs like PHPStorm.
+     *
+     * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode> $types
+     *
+     * @return bool
+     */
+    protected function hasGenericObject(array $types): bool
+    {
+        foreach ($types as $type) {
+            if (!$type instanceof IdentifierTypeNode) {
+                continue;
+            }
+
+            if (strpos((string)$type, '\\') === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
+     *
+     * @return bool
+     */
+    protected function isGenericObject(TypeNode $typeNode): bool
+    {
+        return $typeNode instanceof IdentifierTypeNode && strpos((string)$typeNode, '\\') === 0;
+    }
+
+    /**
+     * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode> $types
+     *
+     * @return bool
+     */
+    protected function containsArrayTypeNode(array $types): bool
+    {
+        foreach ($types as $type) {
+            if (!$type instanceof ArrayTypeNode) {
+                continue;
+            }
+
+            if ($type->type instanceof IdentifierTypeNode || $type->type instanceof ArrayTypeNode) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
+     *
+     * @return bool
+     */
+    protected function isArrayTypeNode(TypeNode $typeNode): bool
+    {
+        return $typeNode instanceof ArrayTypeNode &&
+            ($typeNode->type instanceof IdentifierTypeNode || $typeNode->type instanceof ArrayTypeNode);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param \SlevomatCodingStandard\Helpers\Annotation $annotation
+     * @param int $docCommentOpenPointer
+     * @param \PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode $typeNode
+     * @param array<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes
+     *
+     * @return void
+     */
+    protected function fixGenericObjectCollection(
+        File $phpcsFile,
+        Annotation $annotation,
+        int $docCommentOpenPointer,
+        ArrayTypeNode $typeNode,
+        array $unionTypeNodes
+    ): void {
+        $genericType = null;
+        $arrayType = null;
+        $unionTypes = [];
+
+        foreach ($unionTypeNodes[0]->types as $type) {
+            if ($this->isGenericObject($type)) {
+                if ($genericType !== null) {
+                    return;
+                }
+
+                $genericType = (string)$type;
+
+                continue;
+            }
+
+            if ($this->isArrayTypeNode($type)) {
+                if ($arrayType !== null) {
+                    return;
+                }
+
+                /** @var \PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode $arrayTypeNode */
+                $arrayTypeNode = $type;
+                $arrayType = $this->convertTypeToString($arrayTypeNode->type);
+
+                continue;
+            }
+
+            $unionTypes[] = (string)$type;
+        }
+
+        if (!$genericType || !$arrayType) {
+            return;
+        }
+
+        $fix = $phpcsFile->addFixableError(
+            sprintf(
+                'Usage of old type hint syntax for generic in `%s` is disallowed, use generic type hint syntax instead.',
+                AnnotationTypeHelper::print($typeNode),
+            ),
+            $annotation->getStartPointer(),
+            static::CODE_DISALLOWED_ARRAY_TYPE_HINT_SYNTAX,
+        );
+
+        if (!$fix) {
+            return;
+        }
+
+        $fixedType = sprintf('%s<%s>', $genericType, $arrayType);
+        array_unshift($unionTypes, $fixedType);
+        $fixedType = implode('|', $unionTypes);
+
+        $this->fixAnnotation($phpcsFile, $annotation, $fixedType);
+    }
+
+    /**
+     * @param \PHPStan\PhpDocParser\Ast\Type\TypeNode $typeNode
+     *
+     * @return string
+     */
+    protected function convertTypeToString(TypeNode $typeNode): string
+    {
+        if ($typeNode instanceof ArrayTypeNode) {
+            return sprintf('array<%s>', $this->convertTypeToString($typeNode->type));
+        }
+
+        return (string)$typeNode;
     }
 }
