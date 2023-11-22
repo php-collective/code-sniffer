@@ -24,7 +24,7 @@
     "require": {
         "php": ">=8.1",
         "slevomat/coding-standard": "^8.14.1",
-        "squizlabs/php_codesniffer": "^3.6.2"
+        "squizlabs/php_codesniffer": "^3.7.1"
     },
     "require-dev": {
         "phpstan/phpstan": "^1.0.0",
