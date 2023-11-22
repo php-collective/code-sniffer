@@ -52,18 +52,14 @@ See CS sniffer docs for details, but in general using `severity` of `0` can sile
 ```
 
 ### Excluding certain sniffs
-You can also completely exclude certain sniffs, e.g. if you are on a PHP 8+ project and
-want to use all the new language features:
+You can also completely exclude certain sniffs:
 ```xml
 <rule ref="vendor/php-collective/code-sniffer/PhpCollective/ruleset.xml">
-    <exclude name="SlevomatCodingStandard.Functions.DisallowNamedArguments"/>
-    <exclude name="SlevomatCodingStandard.Functions.DisallowTrailingCommaInDeclaration"/>
-    <exclude name="SlevomatCodingStandard.Classes.DisallowConstructorPropertyPromotion"/>
-    <exclude name="SlevomatCodingStandard.ControlStructures.DisallowNullSafeObjectOperator"/>
+    <exclude name="PhpCollective.ControlStructures.DisallowCloakingCheck"/>
     ...
 </rule>
 ```
-They are shipped by default to avoid PHP8-creep into PHP7.4+ code.
+Some sniffs are shipped by default to avoid PHP 8.2+ creep into PHP 8.1 code.
 
 ## Customize PHP version safety
 
@@ -71,7 +67,7 @@ If you want to enable `PhpCollective.Internal.DisallowFunctions` for your projec
 ```xml
     <rule ref="PhpCollective.Internal.DisallowFunctions">
         <properties>
-            <property name="phpVersion" value="7.4"/>
+            <property name="phpVersion" value="8.1"/>
         </properties>
     </rule>
 ```
@@ -120,7 +116,7 @@ You can also use `"FQCN"` of the sniff instead (".." quotes are important as the
 Tip: When running it without argument, it shows you the sniffs that are yet untested.
 
 ### Tokenizing Tool
-When coding new sniffs it really helps to see what the code looks like in regards of the token arrays.
+When coding new sniffs it really helps to see what the code looks like in regard to the token arrays.
 So we can parse a PHP file into its tokens using the following tool:
 
 ```
