@@ -18,7 +18,7 @@ class NotEqualSniff implements Sniff
     /**
      * @var array<string>
      */
-    public static $matching = [
+    public static array $matching = [
         '<>' => '!=',
     ];
 

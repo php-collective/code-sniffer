@@ -27,7 +27,7 @@ class DocBlockTagOrderSniff extends AbstractSniff
      *
      * @var array<int, string>
      */
-    protected $order = [
+    protected array $order = [
         '@deprecated',
         '@see',
         '@param',

@@ -18,7 +18,7 @@ class PreferCastOverFunctionSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    protected static $matching = [
+    protected static array $matching = [
         'strval' => 'string',
         'intval' => 'int',
         'floatval' => 'float',

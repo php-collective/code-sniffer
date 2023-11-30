@@ -23,7 +23,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    protected $ignored = [
+    protected array $ignored = [
         '__construct',
         '__destruct',
     ];

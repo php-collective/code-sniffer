@@ -23,22 +23,22 @@ class UseStatementSniff implements Sniff
     /**
      * @var array<string, array<string, mixed>>|null
      */
-    protected $existingStatements;
+    protected ?array $existingStatements = null;
 
     /**
      * @var array<string, array<string, mixed>>
      */
-    protected $newStatements = [];
+    protected array $newStatements = [];
 
     /**
      * @var array<string, array<string, mixed>>|null
      */
-    protected $allStatements;
+    protected ?array $allStatements = null;
 
     /**
      * @var string|null
      */
-    protected $className;
+    protected ?string $className = null;
 
     /**
      * @inheritDoc

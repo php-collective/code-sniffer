@@ -20,7 +20,7 @@ class ExitSniff implements Sniff
      *
      * @var array<string>
      */
-    public static $aliases = [
+    public static array $aliases = [
         'die' => 'exit',
     ];
 

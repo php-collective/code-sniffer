@@ -22,7 +22,7 @@ class DisallowCloakingCheckSniff extends AbstractSniff
      *
      * @var bool
      */
-    public $strict = false;
+    public bool $strict = false;
 
     /**
      * @inheritDoc
@@ -35,7 +35,7 @@ class DisallowCloakingCheckSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    protected $validTokens = [
+    protected array $validTokens = [
         T_CLOSE_SQUARE_BRACKET,
         T_CLOSE_CURLY_BRACKET,
     ];

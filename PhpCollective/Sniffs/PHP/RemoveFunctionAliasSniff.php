@@ -20,7 +20,7 @@ class RemoveFunctionAliasSniff implements Sniff
      *
      * @var array<string>
      */
-    public static $matching = [
+    public static array $matching = [
         'is_integer' => 'is_int',
         'is_long' => 'is_int',
         'is_real' => 'is_float',

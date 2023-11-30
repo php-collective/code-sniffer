@@ -28,7 +28,7 @@ class DocBlockTypeOrderSniff extends AbstractSniff
      *
      * @var array<string>
      */
-    protected $sortMap = [
+    protected array $sortMap = [
         'void',
         'null',
         'false',

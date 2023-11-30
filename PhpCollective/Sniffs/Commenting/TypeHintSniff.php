@@ -43,7 +43,7 @@ class TypeHintSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    protected static $typeHintTags = [
+    protected static array $typeHintTags = [
         '@var',
         '@psalm-var',
         '@phpstan-var',
@@ -62,7 +62,7 @@ class TypeHintSniff extends AbstractSniff
      *
      * @var array<string>
      */
-    protected static $sortMap = [
+    protected static array $sortMap = [
         'mixed',
         'callable',
         'resource',
