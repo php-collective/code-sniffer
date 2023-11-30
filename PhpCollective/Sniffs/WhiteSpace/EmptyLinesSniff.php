@@ -21,7 +21,7 @@ class EmptyLinesSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    public $supportedTokenizers = [
+    public array $supportedTokenizers = [
         'PHP',
         'JS',
         'CSS',

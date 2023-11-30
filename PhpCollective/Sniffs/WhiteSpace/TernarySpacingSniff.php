@@ -21,7 +21,7 @@ class TernarySpacingSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    public $supportedTokenizers = [
+    public array $supportedTokenizers = [
         'PHP',
     ];
 

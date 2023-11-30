@@ -18,7 +18,7 @@ class ShortCastSniff implements Sniff
     /**
      * @var array<string>
      */
-    public static $matching = [
+    public static array $matching = [
         '(boolean)' => '(bool)',
         '(integer)' => '(int)',
     ];

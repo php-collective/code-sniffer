@@ -26,7 +26,7 @@ class AssertPrimitivesSniff extends AbstractSniff
     /**
      * @var array<string>
      */
-    protected static $primitives = [
+    protected static array $primitives = [
         'null',
         'true',
         'false',

@@ -37,28 +37,28 @@ class DisallowFunctionsSniff extends AbstractSniff
      *
      * @var string|null
      */
-    public $phpVersion;
+    public ?string $phpVersion = null;
 
     /**
      * @var array<string, array<string>>
      */
-    protected static $methods = [
+    protected static array $methods = [
     ];
 
     /**
      * @var bool|null
      */
-    protected static $enabled;
+    protected static ?bool $enabled = null;
 
     /**
      * @var array<string>
      */
-    protected static $disallowed = [];
+    protected static array $disallowed = [];
 
     /**
      * @var array<int>
      */
-    protected static $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
+    protected static array $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
 
     /**
      * @inheritDoc

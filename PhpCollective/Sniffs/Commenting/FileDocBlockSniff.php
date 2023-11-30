@@ -21,7 +21,7 @@ class FileDocBlockSniff extends AbstractSniff
      *
      * @var array<string>
      */
-    protected $licenseMap = [];
+    protected array $licenseMap = [];
 
     /**
      * @inheritDoc

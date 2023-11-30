@@ -18,7 +18,7 @@ trait BasicsTrait
      *
      * @return bool
      */
-    protected function isGivenKind($search, array $token): bool
+    protected function isGivenKind(array|string|int $search, array $token): bool
     {
         $kind = (array)$search;
 

@@ -18,7 +18,7 @@ class DisallowTrailingCommaInSingleLineSniff implements Sniff
     /**
      * @var array<string|int>
      */
-    protected $closingTokens = [
+    protected array $closingTokens = [
         T_CLOSE_PARENTHESIS,
         T_CLOSE_SQUARE_BRACKET,
     ];

@@ -18,17 +18,17 @@ class MethodSignatureParametersLineBreakMethodSniff extends AbstractSniff
     /**
      * @var int
      */
-    public $methodSignatureLengthHardBreak = 160;
+    public int $methodSignatureLengthHardBreak = 160;
 
     /**
      * @var int
      */
-    public $methodSignatureLengthSoftBreak = 80;
+    public int $methodSignatureLengthSoftBreak = 80;
 
     /**
      * @var int
      */
-    public $methodSignatureNumberParameterSoftBreak = 3;
+    public int $methodSignatureNumberParameterSoftBreak = 3;
 
     /**
      * @inheritDoc

@@ -24,7 +24,7 @@ abstract class AbstractSniff implements Sniff
     /**
      * @var array<string> These markers must remain as inline comments
      */
-    protected static $phpStormMarkers = [
+    protected static array $phpStormMarkers = [
         '@noinspection',
     ];
 
@@ -156,7 +156,7 @@ abstract class AbstractSniff implements Sniff
      *
      * @return bool
      */
-    protected function contains(File $phpcsFile, $search, int $start, int $end, bool $skipNested = true): bool
+    protected function contains(File $phpcsFile, array|string|int $search, int $start, int $end, bool $skipNested = true): bool
     {
         $tokens = $phpcsFile->getTokens();
 

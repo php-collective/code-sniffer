@@ -46,12 +46,12 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     /**
      * @var array<string>
      */
-    public $traversableTypeHints = [];
+    public array $traversableTypeHints = [];
 
     /**
      * @var array<string, int>|null
      */
-    protected $normalizedTraversableTypeHints;
+    protected ?array $normalizedTraversableTypeHints = null;
 
     /**
      * @inheritDoc
@@ -204,14 +204,14 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 /**
                  * @var list<\PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode>
                  */
-                private $nodes = [];
+                private array $nodes = [];
 
                 /**
                  * @param \PHPStan\PhpDocParser\Ast\Node $node
                  *
                  * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
                  */
-                public function enterNode(Node $node)
+                public function enterNode(Node $node): Node|array|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
                 {
                     if ($node instanceof ArrayTypeNode) {
                         $this->nodes[] = $node;

@@ -24,17 +24,17 @@ class Tokenizer
     /**
      * @var string
      */
-    protected $root;
+    protected string $root;
 
     /**
      * @var string
      */
-    protected $path;
+    protected string $path;
 
     /**
      * @var bool
      */
-    protected $verbose;
+    protected bool $verbose;
 
     /**
      * @param array<string> $argv

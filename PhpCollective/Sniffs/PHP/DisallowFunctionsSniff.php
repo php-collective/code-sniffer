@@ -18,12 +18,12 @@ class DisallowFunctionsSniff implements Sniff
     /**
      * @var array<string>
      */
-    public static $disallowed = [];
+    public static array $disallowed = [];
 
     /**
      * @var array<int>
      */
-    protected static $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
+    protected static array $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
 
     /**
      * @inheritDoc

@@ -26,24 +26,24 @@ class DeclareStrictTypesSniff implements Sniff
      *
      * @var bool
      */
-    public $declareOnFirstLine = false;
+    public bool $declareOnFirstLine = false;
 
     /**
      * Only in effect if $declareOnFirstLine is false, e.g. a file docblock is between.
      *
      * @var int
      */
-    public $linesCountBeforeDeclare = 1;
+    public int $linesCountBeforeDeclare = 1;
 
     /**
      * @var int
      */
-    public $linesCountAfterDeclare = 1;
+    public int $linesCountAfterDeclare = 1;
 
     /**
      * @var int
      */
-    public $spacesCountAroundEqualsSign = 0;
+    public int $spacesCountAroundEqualsSign = 0;
 
     /**
      * @return array<int, (int|string)>
@@ -248,7 +248,7 @@ class DeclareStrictTypesSniff implements Sniff
      *
      * @return int
      */
-    protected function normalizeIntValue($value): int
+    protected function normalizeIntValue(mixed $value): int
     {
         return (int)trim((string)$value);
     }
