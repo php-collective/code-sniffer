@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 210 sniffs
+The PhpCollectiveStrict standard contains 211 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -162,7 +162,7 @@ PhpCollectiveStrict (3 sniffs)
 - PhpCollectiveStrict.TypeHints.PropertyTypeHint
 - PhpCollectiveStrict.TypeHints.ReturnTypeHint
 
-SlevomatCodingStandard (44 sniffs)
+SlevomatCodingStandard (45 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
 - SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace
@@ -184,6 +184,7 @@ SlevomatCodingStandard (44 sniffs)
 - SlevomatCodingStandard.ControlStructures.RequireShortTernaryOperator
 - SlevomatCodingStandard.Exceptions.DeadCatch
 - SlevomatCodingStandard.Functions.ArrowFunctionDeclaration
+- SlevomatCodingStandard.Functions.NamedArgumentSpacing
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInCall
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInClosureUse
 - SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses
