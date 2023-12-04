@@ -1,8 +1,8 @@
 {
-    "name": "php-collective/code-sniffer",
+    "name": "php-collective\/code-sniffer",
     "description": "PhpCollective Code Sniffer Standards",
-    "type": "phpcodesniffer-standard",
     "license": "MIT",
+    "type": "phpcodesniffer-standard",
     "keywords": [
         "framework",
         "codesniffer",
@@ -10,66 +10,66 @@
         "static analysis",
         "standards"
     ],
-    "homepage": "https://github.com/php-collective/code-sniffer",
     "authors": [
         {
             "name": "The PHP Collective",
-            "homepage": "https://github.com/php-collective"
+            "homepage": "https:\/\/github.com\/php-collective"
         },
         {
             "name": "Spryker",
-            "homepage": "https://spryker.com"
+            "homepage": "https:\/\/spryker.com"
         }
     ],
+    "homepage": "https:\/\/github.com\/php-collective\/code-sniffer",
+    "support": {
+        "source": "https:\/\/github.com\/php-collective\/code-sniffer"
+    },
     "require": {
         "php": ">=8.1",
-        "slevomat/coding-standard": "^8.14.1",
-        "squizlabs/php_codesniffer": "^3.7.1"
+        "slevomat\/coding-standard": "^8.14.1",
+        "squizlabs\/php_codesniffer": "^3.7.1"
     },
     "require-dev": {
-        "phpstan/phpstan": "^1.0.0",
-        "phpunit/phpunit": "^10.3"
+        "phpstan\/phpstan": "^1.0.0",
+        "phpunit\/phpunit": "^10.3"
     },
     "autoload": {
         "psr-4": {
-            "PhpCollective\\": "PhpCollective/",
-            "PhpCollectiveStrict\\": "PhpCollectiveStrict/"
+            "PhpCollectiveStrict\\": "PhpCollectiveStrict\/",
+            "PhpCollective\\": "PhpCollective\/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "PhpCollective\\Test\\": "tests/"
+            "PhpCollective\\Test\\": "tests\/"
         },
         "files": [
-            "vendor/squizlabs/php_codesniffer/autoload.php"
+            "vendor\/squizlabs\/php_codesniffer\/autoload.php"
         ]
     },
-    "scripts": {
-        "docs": "php docs/generate.php",
-        "docs-listing": "phpcs -e --standard=SprykerStrict/ruleset.xml",
-        "add-standard": "phpcs --config-set installed_paths $(pwd)",
-        "increase-severity": "sed -i.bak 's/<severity>0<\\/severity>/<!--<severity>0<\\/severity>-->/' Spryker/ruleset.xml",
-        "reset-ruleset": [
-            "sed -i.bak 's/<!--<severity>0<\\/severity>-->/<severity>0<\\/severity>/' Spryker/ruleset.xml",
-            "rm -f Spryker/ruleset.xml.bak"
-        ],
-        "cs-check": "vendor/bin/phpcs --extensions=php",
-        "cs-fix": "vendor/bin/phpcbf --extensions=php",
-        "test": "vendor/bin/phpunit",
-        "stan": "phpstan analyse",
-        "xml": "tests/xmllint.sh"
-    },
     "bin": [
-        "bin/tokenize"
+        "bin\/tokenize"
     ],
-    "support": {
-        "source": "https://github.com/php-collective/code-sniffer"
-    },
     "config": {
-        "sort-packages": true,
-        "process-timeout": 900,
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+            "dealerdirect\/phpcodesniffer-composer-installer": true
+        },
+        "process-timeout": 900,
+        "sort-packages": true
+    },
+    "scripts": {
+        "add-standard": "phpcs --config-set installed_paths $(pwd)",
+        "cs-check": "vendor\/bin\/phpcs --extensions=php",
+        "cs-fix": "vendor\/bin\/phpcbf --extensions=php",
+        "docs": "php docs\/generate.php",
+        "docs-listing": "phpcs -e --standard=SprykerStrict\/ruleset.xml",
+        "increase-severity": "sed -i.bak 's\/<severity>0<\\\/severity>\/<!--<severity>0<\\\/severity>-->\/' Spryker\/ruleset.xml",
+        "reset-ruleset": [
+            "sed -i.bak 's\/<!--<severity>0<\\\/severity>-->\/<severity>0<\\\/severity>\/' Spryker\/ruleset.xml",
+            "rm -f Spryker\/ruleset.xml.bak"
+        ],
+        "stan": "phpstan analyse",
+        "test": "vendor\/bin\/phpunit",
+        "xml": "tests\/xmllint.sh"
     }
 }
