@@ -175,8 +175,18 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         $parameterName = $annotation->getNode()->value->parameterName ?? '';
         $variableName = $annotation->getNode()->value->variableName ?? '';
         $description = $annotation->getNode()->value->description ?? '';
+        /** @var string $methodName */
+        $methodName = $annotation->getNode()->value->methodName ?? '';
+        if ($methodName) {
+            $parameters = $annotation->getNode()->value->parameters ?? [];
+            $list = [];
+            foreach ($parameters as $parameter) {
+                $list[] = (string)$parameter;
+            }
+            $methodName .= '(' . implode(', ', $list) . ')';
+        }
 
-        $fixedAnnotation = sprintf('%s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description);
+        $fixedAnnotation = sprintf('%s %s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description, $methodName);
         /** @var string $fixedAnnotation */
         $fixedAnnotation = preg_replace('/\s+/', ' ', trim($fixedAnnotation));
 
