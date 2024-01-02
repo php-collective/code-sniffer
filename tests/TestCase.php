@@ -153,9 +153,9 @@ class TestCase extends PHPUnitTestCase
      */
     protected function runFixer(
         Sniff $sniff,
-        ?int  $errorCount = null,
-        ?int  $fixableErrorCount = null,
-        bool  $fix = false
+        ?int $errorCount = null,
+        ?int $fixableErrorCount = null,
+        bool $fix = false
     ): array {
         $codeSniffer = new Runner();
         $codeSniffer->config = new Config([

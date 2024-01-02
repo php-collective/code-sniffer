@@ -197,7 +197,8 @@ class DisallowCloakingCheckSniff extends AbstractSniff
         }
 
         $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($objectOperatorIndex - 1), $valueIndex, true);
-        if ($prevIndex
+        if (
+            $prevIndex
             && $tokens[$prevIndex]['code'] === T_VARIABLE
             && $tokens[$prevIndex]['content'] === '$this'
             && !$this->isMethod($phpcsFile, $objectOperatorIndex, $lastValueIndex)

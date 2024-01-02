@@ -41,6 +41,11 @@ class DeclareStrictTypesSniff implements Sniff
     public int $linesCountAfterDeclare = 1;
 
     /**
+     * @var int
+     */
+    public int $spacesCountAroundEqualsSign = 0;
+
+    /**
      * @return array<int, (int|string)>
      */
     public function register(): array
@@ -56,6 +61,8 @@ class DeclareStrictTypesSniff implements Sniff
     public function process(File $phpcsFile, $stackPtr): void
     {
         $this->onBeforeProcess();
+
+        $this->checkContent($phpcsFile, $stackPtr);
 
         $openTagPointer = TokenHelper::findPrevious($phpcsFile, T_OPEN_TAG, $stackPtr - 1);
         if ($openTagPointer === null) {
@@ -245,5 +252,99 @@ class DeclareStrictTypesSniff implements Sniff
     protected function normalizeIntValue(mixed $value): int
     {
         return (int)trim((string)$value);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $declarePointer
+     *
+     * @return void
+     */
+    protected function checkContent(File $phpcsFile, int $declarePointer): void
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        $strictTypesPointer = null;
+        for ($i = $tokens[$declarePointer]['parenthesis_opener'] + 1; $i < $tokens[$declarePointer]['parenthesis_closer']; $i++) {
+            if ($tokens[$i]['code'] !== T_STRING || $tokens[$i]['content'] !== 'strict_types') {
+                continue;
+            }
+
+            /** @var int $strictTypesPointer */
+            $strictTypesPointer = $i;
+
+            break;
+        }
+
+        if ($strictTypesPointer === null) {
+            $fix = $phpcsFile->addFixableError(
+                sprintf('Missing declare(%s).', $this->getStrictTypeDeclaration()),
+                $declarePointer,
+                'DeclareStrictTypesMissing',
+            );
+            if ($fix) {
+                $phpcsFile->fixer->beginChangeset();
+                $phpcsFile->fixer->addContentBefore(
+                    $tokens[$declarePointer]['parenthesis_closer'],
+                    ', ' . $this->getStrictTypeDeclaration(),
+                );
+                $phpcsFile->fixer->endChangeset();
+            }
+
+            return;
+        }
+
+        $numberPointer = TokenHelper::findNext($phpcsFile, T_LNUMBER, $strictTypesPointer + 1);
+        if ($numberPointer && $tokens[$numberPointer]['content'] !== '1') {
+            $fix = $phpcsFile->addFixableError(
+                sprintf(
+                    'Expected %s, found %s.',
+                    $this->getStrictTypeDeclaration(),
+                    TokenHelper::getContent($phpcsFile, $strictTypesPointer, $numberPointer),
+                ),
+                $strictTypesPointer,
+                'DeclareStrictTypesMissing',
+            );
+            if ($fix) {
+                $phpcsFile->fixer->beginChangeset();
+                $phpcsFile->fixer->replaceToken($numberPointer, '1');
+                $phpcsFile->fixer->endChangeset();
+            }
+
+            return;
+        }
+
+        $strictTypesContent = TokenHelper::getContent($phpcsFile, $strictTypesPointer, $numberPointer);
+
+        $format = sprintf('strict_types%1$s=%1$s1', str_repeat(' ', $this->spacesCountAroundEqualsSign));
+        if ($strictTypesContent !== $format) {
+            $message = sprintf(
+                'Expected %s, found %s.',
+                $format,
+                $strictTypesContent,
+            );
+            if (!$numberPointer) {
+                $phpcsFile->addError(
+                    $message,
+                    $strictTypesPointer,
+                    'IncorrectStrictTypesFormat',
+                );
+
+                return;
+            }
+
+            $fix = $phpcsFile->addFixableError(
+                $message,
+                $strictTypesPointer,
+                'IncorrectStrictTypesFormat',
+            );
+            if ($fix) {
+                $phpcsFile->fixer->beginChangeset();
+
+                FixerHelper::change($phpcsFile, $strictTypesPointer, $numberPointer, $format);
+
+                $phpcsFile->fixer->endChangeset();
+            }
+        }
     }
 }
