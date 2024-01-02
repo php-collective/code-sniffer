@@ -111,7 +111,7 @@ class FileDocBlockSniff extends AbstractSniff
 
         $firstLineComment = array_shift($fileDockBlockLines);
 
-        if (strpos($firstLineComment, 'modified by ') !== false) {
+        if (str_contains($firstLineComment, 'modified by ')) {
             return false;
         }
 

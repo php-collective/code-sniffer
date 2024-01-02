@@ -138,14 +138,14 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
 
         foreach ($classNames as $key => $className) {
             foreach (static::$whitelistedStartsWithTypes as $whitelistedStartsWithType) {
-                if (strpos($className, $whitelistedStartsWithType) === 0) {
+                if (str_starts_with($className, $whitelistedStartsWithType)) {
                     // We skip for now
                     continue 2;
                 }
             }
 
             $arrayOfObject = 0;
-            while (substr($className, -2) === '[]') {
+            while (str_ends_with($className, '[]')) {
                 $arrayOfObject++;
                 $className = substr($className, 0, -2);
             }
@@ -154,7 +154,7 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
                 continue;
             }
 
-            if (strpos($className, '\\') !== false) {
+            if (str_contains($className, '\\')) {
                 continue;
             }
 
@@ -302,11 +302,11 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
 
             $useStatement = trim($useStatement);
 
-            if (strpos($useStatement, ' as ') !== false) {
+            if (str_contains($useStatement, ' as ')) {
                 [$useStatement, $className] = explode(' as ', $useStatement);
             } else {
                 $className = $useStatement;
-                if (strpos($useStatement, '\\') !== false) {
+                if (str_contains($useStatement, '\\')) {
                     $lastSeparator = strrpos($useStatement, '\\');
                     $className = substr($useStatement, $lastSeparator + 1);
                 }

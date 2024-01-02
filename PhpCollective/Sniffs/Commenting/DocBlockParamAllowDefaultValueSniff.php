@@ -255,7 +255,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
         }
 
         foreach ($parts as $part) {
-            if (strpos($part, 'class-string<') === 0) {
+            if (str_starts_with($part, 'class-string<')) {
                 return true;
             }
         }

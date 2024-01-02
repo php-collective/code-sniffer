@@ -36,7 +36,7 @@ class DocBlockPipeSpacingSniff implements Sniff
 
         $description = '';
         $hint = $content;
-        if (strpos($hint, ' ') !== false) {
+        if (str_contains($hint, ' ')) {
             [$hint, $description] = explode(' ', $content, 2);
         }
 
@@ -46,7 +46,7 @@ class DocBlockPipeSpacingSniff implements Sniff
             $trailingWhitespace = $matches[1];
         }
 
-        if (strpos($hint, '|') === false) {
+        if (!str_contains($hint, '|')) {
             return;
         }
 

@@ -47,7 +47,7 @@ class DocBlockTagSniff implements Sniff
 
         $description = '';
         $tag = $content;
-        if (strpos($tag, ' ') !== false) {
+        if (str_contains($tag, ' ')) {
             [$tag, $description] = explode(' ', $content, 2);
         }
 

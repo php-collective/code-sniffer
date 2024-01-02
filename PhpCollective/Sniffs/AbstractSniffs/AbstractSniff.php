@@ -403,7 +403,7 @@ abstract class AbstractSniff implements Sniff
         for ($i = $begin; $i <= $end; $i++) {
             $token = $tokens[$i];
             if ($token['code'] === T_CONSTANT_ENCAPSED_STRING) {
-                if (strpos(strtolower($token['content']), 'deprecated') !== false) {
+                if (str_contains(strtolower($token['content']), 'deprecated')) {
                     return true;
                 }
             }

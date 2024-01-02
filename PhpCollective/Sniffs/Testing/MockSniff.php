@@ -154,14 +154,14 @@ class MockSniff extends AbstractSniff
         if ($hasMockAnnotation && !$returnTypeHint && count($docBlockReturnTypes) === 2) {
             $returnType = null;
             foreach ($docBlockReturnTypes as $docBlockReturnType) {
-                if (strpos($docBlockReturnType, 'MockObject') !== false) {
+                if (str_contains($docBlockReturnType, 'MockObject')) {
                     continue;
                 }
 
                 $returnType = $docBlockReturnType;
             }
 
-            if (!$returnType || substr($returnType, -5) === 'Trait') {
+            if (!$returnType || str_ends_with($returnType, 'Trait')) {
                 return;
             }
 
@@ -209,7 +209,7 @@ class MockSniff extends AbstractSniff
     protected function isTest(File $phpcsFile, int $stackPtr): bool
     {
         $filename = $phpcsFile->getFilename();
-        if (substr($filename, -8) !== 'Test.php' && substr($filename, -9) !== 'Mocks.php') {
+        if (!str_ends_with($filename, 'Test.php') && !str_ends_with($filename, 'Mocks.php')) {
             return false;
         }
 
@@ -224,7 +224,7 @@ class MockSniff extends AbstractSniff
     protected function hasMockObjectAnnotation(array $docBlockReturnTypes): bool
     {
         foreach ($docBlockReturnTypes as $docBlockReturnType) {
-            if (strpos($docBlockReturnType, 'MockObject') === false) {
+            if (!str_contains($docBlockReturnType, 'MockObject')) {
                 continue;
             }
 

@@ -259,7 +259,7 @@ class DocBlockThrowsSniff extends AbstractSniff
             if ($this->isInCode($annotation, $exceptions, $useStatements)) {
                 continue;
             }
-            if (substr($annotation['comment'], 0, 1) === '!') {
+            if (str_starts_with($annotation['comment'], '!')) {
                 continue;
             }
 

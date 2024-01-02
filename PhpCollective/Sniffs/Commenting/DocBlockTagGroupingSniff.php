@@ -210,7 +210,7 @@ class DocBlockTagGroupingSniff extends AbstractSniff
                 continue;
             }
 
-            if ($currentTag === $tag['tag'] || strpos($tag['tag'], $currentTag) === 0) {
+            if ($currentTag === $tag['tag'] || str_starts_with($tag['tag'], $currentTag)) {
                 $this->assertNoSpacing($phpCsFile, $tags[$i - 1], $tag);
 
                 continue;

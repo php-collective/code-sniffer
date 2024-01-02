@@ -154,7 +154,7 @@ class InlineDocBlockSniff extends AbstractSniff
      */
     protected function isAllowedTag(string $tag): bool
     {
-        if (strpos($tag, '@phpstan-') === 0 || strpos($tag, '@psalm-') === 0) {
+        if (str_starts_with($tag, '@phpstan-') || str_starts_with($tag, '@psalm-')) {
             return true;
         }
 
@@ -194,7 +194,7 @@ class InlineDocBlockSniff extends AbstractSniff
         $comment = $tokens[$contentIndex]['content'];
 
         // SKip for complex arrays until next major
-        if (strpos($comment, '<') !== false) {
+        if (str_contains($comment, '<')) {
             return [];
         }
 

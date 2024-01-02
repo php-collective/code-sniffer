@@ -332,7 +332,7 @@ class TypeHintSniff extends AbstractSniff
                 continue;
             }
 
-            if (strpos((string)$type, '\\') === 0) {
+            if (str_starts_with((string)$type, '\\')) {
                 return true;
             }
         }
@@ -350,7 +350,7 @@ class TypeHintSniff extends AbstractSniff
      */
     protected function isStanTag(string $tag): bool
     {
-        return strpos($tag, '@phpstan-') === 0 || strpos($tag, '@psalm-') === 0;
+        return str_starts_with($tag, '@phpstan-') || str_starts_with($tag, '@psalm-');
     }
 
     /**

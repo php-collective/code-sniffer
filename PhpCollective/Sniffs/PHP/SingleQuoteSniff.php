@@ -53,8 +53,8 @@ class SingleQuoteSniff extends AbstractSniff
         $content = $tokens[$stackPtr]['content'];
         if (
             $content[0] === '"'
-            && strpos($content, "'") === false
-            && strpos($content, "\n") === false
+            && !str_contains($content, "'")
+            && !str_contains($content, "\n")
             // regex: odd number of backslashes, not followed by double quote or dollar
             && !preg_match('/(?<!\\\\)(?:\\\\{2})*\\\\(?!["$\\\\])/', $content)
         ) {

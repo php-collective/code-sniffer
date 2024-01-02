@@ -85,7 +85,7 @@ trait UseStatementsTrait
      */
     protected function isMultipleUseStatement(string $statementContent): bool
     {
-        if (strpos($statementContent, ',') !== false) {
+        if (str_contains($statementContent, ',')) {
             return true;
         }
 

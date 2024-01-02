@@ -39,7 +39,7 @@ class DocBlockTagIterableSniff implements Sniff
         $content = $tokens[$stackPtr]['content'];
 
         $tag = $content;
-        if (strpos($tag, ' ') !== false) {
+        if (str_contains($tag, ' ')) {
             [$tag, $description] = explode(' ', $content, 2);
         }
 

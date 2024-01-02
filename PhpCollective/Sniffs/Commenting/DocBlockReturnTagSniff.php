@@ -71,12 +71,12 @@ class DocBlockReturnTagSniff extends AbstractSniff
         $returnTypes = $this->valueNodeParts($valueNode);
         $typeString = $this->renderUnionTypes($returnTypes);
 
-        if (strpos($content, $typeString) !== 0) {
+        if (!str_starts_with($content, $typeString)) {
             return;
         }
 
         $description = mb_substr($content, mb_strlen($typeString) + 1);
-        if (!$description || strpos($description, '$') !== 0) {
+        if (!$description || !str_starts_with($description, '$')) {
             return;
         }
 

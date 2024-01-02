@@ -132,11 +132,11 @@ trait CommentingTrait
      * @param \PHP_CodeSniffer\Files\File $phpCsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
-     * @param string $needle
+     * @param string $check
      *
      * @return bool
      */
-    protected function hasInheritDoc(File $phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $needle = '@inheritDoc')
+    protected function hasInheritDoc(File $phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $check = '@inheritDoc')
     {
         $tokens = $phpCsFile->getTokens();
 
@@ -145,12 +145,12 @@ trait CommentingTrait
                 continue;
             }
             $content = $tokens[$i]['content'];
-            $pos = stripos($content, $needle);
+            $pos = stripos($content, $check);
             if ($pos === false) {
                 continue;
             }
 
-            if ($pos && strpos($needle, '@') === 0 && substr($content, $pos - 1, $pos) === '{') {
+            if ($pos && str_starts_with($check, '@') && substr($content, $pos - 1, $pos) === '{') {
                 return false;
             }
 
@@ -171,7 +171,7 @@ trait CommentingTrait
     protected function containsTypeArray(array $docBlockTypes, string $iterableType = 'array'): bool
     {
         foreach ($docBlockTypes as $docBlockType) {
-            if (strpos($docBlockType, '[]') !== false || strpos($docBlockType, $iterableType . '<') === 0) {
+            if (str_contains($docBlockType, '[]') || str_starts_with($docBlockType, $iterableType . '<')) {
                 return true;
             }
         }
@@ -189,7 +189,7 @@ trait CommentingTrait
     protected function containsIterableSyntax(array $docBlockTypes): bool
     {
         foreach ($docBlockTypes as $docBlockType) {
-            if (strpos($docBlockType, '<') !== false) {
+            if (str_contains($docBlockType, '<')) {
                 return true;
             }
         }

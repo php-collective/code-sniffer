@@ -111,7 +111,7 @@ class DocBlockParamSniff extends AbstractSniff
                 continue;
             }
             // We let other sniffers take care of missing type for now
-            if (strpos($docBlockParam['type'], '$') !== false) {
+            if (str_contains($docBlockParam['type'], '$')) {
                 continue;
             }
 

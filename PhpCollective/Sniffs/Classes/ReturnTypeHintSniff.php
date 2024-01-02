@@ -153,7 +153,7 @@ class ReturnTypeHintSniff extends AbstractSniff
             }
 
             $content = $tokens[$classNameIndex]['content'];
-            if (!$content || strpos($content, '\\') !== 0) {
+            if (!$content || !str_starts_with($content, '\\')) {
                 continue;
             }
 

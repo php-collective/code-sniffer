@@ -76,13 +76,13 @@ class DocBlockParamNotJustNullSniff extends AbstractSniff
 
             $content = $tokens[$classNameIndex]['content'];
 
-            $appendix = '';
+            //$appendix = '';
             $spaceIndex = strpos($content, ' ');
             if ($spaceIndex) {
-                $appendix = substr($content, $spaceIndex);
+                //$appendix = substr($content, $spaceIndex);
                 $content = substr($content, 0, $spaceIndex);
             }
-            if (!$content || $content !== 'null') {
+            if ($content !== 'null') {
                 continue;
             }
 

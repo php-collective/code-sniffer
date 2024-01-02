@@ -129,7 +129,7 @@ class AssertPrimitivesSniff extends AbstractSniff
     protected function isTest(File $phpcsFile, int $stackPtr): bool
     {
         $filename = $phpcsFile->getFilename();
-        if (substr($filename, -8) !== 'Test.php' && substr($filename, -9) !== 'Mocks.php') {
+        if (!str_ends_with($filename, 'Test.php') && !str_ends_with($filename, 'Mocks.php')) {
             return false;
         }
 

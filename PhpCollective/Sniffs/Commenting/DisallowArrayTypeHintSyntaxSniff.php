@@ -437,7 +437,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 continue;
             }
 
-            if (strpos((string)$type, '\\') === 0) {
+            if (str_starts_with((string)$type, '\\')) {
                 return true;
             }
         }
@@ -452,7 +452,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function isGenericObject(TypeNode $typeNode): bool
     {
-        return $typeNode instanceof IdentifierTypeNode && strpos((string)$typeNode, '\\') === 0;
+        return $typeNode instanceof IdentifierTypeNode && str_starts_with((string)$typeNode, '\\');
     }
 
     /**

@@ -63,7 +63,7 @@ class DocBlockNoInlineAlignmentSniff extends AbstractSniff
         }
 
         $content = $tokens[$followingWhitespace]['content'];
-        if (strpos($content, ' ') === false || $content === ' ') {
+        if (!str_contains($content, ' ') || $content === ' ') {
             return;
         }
 

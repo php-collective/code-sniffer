@@ -142,11 +142,11 @@ class UseStatementSniff implements Sniff
      */
     protected function fixStatement(File $phpcsFile, array $statement, int $stackPtr): void
     {
-        if (strpos($statement['content'], '\\') === false) {
+        if (!str_contains($statement['content'], '\\')) {
             return;
         }
 
-        $partial = strpos($statement['content'], '\\') !== 0;
+        $partial = !str_starts_with($statement['content'], '\\');
 
         $extractedUseStatement = ltrim($statement['content'], '\\');
         $className = substr($statement['content'], strrpos($statement['content'], '\\') + 1);
@@ -717,7 +717,7 @@ class UseStatementSniff implements Sniff
      */
     protected function isMultipleUseStatement(string $statementContent): bool
     {
-        if (strpos($statementContent, ',') !== false) {
+        if (str_contains($statementContent, ',')) {
             return true;
         }
 
@@ -780,7 +780,7 @@ class UseStatementSniff implements Sniff
             return $namespaceStatement['namespace'] === $fullName;
         }
 
-        return strpos($namespaceStatement['namespace'], substr($fullName, 0, $firstSeparator)) === 0;
+        return str_starts_with($namespaceStatement['namespace'], substr($fullName, 0, $firstSeparator));
     }
 
     /**
