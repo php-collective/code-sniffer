@@ -10,12 +10,14 @@ enum DriverFeatureEnum: string
     case CTE = 'cte';
 
     /**
-     * Disabling constraints without being in transaction support.
-     */
-    case DISABLE_CONSTRAINT_WITHOUT_TRANSACTION = 'disble-constarint-without-transaction';
-
-    /**
      * Native JSON data type support.
      */
-    case JSON = 'json';
+    case JsonType = 'json-type';
+
+    /**
+     * Disabling constraints without being in transaction support.
+     */
+    case DISABLE_CONSTRAINT = 'disable-constraint';
+
+    case iNVALID = 'invalid';
 }

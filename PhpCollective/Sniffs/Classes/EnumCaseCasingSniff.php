@@ -36,8 +36,20 @@ class EnumCaseCasingSniff extends AbstractSniff
         }
 
         $content = $tokens[$nextIndex]['content'];
+        if (!preg_match('/[A-Z]/', $content)) {
+            return;
+        }
+
         if (str_contains($content, '_')) {
             $phpcsFile->addError('Enum cases must be in PascalCase format', $nextIndex, 'NotFixableWrongCasing');
+
+            return;
+        }
+
+        if (preg_match('/[a-z]/', $content)) {
+            if (preg_match('/^[a-z]/', $content)) {
+                $phpcsFile->addError('Enum cases must be in PascalCase format', $nextIndex, 'NotFixableWrongCasing');
+            }
 
             return;
         }
