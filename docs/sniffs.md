@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 211 sniffs
+The PhpCollectiveStrict standard contains 213 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -37,44 +37,6 @@ PEAR (4 sniffs)
 - PEAR.ControlStructures.ControlSignature
 - PEAR.Functions.ValidDefaultValue
 - PEAR.NamingConventions.ValidClassName
-
-PSR1 (3 sniffs)
----------------
-- PSR1.Classes.ClassDeclaration
-- PSR1.Files.SideEffects
-- PSR1.Methods.CamelCapsMethodName
-
-PSR12 (14 sniffs)
------------------
-- PSR12.Classes.AnonClassDeclaration
-- PSR12.Classes.ClassInstantiation
-- PSR12.Classes.ClosingBrace
-- PSR12.Classes.OpeningBraceSpace
-- PSR12.ControlStructures.BooleanOperatorPlacement
-- PSR12.ControlStructures.ControlStructureSpacing
-- PSR12.Files.ImportStatement
-- PSR12.Functions.NullableTypeDeclaration
-- PSR12.Functions.ReturnTypeDeclaration
-- PSR12.Keywords.ShortFormTypeKeywords
-- PSR12.Namespaces.CompoundNamespaceDepth
-- PSR12.Operators.OperatorSpacing
-- PSR12.Properties.ConstantVisibility
-- PSR12.Traits.UseDeclaration
-
-PSR2 (12 sniffs)
-----------------
-- PSR2.Classes.ClassDeclaration
-- PSR2.Classes.PropertyDeclaration
-- PSR2.ControlStructures.ControlStructureSpacing
-- PSR2.ControlStructures.ElseIfDeclaration
-- PSR2.ControlStructures.SwitchDeclaration
-- PSR2.Files.ClosingTag
-- PSR2.Files.EndFileNewline
-- PSR2.Methods.FunctionCallSignature
-- PSR2.Methods.FunctionClosingBrace
-- PSR2.Methods.MethodDeclaration
-- PSR2.Namespaces.NamespaceDeclaration
-- PSR2.Namespaces.UseDeclaration
 
 PhpCollective (77 sniffs)
 -------------------------
@@ -162,14 +124,54 @@ PhpCollectiveStrict (3 sniffs)
 - PhpCollectiveStrict.TypeHints.PropertyTypeHint
 - PhpCollectiveStrict.TypeHints.ReturnTypeHint
 
-SlevomatCodingStandard (45 sniffs)
+PSR1 (3 sniffs)
+---------------
+- PSR1.Classes.ClassDeclaration
+- PSR1.Files.SideEffects
+- PSR1.Methods.CamelCapsMethodName
+
+PSR2 (12 sniffs)
+----------------
+- PSR2.Classes.ClassDeclaration
+- PSR2.Classes.PropertyDeclaration
+- PSR2.ControlStructures.ControlStructureSpacing
+- PSR2.ControlStructures.ElseIfDeclaration
+- PSR2.ControlStructures.SwitchDeclaration
+- PSR2.Files.ClosingTag
+- PSR2.Files.EndFileNewline
+- PSR2.Methods.FunctionCallSignature
+- PSR2.Methods.FunctionClosingBrace
+- PSR2.Methods.MethodDeclaration
+- PSR2.Namespaces.NamespaceDeclaration
+- PSR2.Namespaces.UseDeclaration
+
+PSR12 (14 sniffs)
+-----------------
+- PSR12.Classes.AnonClassDeclaration
+- PSR12.Classes.ClassInstantiation
+- PSR12.Classes.ClosingBrace
+- PSR12.Classes.OpeningBraceSpace
+- PSR12.ControlStructures.BooleanOperatorPlacement
+- PSR12.ControlStructures.ControlStructureSpacing
+- PSR12.Files.ImportStatement
+- PSR12.Functions.NullableTypeDeclaration
+- PSR12.Functions.ReturnTypeDeclaration
+- PSR12.Keywords.ShortFormTypeKeywords
+- PSR12.Namespaces.CompoundNamespaceDepth
+- PSR12.Operators.OperatorSpacing
+- PSR12.Properties.ConstantVisibility
+- PSR12.Traits.UseDeclaration
+
+SlevomatCodingStandard (47 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
 - SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace
 - SlevomatCodingStandard.Arrays.TrailingArrayComma
+- SlevomatCodingStandard.Classes.BackedEnumTypeSpacing
 - SlevomatCodingStandard.Classes.ClassConstantVisibility
 - SlevomatCodingStandard.Classes.ClassMemberSpacing
 - SlevomatCodingStandard.Classes.ConstantSpacing
+- SlevomatCodingStandard.Classes.EnumCaseSpacing
 - SlevomatCodingStandard.Classes.ModernClassNameReference
 - SlevomatCodingStandard.Commenting.DeprecatedAnnotationDeclaration
 - SlevomatCodingStandard.Commenting.DisallowOneLinePropertyDocComment
@@ -195,8 +197,8 @@ SlevomatCodingStandard (45 sniffs)
 - SlevomatCodingStandard.Namespaces.UnusedUses
 - SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash
 - SlevomatCodingStandard.Namespaces.UseFromSameNamespace
-- SlevomatCodingStandard.Namespaces.UseSpacing
 - SlevomatCodingStandard.Namespaces.UselessAlias
+- SlevomatCodingStandard.Namespaces.UseSpacing
 - SlevomatCodingStandard.Operators.SpreadOperatorSpacing
 - SlevomatCodingStandard.PHP.ForbiddenClasses
 - SlevomatCodingStandard.PHP.ShortList
@@ -241,5 +243,5 @@ Squiz (27 sniffs)
 - Squiz.WhiteSpace.SuperfluousWhitespace
 
 Zend (1 sniff)
----------------
+--------------
 - Zend.Files.ClosingTag

@@ -54,6 +54,8 @@
     <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue"/>
     <rule ref="SlevomatCodingStandard.TypeHints.LongTypeHints"/>
 
+    <rule ref="SlevomatCodingStandard.Classes.BackedEnumTypeSpacing"/>
+    <rule ref="SlevomatCodingStandard.Classes.EnumCaseSpacing"/>
     <rule ref="SlevomatCodingStandard.Classes.ConstantSpacing">
         <properties>
             <property name="minLinesCountBeforeWithoutComment" value="1"/>
