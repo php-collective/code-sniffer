@@ -59,7 +59,7 @@ class DisallowCloakingCheckSniff extends AbstractSniff
             return;
         }
 
-        if ($tokens[$valueIndex]['code'] === T_VARIABLE && strpos($tokens[$valueIndex]['content'], '$_') === 0) {
+        if ($tokens[$valueIndex]['code'] === T_VARIABLE && str_starts_with($tokens[$valueIndex]['content'], '$_')) {
             return;
         }
 
@@ -197,7 +197,11 @@ class DisallowCloakingCheckSniff extends AbstractSniff
         }
 
         $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($objectOperatorIndex - 1), $valueIndex, true);
-        if ($prevIndex && $tokens[$prevIndex]['code'] === T_VARIABLE && $tokens[$prevIndex]['content'] !== '$this') {
+        if ($prevIndex
+            && $tokens[$prevIndex]['code'] === T_VARIABLE
+            && $tokens[$prevIndex]['content'] === '$this'
+            && !$this->isMethod($phpcsFile, $objectOperatorIndex, $lastValueIndex)
+        ) {
             return true;
         }
         if ($prevIndex && $tokens[$prevIndex]['code'] === T_STRING) {
@@ -205,5 +209,29 @@ class DisallowCloakingCheckSniff extends AbstractSniff
         }
 
         return false;
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $objectOperatorIndex
+     * @param int $lastValueIndex
+     *
+     * @return bool
+     */
+    protected function isMethod(File $phpcsFile, int $objectOperatorIndex, int $lastValueIndex): bool
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, ($objectOperatorIndex + 1), $lastValueIndex, true);
+        if (!$nextIndex || $tokens[$nextIndex]['code'] !== T_STRING) {
+            return false;
+        }
+
+        $openParenthesisIndex = $phpcsFile->findNext(Tokens::$emptyTokens, ($nextIndex + 1), $lastValueIndex, true);
+        if (!$openParenthesisIndex || $tokens[$openParenthesisIndex]['code'] !== T_OPEN_PARENTHESIS) {
+            return false;
+        }
+
+        return true;
     }
 }

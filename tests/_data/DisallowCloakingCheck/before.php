@@ -64,4 +64,13 @@ class FixMe
 
         if (empty($_SESSION)) {}
     }
+
+    /**
+     * @return void
+     */
+    public function alsoOK(): void
+    {
+        if (isset($this->modelClass)) {
+        }
+    }
 }

@@ -27,7 +27,7 @@ class FixMe
         if (!isset($this->prop)) {
         }
 
-        $x = (bool)$this->prop;
+        $x = !empty($this->prop);
 
         return (bool)$x;
     }
@@ -63,5 +63,14 @@ class FixMe
         if (!isset($this->_joinData->relation)) {}
 
         if (empty($_SESSION)) {}
+    }
+
+    /**
+     * @return void
+     */
+    public function alsoOK(): void
+    {
+        if (isset($this->modelClass)) {
+        }
     }
 }
