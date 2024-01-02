@@ -196,12 +196,14 @@ class DisallowCloakingCheckSniff extends AbstractSniff
             return false;
         }
 
+        if ($this->isMethod($phpcsFile, $objectOperatorIndex, $lastValueIndex)) {
+            return false;
+        }
+
         $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($objectOperatorIndex - 1), $valueIndex, true);
         if (
             $prevIndex
             && $tokens[$prevIndex]['code'] === T_VARIABLE
-            && $tokens[$prevIndex]['content'] === '$this'
-            && !$this->isMethod($phpcsFile, $objectOperatorIndex, $lastValueIndex)
         ) {
             return true;
         }

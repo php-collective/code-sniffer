@@ -13,6 +13,12 @@ class FixMe
         if (!empty($customerBlacklistIds)) {
         }
 
+        if (empty($x->ok())) {
+        }
+
+        if (empty($x->ok)) {
+        }
+
         if (empty($this->ok())) {
         }
 
