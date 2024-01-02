@@ -32,6 +32,13 @@ class TestCase extends PHPUnitTestCase
     protected const FILE_AFTER = 'after.php';
 
     /**
+     * File prefix for test before/after files.
+     *
+     * @var string|null
+     */
+    protected ?string $prefix = null;
+
+    /**
      * This will run code sniffer
      *
      * @param \PHP_CodeSniffer\Sniffs\Sniff $sniffer
@@ -61,14 +68,14 @@ class TestCase extends PHPUnitTestCase
     /**
      * This will run code sniffer and code fixer.
      *
-     * @param \PHP_CodeSniffer\Sniffs\Sniff $sniffer
+     * @param \PHP_CodeSniffer\Sniffs\Sniff $sniff
      * @param int|null $fixableErrorCount
      *
      * @return void
      */
-    protected function assertSnifferCanFixErrors(Sniff $sniffer, ?int $fixableErrorCount = null): void
+    protected function assertSnifferCanFixErrors(Sniff $sniff, ?int $fixableErrorCount = null): void
     {
-        $this->runFixer($sniffer, null, $fixableErrorCount, true);
+        $this->runFixer($sniff, null, $fixableErrorCount, true);
     }
 
     /**
@@ -137,7 +144,7 @@ class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * @param \PHP_CodeSniffer\Sniffs\Sniff $sniffer
+     * @param \PHP_CodeSniffer\Sniffs\Sniff $sniff
      * @param int|null $errorCount
      * @param int|null $fixableErrorCount
      * @param bool $fix
@@ -145,19 +152,24 @@ class TestCase extends PHPUnitTestCase
      * @return array<array>
      */
     protected function runFixer(
-        Sniff $sniffer,
-        ?int $errorCount = null,
-        ?int $fixableErrorCount = null,
-        bool $fix = false
+        Sniff $sniff,
+        ?int  $errorCount = null,
+        ?int  $fixableErrorCount = null,
+        bool  $fix = false
     ): array {
         $codeSniffer = new Runner();
         $codeSniffer->config = new Config([
             '-s',
         ]);
         $codeSniffer->init();
-        $codeSniffer->ruleset->sniffs = [get_class($sniffer) => $sniffer];
+        $codeSniffer->ruleset->sniffs = [get_class($sniff) => $sniff];
+
+        $properties = get_object_vars($sniff);
         $codeSniffer->ruleset->populateTokenListeners();
-        $file = new LocalFile($this->getDummyFileBefore($sniffer), $codeSniffer->ruleset, $codeSniffer->config);
+        foreach ($properties as $property => $value) {
+            $codeSniffer->ruleset->setSniffProperty(get_class($sniff), $property, ['scope' => 'sniff', 'value' => $value]);
+        }
+        $file = new LocalFile($this->getDummyFileBefore($sniff), $codeSniffer->ruleset, $codeSniffer->config);
 
         if ($fix) {
             $file->fixer->enabled = true;
@@ -172,7 +184,7 @@ class TestCase extends PHPUnitTestCase
             $this->assertEquals($fixableErrorCount, $file->getFixableCount());
         }
         if ($fix) {
-            $diff = $file->fixer->generateDiff($this->getDummyFileAfter($sniffer));
+            $diff = $file->fixer->generateDiff($this->getDummyFileAfter($sniff));
             $this->assertSame('', $diff, $diff);
         }
 
@@ -217,6 +229,10 @@ class TestCase extends PHPUnitTestCase
     {
         $className = (new ReflectionClass($sniffer))->getShortName();
         $className = str_replace('Sniff', '', $className);
+
+        if ($this->prefix) {
+            $fileName = $this->prefix . $fileName;
+        }
 
         $file = $this->testFilePath() . $className . DS . $fileName;
         if (!file_exists($file)) {

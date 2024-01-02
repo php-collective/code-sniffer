@@ -41,11 +41,6 @@ class DeclareStrictTypesSniff implements Sniff
     public int $linesCountAfterDeclare = 1;
 
     /**
-     * @var int
-     */
-    public int $spacesCountAroundEqualsSign = 0;
-
-    /**
      * @return array<int, (int|string)>
      */
     public function register(): array
@@ -96,7 +91,6 @@ class DeclareStrictTypesSniff implements Sniff
 
         $isDeclaredOnFirstLine = $tokens[$stackPtr]['line'] === $tokens[$openTagPointer]['line'];
         $linesCountBefore = $isDeclaredOnFirstLine ? 0 : substr_count($whitespaceBefore, $phpcsFile->eolChar) - 1;
-
         if ($this->declareOnFirstLine) {
             if ($tokens[$openTagPointer]['line'] !== $tokens[$stackPtr]['line']) {
                 $linesCountBefore++;
