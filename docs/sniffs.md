@@ -47,6 +47,7 @@ PhpCollective (78 sniffs)
 - PhpCollective.Classes.MethodDeclaration
 - PhpCollective.Classes.MethodTypeHint
 - PhpCollective.Classes.PropertyDefaultValue
+- PhpCollective.Classes.Psr4
 - PhpCollective.Classes.ReturnTypeHint
 - PhpCollective.Classes.SelfAccessor
 - PhpCollective.Commenting.Attributes
