@@ -172,13 +172,15 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function fixAnnotation(File $phpcsFile, Annotation $annotation, string $fixedAnnotation): void
     {
-        $parameterName = $annotation->getNode()->value->parameterName ?? '';
-        $variableName = $annotation->getNode()->value->variableName ?? '';
-        $description = $annotation->getNode()->value->description ?? '';
+        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|mixed $value */
+        $value = $annotation->getNode()->value;
+        $parameterName = $value->parameterName ?? '';
+        $variableName = $value->variableName ?? '';
+        $description = $value->description ?? '';
         /** @var string $methodName */
-        $methodName = $annotation->getNode()->value->methodName ?? '';
+        $methodName = $value->methodName ?? '';
         if ($methodName) {
-            $parameters = $annotation->getNode()->value->parameters ?? [];
+            $parameters = $value->parameters ?? [];
             $list = [];
             foreach ($parameters as $parameter) {
                 $list[] = (string)$parameter;
