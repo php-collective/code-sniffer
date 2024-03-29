@@ -65,7 +65,7 @@ class AutoloadabilityInspectorsFactory
                     $dirs = [$dirs];
                 }
                 foreach ($dirs as $dir) {
-                    $psr4Directories[] = new AutoloadabilityInspector(
+                    $psr4Directories[$dir] = new AutoloadabilityInspector(
                         $base . $dir,
                         $namespace,
                     );
@@ -79,13 +79,15 @@ class AutoloadabilityInspectorsFactory
                     $dirs = [$dirs];
                 }
                 foreach ($dirs as $dir) {
-                    $psr4Directories[] = new AutoloadabilityInspector(
+                    $psr4Directories[$dir] = new AutoloadabilityInspector(
                         $base . $dir,
                         $namespace,
                     );
                 }
             }
         }
+
+        krsort($psr4Directories);
 
         return new AutoloadabilityInspectors(...$psr4Directories);
     }
