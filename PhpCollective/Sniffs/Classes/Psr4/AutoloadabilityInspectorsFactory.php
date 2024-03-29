@@ -58,6 +58,7 @@ class AutoloadabilityInspectorsFactory
         }
         $psr4Directories = [];
 
+        $base = dirname($filename) . '/';
         if (isset($data['autoload']['psr-4'])) {
             foreach ($data['autoload']['psr-4'] as $namespace => $dirs) {
                 if (!is_array($dirs)) {
@@ -65,7 +66,7 @@ class AutoloadabilityInspectorsFactory
                 }
                 foreach ($dirs as $dir) {
                     $psr4Directories[] = new AutoloadabilityInspector(
-                        dirname($filename) . '/' . $dir,
+                        $base . $dir,
                         $namespace,
                     );
                 }
@@ -79,7 +80,7 @@ class AutoloadabilityInspectorsFactory
                 }
                 foreach ($dirs as $dir) {
                     $psr4Directories[] = new AutoloadabilityInspector(
-                        dirname($filename) . '/' . $dir,
+                        $base . $dir,
                         $namespace,
                     );
                 }

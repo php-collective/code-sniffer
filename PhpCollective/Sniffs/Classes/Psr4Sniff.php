@@ -98,7 +98,7 @@ class Psr4Sniff implements Sniff
             $this->initialization = static::INITIALIZATION_FAILURE;
             $this->autoloadabilityInspectors =
                 AutoloadabilityInspectorsFactory::create(
-                    $config->getSettings()['basepath'],
+                    $config->getSettings()['basepath'] ?: getcwd(),
                     $this->composerJsonPath,
                 );
             $this->initialization = static::INITIALIZED;
