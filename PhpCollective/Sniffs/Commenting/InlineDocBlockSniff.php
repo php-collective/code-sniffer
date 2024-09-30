@@ -199,7 +199,7 @@ class InlineDocBlockSniff extends AbstractSniff
         }
 
         preg_match('#^(.+?)(\s+)(.+?)\s*$#', $comment, $contentMatches);
-        if (!$contentMatches || !$contentMatches[1] || !$contentMatches[3]) {
+        if (!$contentMatches || empty($contentMatches[1]) || empty($contentMatches[2]) || empty($contentMatches[3])) {
             if ($this->hasReturnAsFollowingToken($phpCsFile, $contentIndex)) {
                 return [];
             }
