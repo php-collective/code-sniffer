@@ -160,7 +160,6 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
             || $phpDocNode instanceof ReturnTagValueNode
             || $phpDocNode instanceof VarTagValueNode
         ) {
-            echo PHP_EOL . 'processing...' . PHP_EOL;
             $phpDocNode->type = $this->transformNullableType($phpDocNode->type);
         }
 
