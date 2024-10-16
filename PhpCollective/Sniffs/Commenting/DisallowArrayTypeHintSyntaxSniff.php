@@ -189,7 +189,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
             $methodName .= '(' . implode(', ', $list) . ')';
         }
 
-        $fixedAnnotation = sprintf('%s %s %s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description, $methodName, $propertyName);
+        $fixedAnnotation = sprintf('%s %s %s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $propertyName, $description, $methodName);
         /** @var string $fixedAnnotation */
         $fixedAnnotation = preg_replace('/\s+/', ' ', trim($fixedAnnotation));
 
