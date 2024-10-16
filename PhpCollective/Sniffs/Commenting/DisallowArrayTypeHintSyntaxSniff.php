@@ -32,9 +32,7 @@ use SlevomatCodingStandard\Helpers\TokenHelper;
 use SlevomatCodingStandard\Helpers\TypeHintHelper;
 
 /**
- * Fixed version of Slevomatic, touching collection objects the right way.
- *
- * @see https://github.com/slevomat/coding-standard/issues/1296
+ * Disallows use of `?type` in favor of `type|null`. Reduces conflict or issues with other sniffs.
  */
 class DisallowArrayTypeHintSyntaxSniff implements Sniff
 {
@@ -66,9 +64,9 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpcsFile, $docCommentOpenPointer): void
+    public function process(File $phpcsFile, $pointer): void
     {
-        $annotations = AnnotationHelper::getAnnotations($phpcsFile, $docCommentOpenPointer);
+        $annotations = AnnotationHelper::getAnnotations($phpcsFile, $pointer);
 
         foreach ($annotations as $annotation) {
             $arrayTypeNodes = $this->getArrayTypeNodes($annotation->getValue());
@@ -88,7 +86,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 }
 
                 /** @var \SlevomatCodingStandard\Helpers\ParsedDocComment $parsedDocComment */
-                $parsedDocComment = DocCommentHelper::parseDocComment($phpcsFile, $docCommentOpenPointer);
+                $parsedDocComment = DocCommentHelper::parseDocComment($phpcsFile, $pointer);
 
                 /** @var list<\PHPStan\PhpDocParser\Ast\Type\UnionTypeNode> $unionTypeNodes */
                 $unionTypeNodes = AnnotationHelper::getAnnotationNodesByType($annotation->getNode(), UnionTypeNode::class);
@@ -96,14 +94,14 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
 
                 if ($unionTypeNode !== null) {
                     if ($this->isUnionTypeGenericObjectCollection($unionTypeNodes[0])) {
-                        $this->fixGenericObjectCollection($phpcsFile, $annotation, $docCommentOpenPointer, $arrayTypeNode, $unionTypeNodes);
+                        $this->fixGenericObjectCollection($phpcsFile, $annotation, $pointer, $arrayTypeNode, $unionTypeNodes);
 
                         continue;
                     }
 
                     $genericIdentifier = $this->findGenericIdentifier(
                         $phpcsFile,
-                        $docCommentOpenPointer,
+                        $pointer,
                         $unionTypeNode,
                         $annotation->getValue(),
                     );
@@ -136,7 +134,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 } else {
                     $genericIdentifier = $this->findGenericIdentifier(
                         $phpcsFile,
-                        $docCommentOpenPointer,
+                        $pointer,
                         $arrayTypeNode,
                         $annotation->getValue(),
                     ) ?? 'array';
