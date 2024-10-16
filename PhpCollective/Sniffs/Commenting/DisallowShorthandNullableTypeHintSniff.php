@@ -162,8 +162,6 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
         ) {
             $phpDocNode->type = $this->transformNullableType($phpDocNode->type);
         }
-
-        echo PHP_EOL . PHP_EOL;
     }
 
     /**
