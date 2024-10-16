@@ -145,7 +145,6 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                         new IdentifierTypeNode($genericIdentifier),
                         [$this->fixArrayNode($arrayTypeNode->type)],
                     );
-
                     $this->fixAnnotation($phpcsFile, $annotation, $genericTypeNode);
 
                     continue;
@@ -177,6 +176,8 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         $parameterName = $value->parameterName ?? '';
         $variableName = $value->variableName ?? '';
         $description = $value->description ?? '';
+        $propertyName = $value->propertyName ?? '';
+
         /** @var string $methodName */
         $methodName = $value->methodName ?? '';
         if ($methodName) {
@@ -188,7 +189,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
             $methodName .= '(' . implode(', ', $list) . ')';
         }
 
-        $fixedAnnotation = sprintf('%s %s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description, $methodName);
+        $fixedAnnotation = sprintf('%s %s %s %s %s %s', $fixedAnnotation, $parameterName, $variableName, $description, $methodName, $propertyName);
         /** @var string $fixedAnnotation */
         $fixedAnnotation = preg_replace('/\s+/', ' ', trim($fixedAnnotation));
 
