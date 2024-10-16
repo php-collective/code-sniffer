@@ -17,7 +17,7 @@ class DisallowShorthandNullableTypeHintSniffTest extends TestCase
      */
     public function testDocBlockConstSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new DisallowShorthandNullableTypeHintSniff(), 3);
+        $this->assertSnifferFindsErrors(new DisallowShorthandNullableTypeHintSniff(), 5);
     }
 
     /**

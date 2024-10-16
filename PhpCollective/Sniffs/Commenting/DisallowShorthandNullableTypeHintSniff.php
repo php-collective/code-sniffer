@@ -14,7 +14,6 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
@@ -52,14 +51,25 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
         $docCommentContent = $tokens[$pointer]['content'];
 
-        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode $valueNode */
+        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode $valueNode */
         $valueNode = static::getValueNode($tokens[$pointer - 2]['content'], $docCommentContent);
-        if ($valueNode instanceof InvalidTagValueNode || $valueNode instanceof TypelessParamTagValueNode) {
-            return;
-        }
 
         $printer = new Printer();
         $before = $printer->print($valueNode);
+
+        // Check if the value node is invalid and handle it
+        if ($valueNode instanceof InvalidTagValueNode) {
+            // Attempt to clean up and process invalid types
+            $fixedNode = $this->fixInvalidTagValueNode($valueNode);
+            if ($fixedNode) {
+                $valueNode = $fixedNode;
+            }
+        }
+
+        if ($valueNode instanceof InvalidTagValueNode) {
+            return;
+        }
+
         // Traverse and fix the nullable types
         $this->traversePhpDocNode($valueNode);
 
@@ -79,6 +89,64 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
     }
 
     /**
+     * Attempt to fix an InvalidTagValueNode by parsing and correcting the types manually.
+     *
+     * @param \PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode $invalidNode
+     *
+     * @return \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode|null
+     */
+    protected function fixInvalidTagValueNode(InvalidTagValueNode $invalidNode): ?PhpDocTagValueNode
+    {
+        $value = $invalidNode->value;
+        $rest = '';
+        if (str_contains($value, '$')) {
+            $string = trim(substr($value, 0, (int)strpos($value, '$')));
+            $rest = trim(substr($value, strlen($string)));
+            $value = $string;
+        }
+
+        // Try to parse and correct the invalid node's type (e.g., `?string|null`)
+        if (str_contains($value, '|')) {
+            // Split the types
+            $types = explode('|', $value);
+
+            $transformedTypes = [];
+            $hasNullable = false;
+
+            foreach ($types as $type) {
+                $type = trim($type);
+
+                // Handle `?Type` shorthand
+                if (str_starts_with($type, '?')) {
+                    $type = substr($type, 1); // Remove leading '?'
+                    $transformedTypes[] = new IdentifierTypeNode($type);
+                    $hasNullable = true; // Mark as nullable
+                } elseif (strtolower($type) === 'null') {
+                    // If 'null' is encountered, mark as nullable but don't add now
+                    $hasNullable = true;
+                } else {
+                    $transformedTypes[] = new IdentifierTypeNode($type);
+                }
+            }
+
+            // Add `null` at the end if the type is nullable
+            if ($hasNullable) {
+                $transformedTypes[] = new IdentifierTypeNode('null');
+            }
+
+            // Create a new UnionTypeNode with the transformed types
+            return new ParamTagValueNode(
+                new UnionTypeNode($transformedTypes),
+                false,
+                $rest,
+                '',
+            );
+        }
+
+        return null;
+    }
+
+    /**
      * Traverse and transform the PHPDoc AST.
      *
      * @param \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode $phpDocNode
@@ -92,9 +160,11 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
             || $phpDocNode instanceof ReturnTagValueNode
             || $phpDocNode instanceof VarTagValueNode
         ) {
-            // Traverse the type node recursively
+            echo PHP_EOL . 'processing...' . PHP_EOL;
             $phpDocNode->type = $this->transformNullableType($phpDocNode->type);
         }
+
+        echo PHP_EOL . PHP_EOL;
     }
 
     /**
@@ -116,39 +186,16 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
             ]);
         }
 
-        // Recursively handle UnionTypeNode (e.g., `Type|null`)
+        // Handle UnionTypeNode (e.g., `Type|null`)
         if ($typeNode instanceof UnionTypeNode) {
-            // Traverse each type in the union and transform nullable types
-            foreach ($typeNode->types as &$subType) {
-                $subType = $this->transformNullableType($subType);
+            $transformedTypes = [];
+            foreach ($typeNode->types as $subType) {
+                $transformedTypes[] = $this->transformNullableType($subType); // Recursively transform
             }
 
-            return $typeNode;
-        }
-
-        // Recursively handle other nodes that might contain nested types
-        if (property_exists($typeNode, 'types') && is_array($typeNode->types)) {
-            foreach ($typeNode->types as &$subType) {
-                $subType = $this->transformNullableType($subType);
-            }
+            return new UnionTypeNode($transformedTypes);
         }
 
         return $typeNode;
-    }
-
-    /**
-     * @param array<string> $types
-     *
-     * @return bool
-     */
-    protected function containsShorthand(array $types): bool
-    {
-        foreach ($types as $type) {
-            if (str_starts_with($type, '?')) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
