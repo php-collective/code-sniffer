@@ -40,10 +40,8 @@ trait SignatureTrait
                         $default = 'string';
                     } elseif ($tokens[$defaultIndex]['code'] === T_OPEN_SHORT_ARRAY) {
                         $default = 'array';
-                    } elseif ($tokens[$defaultIndex]['code'] === T_FALSE) {
-                        $default = 'false';
-                    } elseif ($tokens[$defaultIndex]['code'] === T_TRUE) {
-                        $default = 'true';
+                    } elseif ($tokens[$defaultIndex]['code'] === T_FALSE || $tokens[$defaultIndex]['code'] === T_TRUE) {
+                        $default = 'bool';
                     } elseif ($tokens[$defaultIndex]['code'] === T_LNUMBER) {
                         $default = 'int';
                     } elseif ($tokens[$defaultIndex]['code'] === T_DNUMBER) {

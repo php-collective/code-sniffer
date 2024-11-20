@@ -129,6 +129,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                     !in_array($type, $parts, true)
                     && !$this->isPrimitiveGenerics($type, $parts)
                     && !$this->isClassString($type, $parts)
+                    && !$this->isBoolish($type, $parts)
                 ) {
                     $parts[] = $type;
                     $error = 'Possible doc block error: `' . $content . '` seems to be missing type `' . $type . '`.';
@@ -258,6 +259,29 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
             if (str_starts_with($part, 'class-string<')) {
                 return true;
             }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $type
+     * @param array<string> $parts
+     *
+     * @return bool
+     */
+    protected function isBoolish(string $type, array $parts): bool
+    {
+        if ($type !== 'bool') {
+            return false;
+        }
+
+        if (in_array('false', $parts, true)) {
+            return true;
+        }
+
+        if (in_array('true', $parts, true)) {
+            return true;
         }
 
         return false;
