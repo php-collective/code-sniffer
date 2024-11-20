@@ -100,7 +100,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 continue;
             }
 
-            if ($methodSignatureValue['typehint'] && in_array($methodSignatureValue['typehint'], ['array', 'iterable', 'string', 'int', 'bool', 'float', 'self', 'parent'], true)) {
+            if ($methodSignatureValue['typehint'] && in_array($methodSignatureValue['typehint'], ['array', 'iterable', 'string', 'int', 'bool', 'float', 'self', 'parent', 'false', 'true'], true)) {
                 $type = $methodSignatureValue['typehint'];
                 if (
                     !$this->containsType($type, $parts)
@@ -205,6 +205,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
         $longTypes = [
             'int' => 'integer',
             'bool' => 'boolean',
+            'array' => 'iterable',
         ];
         if (!isset($longTypes[$type])) {
             return false;
