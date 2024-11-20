@@ -148,8 +148,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
 
             if ($methodSignatureValue['nullable']) {
                 $type = 'null';
-
-                if (!in_array($type, $parts, true)) {
+                if (!in_array($type, $parts, true) && !$this->hasShorthand($parts)) {
                     $parts[] = $type;
                     $error = 'Doc block error: `' . $content . '` seems to be missing type `' . $type . '`.';
                     $fix = $phpCsFile->addFixableError($error, $classNameIndex, 'Nullable');
@@ -256,6 +255,22 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
 
         foreach ($parts as $part) {
             if (str_starts_with($part, 'class-string<')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<string> $parts
+     *
+     * @return bool
+     */
+    protected function hasShorthand(array $parts): bool
+    {
+        foreach ($parts as $part) {
+            if (str_starts_with($part, '?')) {
                 return true;
             }
         }
