@@ -12,6 +12,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\GenericTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\MethodTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ThrowsTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
@@ -111,6 +112,14 @@ trait CommentingTrait
                 '%s %s%s',
                 implode('|', $parts),
                 $valueNode->variableName,
+                $valueNode->description,
+            ));
+        }
+        if ($valueNode instanceof PropertyTagValueNode) {
+            return trim(sprintf(
+                '%s %s%s',
+                implode('|', $parts),
+                $valueNode->propertyName,
                 $valueNode->description,
             ));
         }
