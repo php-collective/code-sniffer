@@ -128,12 +128,10 @@ class DocCommentSniff extends AbstractSniff
 
         // Account for the fact that a short description might cover
         // multiple lines.
-        $shortContent = $tokens[$short]['content'];
         $shortEnd = $short;
         for ($i = ($short + 1); $i < $commentEnd; $i++) {
             if ($tokens[$i]['code'] === T_DOC_COMMENT_STRING) {
                 if ($tokens[$i]['line'] === ($tokens[$shortEnd]['line'] + 1)) {
-                    $shortContent .= $tokens[$i]['content'];
                     $shortEnd = $i;
                 } else {
                     break;
