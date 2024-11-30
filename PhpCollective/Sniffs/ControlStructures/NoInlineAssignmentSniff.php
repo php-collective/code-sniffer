@@ -67,7 +67,7 @@ class NoInlineAssignmentSniff extends AbstractSniff
         File $phpcsFile,
         int $startIndex,
         int $endIndex,
-        int &$indexEqualSign
+        int &$indexEqualSign,
     ): bool {
         $tokens = $phpcsFile->getTokens();
 

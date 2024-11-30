@@ -307,7 +307,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         File $phpcsFile,
         int $docCommentOpenPointer,
         TypeNode $typeNode,
-        PhpDocTagValueNode $annotationValue
+        PhpDocTagValueNode $annotationValue,
     ): ?string {
         if (!$typeNode instanceof UnionTypeNode) {
             if (!$annotationValue instanceof ParamTagValueNode && !$annotationValue instanceof ReturnTagValueNode) {
@@ -501,7 +501,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
         Annotation $annotation,
         int $docCommentOpenPointer,
         ArrayTypeNode $typeNode,
-        array $unionTypeNodes
+        array $unionTypeNodes,
     ): void {
         $genericType = null;
         $arrayType = null;

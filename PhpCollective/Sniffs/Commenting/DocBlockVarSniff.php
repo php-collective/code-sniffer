@@ -214,7 +214,7 @@ class DocBlockVarSniff extends AbstractSniff
         File $phpCsFile,
         int $docBlockEndIndex,
         int $docBlockStartIndex,
-        ?string $defaultValueType
+        ?string $defaultValueType,
     ): void {
         $error = 'Doc Block annotation @var for property missing';
         if ($defaultValueType === null) {

@@ -251,7 +251,7 @@ class DocBlockThrowsSniff extends AbstractSniff
         File $phpCsFile,
         array $exceptions,
         array $annotations,
-        int $docBlockEndIndex
+        int $docBlockEndIndex,
     ): void {
         $useStatements = $this->getUseStatements($phpCsFile);
 

@@ -160,7 +160,7 @@ class DocBlockReturnNullableTypeSniff extends AbstractSniff
     public function assertRequiredNullableReturnType(
         File $phpCsFile,
         int $stackPointer,
-        array $docBlockReturnTypes
+        array $docBlockReturnTypes,
     ): void {
         if (!$docBlockReturnTypes) {
             return;
