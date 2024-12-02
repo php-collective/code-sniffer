@@ -584,7 +584,7 @@ abstract class AbstractSniff implements Sniff
         array $tokens,
         int $stackPtr,
         array $methodProperties,
-        array $methodParameters
+        array $methodParameters,
     ): int {
         $totalLength = $this->getMethodSingleLineSignatureLength($tokens, $stackPtr);
         $firstLineEndPosition = $this->getLineEndingPosition($tokens, $stackPtr);

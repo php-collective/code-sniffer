@@ -87,7 +87,7 @@ class PreferCastOverFunctionSniff extends AbstractSniff
         int $stackPtr,
         string $key,
         int $openingBraceIndex,
-        int $closingBraceIndex
+        int $closingBraceIndex,
     ): void {
         $needsBrackets = $this->needsBrackets($phpcsFile, $openingBraceIndex, $closingBraceIndex);
 

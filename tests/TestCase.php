@@ -92,7 +92,7 @@ class TestCase extends PHPUnitTestCase
         string $pathAfter,
         ?int $errorCount = null,
         ?int $fixableErrorCount = null,
-        bool $fix = false
+        bool $fix = false,
     ): array {
         $codeSniffer = new Runner();
         $codeSniffer->config = new Config([
@@ -155,7 +155,7 @@ class TestCase extends PHPUnitTestCase
         Sniff $sniff,
         ?int $errorCount = null,
         ?int $fixableErrorCount = null,
-        bool $fix = false
+        bool $fix = false,
     ): array {
         $codeSniffer = new Runner();
         $codeSniffer->config = new Config([

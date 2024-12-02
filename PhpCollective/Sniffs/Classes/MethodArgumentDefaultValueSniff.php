@@ -147,11 +147,9 @@ class MethodArgumentDefaultValueSniff extends AbstractSniff
      */
     protected function isTypehintedNullableVariable(File $phpcsFile, int $index): bool
     {
-        $tokens = $phpcsFile->getTokens();
-
-        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $index + 1, null, true);
-
-        $nextToken = $tokens[$nextIndex];
+        //$tokens = $phpcsFile->getTokens();
+        //$nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $index + 1, null, true);
+        //$nextToken = $tokens[$nextIndex];
 
         /*
         if (!$nextToken->equals([T_STRING, 'null'], false)) {

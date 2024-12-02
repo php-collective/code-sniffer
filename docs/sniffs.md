@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 217 sniffs
+The PhpCollectiveStrict standard contains 226 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -165,12 +165,14 @@ PSR12 (14 sniffs)
 - PSR12.Properties.ConstantVisibility
 - PSR12.Traits.UseDeclaration
 
-SlevomatCodingStandard (48 sniffs)
+SlevomatCodingStandard (56 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.ArrayAccess
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
 - SlevomatCodingStandard.Arrays.SingleLineArrayWhitespace
 - SlevomatCodingStandard.Arrays.TrailingArrayComma
+- SlevomatCodingStandard.Attributes.AttributeAndTargetSpacing
+- SlevomatCodingStandard.Attributes.RequireAttributeAfterDocComment
 - SlevomatCodingStandard.Classes.BackedEnumTypeSpacing
 - SlevomatCodingStandard.Classes.ClassConstantVisibility
 - SlevomatCodingStandard.Classes.ClassMemberSpacing
@@ -185,14 +187,19 @@ SlevomatCodingStandard (48 sniffs)
 - SlevomatCodingStandard.ControlStructures.DisallowContinueWithoutIntegerOperandInSwitch
 - SlevomatCodingStandard.ControlStructures.DisallowYodaComparison
 - SlevomatCodingStandard.ControlStructures.JumpStatementsSpacing
+- SlevomatCodingStandard.ControlStructures.LanguageConstructWithParentheses
 - SlevomatCodingStandard.ControlStructures.NewWithParentheses
 - SlevomatCodingStandard.ControlStructures.RequireNullCoalesceOperator
 - SlevomatCodingStandard.ControlStructures.RequireShortTernaryOperator
 - SlevomatCodingStandard.Exceptions.DeadCatch
 - SlevomatCodingStandard.Functions.ArrowFunctionDeclaration
+- SlevomatCodingStandard.Functions.DisallowTrailingCommaInCall
+- SlevomatCodingStandard.Functions.DisallowTrailingCommaInClosureUse
+- SlevomatCodingStandard.Functions.DisallowTrailingCommaInDeclaration
 - SlevomatCodingStandard.Functions.NamedArgumentSpacing
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInCall
 - SlevomatCodingStandard.Functions.RequireTrailingCommaInClosureUse
+- SlevomatCodingStandard.Functions.RequireTrailingCommaInDeclaration
 - SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses
 - SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation
 - SlevomatCodingStandard.Namespaces.NamespaceDeclaration
@@ -214,9 +221,10 @@ SlevomatCodingStandard (48 sniffs)
 - SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing
 - SlevomatCodingStandard.TypeHints.UnionTypeHintFormat
 - SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable
+- SlevomatCodingStandard.Variables.UnusedVariable
 - SlevomatCodingStandard.Whitespaces.DuplicateSpaces
 
-Squiz (27 sniffs)
+Squiz (28 sniffs)
 -----------------
 - Squiz.Arrays.ArrayBracketSpacing
 - Squiz.Classes.LowercaseClassKeywords
@@ -231,6 +239,7 @@ Squiz (27 sniffs)
 - Squiz.Functions.LowercaseFunctionKeywords
 - Squiz.Functions.MultiLineFunctionDeclaration
 - Squiz.Operators.ValidLogicalOperators
+- Squiz.PHP.DisallowSizeFunctionsInLoops
 - Squiz.PHP.Eval
 - Squiz.PHP.NonExecutableCode
 - Squiz.Scope.MemberVarScope
