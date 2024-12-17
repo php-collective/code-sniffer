@@ -48,8 +48,7 @@ class ExitSniff implements Sniff
      */
     protected function checkExitUsage(File $phpcsFile, int $stackPtr): void
     {
-        $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
-
+        //$wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
         $tokens = $phpcsFile->getTokens();
 
         $tokenContent = $tokens[$stackPtr]['content'];

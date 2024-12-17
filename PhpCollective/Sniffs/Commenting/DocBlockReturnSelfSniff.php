@@ -98,7 +98,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
         int $classNameIndex,
         array $parts,
         array $returnTypes,
-        string $appendix
+        string $appendix,
     ): void {
         $result = [];
         foreach ($parts as $key => $part) {
@@ -185,7 +185,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
         int $classNameIndex,
         array $parts,
         string $appendix,
-        array $returnTypes
+        array $returnTypes,
     ): void {
         $ownClassName = '\\' . $this->getClassName($phpCsFile);
 
@@ -295,7 +295,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
         File $phpCsFile,
         int $stackPointer,
         array $parts,
-        array $returnTypes
+        array $returnTypes,
     ): void {
         if ($returnTypes && $parts === ['$this'] && $returnTypes !== ['$this']) {
             $phpCsFile->addError('Chainable method (@return $this) cannot have multiple return types in code.', $stackPointer, 'InvalidChainable');

@@ -61,7 +61,7 @@ class MockSniff extends AbstractSniff
         File $phpcsFile,
         int $stackPtr,
         ?TypeHint $returnTypeHint,
-        array $docBlockReturnTypes
+        array $docBlockReturnTypes,
     ): void {
         if (!$returnTypeHint || $returnTypeHint->getTypeHint() !== 'MockObject') {
             return;
@@ -111,7 +111,7 @@ class MockSniff extends AbstractSniff
         File $phpcsFile,
         int $stackPtr,
         array $docBlockReturnTypes,
-        ?TypeHint $returnTypeHint
+        ?TypeHint $returnTypeHint,
     ): void {
         $hasMockAnnotation = $this->hasMockObjectAnnotation($docBlockReturnTypes);
 

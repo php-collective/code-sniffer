@@ -181,7 +181,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         File $phpcsFile,
         int $docBlockStartIndex,
         int $docBlockEndIndex,
-        string $returnType = 'void'
+        string $returnType = 'void',
     ): void {
         $indentation = $this->getIndentationWhitespace($phpcsFile, $docBlockEndIndex);
 
@@ -250,7 +250,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         File $phpcsFile,
         int $pointer,
         int $docBlockReturnIndex,
-        ?string $returnType
+        ?string $returnType,
     ): void {
         $tokens = $phpcsFile->getTokens();
 
