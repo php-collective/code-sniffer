@@ -118,8 +118,6 @@ class TypeHintSniff extends AbstractSniff
             $tagComment = $phpcsFile->fixer->getTokenContent($tag + 2);
             $valueNode = static::getValueNode($tokens[$tag]['content'], $tagComment);
 
-
-
             if ($valueNode instanceof InvalidTagValueNode || $valueNode instanceof TypelessParamTagValueNode) {
                 if (!isset($valueNode->type)) {
                     $phpcsFile->addWarning('%s type hint is missing', $tag, 'MissingParamType', [$tokens[$tag]['content']]);
