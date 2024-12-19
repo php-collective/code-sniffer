@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 226 sniffs
+The PhpCollectiveStrict standard contains 225 sniffs
 
 Generic (25 sniffs)
 -------------------
@@ -165,7 +165,7 @@ PSR12 (14 sniffs)
 - PSR12.Properties.ConstantVisibility
 - PSR12.Traits.UseDeclaration
 
-SlevomatCodingStandard (56 sniffs)
+SlevomatCodingStandard (55 sniffs)
 ----------------------------------
 - SlevomatCodingStandard.Arrays.ArrayAccess
 - SlevomatCodingStandard.Arrays.MultiLineArrayEndBracketPlacement
@@ -205,7 +205,6 @@ SlevomatCodingStandard (56 sniffs)
 - SlevomatCodingStandard.Namespaces.NamespaceDeclaration
 - SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly
 - SlevomatCodingStandard.Namespaces.RequireOneNamespaceInFile
-- SlevomatCodingStandard.Namespaces.UnusedUses
 - SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash
 - SlevomatCodingStandard.Namespaces.UseFromSameNamespace
 - SlevomatCodingStandard.Namespaces.UselessAlias

@@ -37,7 +37,11 @@
     <rule ref="SlevomatCodingStandard.Namespaces.UseFromSameNamespace"/>
     <rule ref="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash"/>
     <rule ref="SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses"/>
+
+    <!-- skip for now, not autofixable
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses"/>
+    -->
+
     <rule ref="SlevomatCodingStandard.Namespaces.UseSpacing"/>
 
     <rule ref="SlevomatCodingStandard.Arrays.TrailingArrayComma"/>
