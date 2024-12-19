@@ -51,7 +51,7 @@ class ExpectExceptionSniff extends AbstractSniff
      */
     protected function assertNoAssertsAfterExpectException(
         File $phpcsFile,
-        int $stackPtr
+        int $stackPtr,
     ): void {
         $tokens = $phpcsFile->getTokens();
         if (empty($tokens[$stackPtr]['scope_opener'])) {

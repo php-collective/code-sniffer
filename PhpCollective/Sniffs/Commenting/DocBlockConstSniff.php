@@ -236,7 +236,7 @@ class DocBlockConstSniff extends AbstractSniff
         File $phpCsFile,
         int $docBlockEndIndex,
         int $docBlockStartIndex,
-        ?string $defaultValueType
+        ?string $defaultValueType,
     ): void {
         $error = 'Doc Block annotation @var for const missing';
 

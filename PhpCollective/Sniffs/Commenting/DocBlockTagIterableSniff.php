@@ -40,7 +40,7 @@ class DocBlockTagIterableSniff implements Sniff
 
         $tag = $content;
         if (str_contains($tag, ' ')) {
-            [$tag, $description] = explode(' ', $content, 2);
+            [$tag] = explode(' ', $content, 2);
         }
 
         if (!preg_match('#^@(?:[a-z]+-)?(?:param|return|var)\b#i', $tag)) {
