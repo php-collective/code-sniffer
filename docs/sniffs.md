@@ -205,6 +205,7 @@ SlevomatCodingStandard (55 sniffs)
 - SlevomatCodingStandard.Namespaces.NamespaceDeclaration
 - SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly
 - SlevomatCodingStandard.Namespaces.RequireOneNamespaceInFile
+- SlevomatCodingStandard.Namespaces.UnusedUses
 - SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash
 - SlevomatCodingStandard.Namespaces.UseFromSameNamespace
 - SlevomatCodingStandard.Namespaces.UselessAlias
@@ -220,7 +221,6 @@ SlevomatCodingStandard (55 sniffs)
 - SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing
 - SlevomatCodingStandard.TypeHints.UnionTypeHintFormat
 - SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable
-- SlevomatCodingStandard.Variables.UnusedVariable
 - SlevomatCodingStandard.Whitespaces.DuplicateSpaces
 
 Squiz (28 sniffs)

@@ -38,10 +38,7 @@
     <rule ref="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash"/>
     <rule ref="SlevomatCodingStandard.Namespaces.AlphabeticallySortedUses"/>
 
-    <!-- skip for now, not autofixable
     <rule ref="SlevomatCodingStandard.Namespaces.UnusedUses"/>
-    -->
-
     <rule ref="SlevomatCodingStandard.Namespaces.UseSpacing"/>
 
     <rule ref="SlevomatCodingStandard.Arrays.TrailingArrayComma"/>
@@ -97,7 +94,9 @@
     <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition"/>
 
     <rule ref="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable"/>
+    <!-- skip for now, not autofixable
     <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
+    -->
 
     <rule ref="SlevomatCodingStandard.PHP.UselessSemicolon"/>
     <rule ref="SlevomatCodingStandard.PHP.ShortList"/>
