@@ -22,6 +22,7 @@ use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
+use PHPStan\PhpDocParser\ParserConfig;
 
 /**
  * Common functionality around commenting.
@@ -38,13 +39,15 @@ trait CommentingTrait
     {
         static $phpDocParser;
         if (!$phpDocParser) {
-            $constExprParser = new ConstExprParser();
-            $phpDocParser = new PhpDocParser(new TypeParser($constExprParser), $constExprParser);
+            $config = new ParserConfig(usedAttributes: []);
+            $constExprParser = new ConstExprParser($config);
+            $phpDocParser = new PhpDocParser($config, new TypeParser($config, $constExprParser), $constExprParser);
         }
 
         static $phpDocLexer;
         if (!$phpDocLexer) {
-            $phpDocLexer = new Lexer();
+            $config = new ParserConfig(usedAttributes: []);
+            $phpDocLexer = new Lexer($config);
         }
 
         return $phpDocParser->parseTagValue(new TokenIterator($phpDocLexer->tokenize($tagComment)), $tagName);

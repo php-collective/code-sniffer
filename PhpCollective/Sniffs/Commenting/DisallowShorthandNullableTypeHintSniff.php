@@ -140,6 +140,7 @@ class DisallowShorthandNullableTypeHintSniff implements Sniff
                 false,
                 $rest,
                 '',
+                false,
             );
         }
 
