@@ -479,7 +479,7 @@ class DocBlockThrowsSniff extends AbstractSniff
     protected function containsThrowToken(array $tokens, int $scopeOpener, int $scopeCloser): bool
     {
         for ($i = $scopeOpener + 1; $i < $scopeCloser; $i++) {
-            if ($tokens[$i]['code'] !== T_THROW) {
+            if ($tokens[$i]['code'] !== T_THROW || $tokens[$i]['level'] > 2) {
                 continue;
             }
 
