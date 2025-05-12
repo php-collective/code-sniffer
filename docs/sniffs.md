@@ -3,7 +3,7 @@
 
 The PhpCollectiveStrict standard contains 225 sniffs
 
-Generic (25 sniffs)
+Generic (26 sniffs)
 -------------------
 - Generic.Arrays.DisallowLongArraySyntax
 - Generic.CodeAnalysis.ForLoopShouldBeWhileLoop
@@ -16,7 +16,7 @@ Generic (25 sniffs)
 - Generic.Files.LineEndings
 - Generic.Files.LineLength
 - Generic.Formatting.DisallowMultipleStatements
-- Generic.Formatting.NoSpaceAfterCast
+- Generic.Formatting.SpaceAfterCast
 - Generic.Functions.FunctionCallArgumentSpacing
 - Generic.NamingConventions.UpperCaseConstantName
 - Generic.PHP.DeprecatedFunctions
@@ -29,6 +29,7 @@ Generic (25 sniffs)
 - Generic.PHP.NoSilencedErrors
 - Generic.WhiteSpace.DisallowTabIndent
 - Generic.WhiteSpace.IncrementDecrementSpacing
+- Generic.WhiteSpace.LanguageConstructSpacing
 - Generic.WhiteSpace.ScopeIndent
 
 PEAR (4 sniffs)
@@ -223,7 +224,7 @@ SlevomatCodingStandard (55 sniffs)
 - SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable
 - SlevomatCodingStandard.Whitespaces.DuplicateSpaces
 
-Squiz (28 sniffs)
+Squiz (27 sniffs)
 -----------------
 - Squiz.Arrays.ArrayBracketSpacing
 - Squiz.Classes.LowercaseClassKeywords
@@ -247,7 +248,6 @@ Squiz (28 sniffs)
 - Squiz.WhiteSpace.CastSpacing
 - Squiz.WhiteSpace.ControlStructureSpacing
 - Squiz.WhiteSpace.FunctionOpeningBraceSpace
-- Squiz.WhiteSpace.LanguageConstructSpacing
 - Squiz.WhiteSpace.LogicalOperatorSpacing
 - Squiz.WhiteSpace.ScopeClosingBrace
 - Squiz.WhiteSpace.ScopeKeywordSpacing
