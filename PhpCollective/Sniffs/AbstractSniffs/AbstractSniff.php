@@ -108,7 +108,7 @@ abstract class AbstractSniff implements Sniff
             return null;
         }
 
-        $prevIndex = $phpCsFile->findPrevious(TokenHelper::$typeKeywordTokenCodes, $lastToken);
+        $prevIndex = $phpCsFile->findPrevious([T_CLASS, T_TRAIT, T_INTERFACE, T_ENUM], $lastToken);
         if (!$prevIndex) {
             return null;
         }
