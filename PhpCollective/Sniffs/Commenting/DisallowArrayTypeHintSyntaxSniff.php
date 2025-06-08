@@ -313,7 +313,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
             if (!$annotationValue instanceof ParamTagValueNode && !$annotationValue instanceof ReturnTagValueNode) {
                 return null;
             }
-#
+
             $functionTokenCodes = [
                 T_FUNCTION,
                 T_CLOSURE,
