@@ -313,8 +313,13 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
             if (!$annotationValue instanceof ParamTagValueNode && !$annotationValue instanceof ReturnTagValueNode) {
                 return null;
             }
-
-            $functionPointer = TokenHelper::findNext($phpcsFile, TokenHelper::$functionTokenCodes, $docCommentOpenPointer + 1);
+#
+            $functionTokenCodes = [
+                T_FUNCTION,
+                T_CLOSURE,
+                T_FN,
+            ];
+            $functionPointer = TokenHelper::findNext($phpcsFile, $functionTokenCodes, $docCommentOpenPointer + 1);
 
             if ($functionPointer === null || $phpcsFile->getTokens()[$functionPointer]['code'] !== T_FUNCTION) {
                 return null;
