@@ -9,6 +9,7 @@ namespace PhpCollective\Sniffs\WhiteSpace;
 
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Util\Tokens;
 
 /**
  * Ensures no whitespaces before and one whitespace after is placed around each comma.
@@ -50,9 +51,30 @@ class CommaSpacingSniff implements Sniff
             }
 
             $error = 'Space before comma, expected none, though';
+
+            $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $previous, null, true);
+            if (!$prevIndex) {
+                $phpcsFile->addError($error, $next, 'InvalidCommaBefore');
+
+                return;
+            }
+
             $fix = $phpcsFile->addFixableError($error, $next, 'InvalidCommaBefore');
             if ($fix) {
-                $phpcsFile->fixer->replaceToken($previous + 1, '');
+                $phpcsFile->fixer->beginChangeset();
+
+                $content = $tokens[$prevIndex]['content'];
+                $phpcsFile->fixer->replaceToken($prevIndex, $content . ',');
+                $phpcsFile->fixer->replaceToken($stackPtr, '');
+
+                $nextIndex = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), null, true);
+                if ($nextIndex) {
+                    for ($i = $stackPtr + 1; $i < $nextIndex; $i++) {
+                        $phpcsFile->fixer->replaceToken($i, '');
+                    }
+                }
+
+                $phpcsFile->fixer->endChangeset();
             }
         }
     }
