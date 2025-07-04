@@ -391,6 +391,9 @@ class DocBlockReturnVoidSniff extends AbstractSniff
     protected function hasReturnType(File $phpcsFile, int $stackPtr): bool
     {
         $tokens = $phpcsFile->getTokens();
+        if (empty($tokens[$stackPtr]['parenthesis_closer']) || empty($tokens[$stackPtr]['scope_opener'])) {
+            return false;
+        }
 
         $parenthesisCloserIndex = $tokens[$stackPtr]['parenthesis_closer'];
         $scopeOpenerIndex = $tokens[$stackPtr]['scope_opener'];
