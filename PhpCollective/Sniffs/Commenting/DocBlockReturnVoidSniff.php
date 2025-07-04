@@ -71,10 +71,11 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         $docBlockReturnIndex = $this->findDocBlockReturn($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
 
         $hasInheritDoc = $this->hasInheritDoc($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $hasReturnType = $this->hasReturnType($phpcsFile, $stackPtr);
 
         // If interface we will at least report it
         if (empty($tokens[$stackPtr]['scope_opener']) || empty($tokens[$stackPtr]['scope_closer'])) {
-            if (!$docBlockReturnIndex && !$hasInheritDoc) {
+            if (!$docBlockReturnIndex && !$hasInheritDoc && !$hasReturnType) {
                 $phpcsFile->addError('Method does not have a return statement in doc block: ' . $tokens[$nextIndex]['content'], $nextIndex, 'ReturnMissingInInterface');
             }
 
@@ -82,7 +83,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         }
 
         // If inheritDoc is present assume the parent contains it
-        if (!$docBlockReturnIndex && $hasInheritDoc) {
+        if (!$docBlockReturnIndex && ($hasInheritDoc || $this->hasReturnType($phpcsFile, $stackPtr))) {
             return;
         }
 
@@ -377,5 +378,31 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         }
 
         return $documentedReturnType;
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return bool
+     */
+    protected function hasReturnType(File $phpcsFile, int $stackPtr): bool
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        $parenthesisCloserIndex = $tokens[$stackPtr]['parenthesis_closer'];
+        $scopeOpenerIndex = $tokens[$stackPtr]['scope_opener'];
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $parenthesisCloserIndex + 1, $scopeOpenerIndex, true);
+
+        if ($tokens[$nextIndex]['code'] !== T_COLON) {
+            return false;
+        }
+
+        $typeHintIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $nextIndex + 1, $scopeOpenerIndex, true);
+        if (!$typeHintIndex) {
+            return false;
+        }
+
+        return true;
     }
 }
