@@ -17,7 +17,9 @@ class DocBlockReturnVoidSniffTest extends TestCase
      */
     public function testDocBlockReturnVoidSniffer(): void
     {
-        $this->assertSnifferFindsFixableErrors(new DocBlockReturnVoidSniff(), 3, 3);
+        $sniff = new DocBlockReturnVoidSniff();
+        $sniff->strict = true;
+        $this->assertSnifferFindsFixableErrors($sniff, 3, 3);
     }
 
     /**
@@ -25,6 +27,8 @@ class DocBlockReturnVoidSniffTest extends TestCase
      */
     public function testDocBlockReturnVoidFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new DocBlockReturnVoidSniff(), 3);
+        $sniff = new DocBlockReturnVoidSniff();
+        $sniff->strict = true;
+        $this->assertSnifferCanFixErrors($sniff, 3);
     }
 }

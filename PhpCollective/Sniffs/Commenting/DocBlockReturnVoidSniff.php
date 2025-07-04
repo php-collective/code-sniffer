@@ -20,6 +20,8 @@ class DocBlockReturnVoidSniff extends AbstractSniff
 {
     use CommentingTrait;
 
+    public bool $strict = false;
+
     /**
      * @var array<string>
      */
@@ -75,7 +77,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
 
         // If interface we will at least report it
         if (empty($tokens[$stackPtr]['scope_opener']) || empty($tokens[$stackPtr]['scope_closer'])) {
-            if (!$docBlockReturnIndex && !$hasInheritDoc && !$hasReturnType) {
+            if (!$docBlockReturnIndex && !$hasInheritDoc && (!$hasReturnType || $this->strict)) {
                 $phpcsFile->addError('Method does not have a return statement in doc block: ' . $tokens[$nextIndex]['content'], $nextIndex, 'ReturnMissingInInterface');
             }
 
@@ -83,7 +85,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
         }
 
         // If inheritDoc is present assume the parent contains it
-        if (!$docBlockReturnIndex && ($hasInheritDoc || $this->hasReturnType($phpcsFile, $stackPtr))) {
+        if (!$docBlockReturnIndex && ($hasInheritDoc || $hasReturnType && !$this->strict)) {
             return;
         }
 
