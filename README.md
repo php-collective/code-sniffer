@@ -75,8 +75,8 @@ In order to simplify command line interface, `phpcs` allows to specify [default 
 Assuming the following directory structure:
 
 ```
-vendor/php-collective/code-sniffer/                          # Base directory
-                           |_ PhpCollective/                # Rule set name
+vendor/php-collective/code-sniffer/                   # Base directory
+                           |_ PhpCollective/          # Rule set name
                                       |_ ruleset.xml  # Rule set
 ```
 
