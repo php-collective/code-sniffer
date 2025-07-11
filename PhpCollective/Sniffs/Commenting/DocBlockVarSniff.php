@@ -41,8 +41,15 @@ class DocBlockVarSniff extends AbstractSniff
 
         $previousIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $stackPointer - 1, null, true);
 
+        $type = [];
         while ($previousIndex && in_array($tokens[$previousIndex]['code'], [T_STRING, T_NULLABLE, T_NULL, T_TYPE_UNION], true)) {
+            $type[] = $tokens[$previousIndex]['content'];
             $previousIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $previousIndex - 1, null, true);
+        }
+
+        // Skip these checks for typed ones for now
+        if ($type) {
+            return;
         }
 
         if ($previousIndex && $tokens[$previousIndex]['code'] === T_STATIC) {

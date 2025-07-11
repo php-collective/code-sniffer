@@ -215,9 +215,6 @@ class InlineDocBlockSniff extends AbstractSniff
             $errors['space-before-end'] = 'Expected single space before ´*/´';
         }
 
-        var_export($contentMatches);
-die();
-
         if (!preg_match('|^\$[a-z0-9_]+$|i', $contentMatches[3])) {
             $errors['order'] = 'Expected `{Type} ${var}`, got `' . $contentMatches[1] . $contentMatches[2] . $contentMatches[3] . '`';
         }
