@@ -194,7 +194,7 @@ class InlineDocBlockSniff extends AbstractSniff
         $comment = $tokens[$contentIndex]['content'];
 
         // SKip for complex arrays until next major
-        if (str_contains($comment, '<')) {
+        if (str_contains($comment, '<') || str_starts_with($comment, 'array{')) {
             return [];
         }
 
@@ -214,6 +214,9 @@ class InlineDocBlockSniff extends AbstractSniff
         if ($isSingleLine && !preg_match('|([a-z0-9]) $|i', $comment)) {
             $errors['space-before-end'] = 'Expected single space before ´*/´';
         }
+
+        var_export($contentMatches);
+die();
 
         if (!preg_match('|^\$[a-z0-9_]+$|i', $contentMatches[3])) {
             $errors['order'] = 'Expected `{Type} ${var}`, got `' . $contentMatches[1] . $contentMatches[2] . $contentMatches[3] . '`';
