@@ -20,6 +20,9 @@ class FixMe
          */
         $foo = $_indices['x'];
 
+        /** @var \App\Model\Entity\LoginInstance[] $some_data */
+        $some_data = $_indices;
+
         /** @var string|null $bar */
         $bar = $_indices['y'];
 
