@@ -46,9 +46,12 @@ class DocBlockVarSniff extends AbstractSniff
             $type[] = $tokens[$previousIndex]['content'];
             $previousIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $previousIndex - 1, null, true);
         }
+        $type = array_reverse($type);
 
         // Skip these checks for typed ones for now
         if ($type) {
+            $this->checkTyped($phpCsFile, $stackPointer, $type);
+
             return;
         }
 
@@ -69,93 +72,7 @@ class DocBlockVarSniff extends AbstractSniff
             return;
         }
 
-        /** @var int $docBlockStartIndex */
-        $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
-
-        $defaultValueType = $this->findDefaultValueType($phpCsFile, $stackPointer);
-
-        $varIndex = null;
-        for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
-            if ($tokens[$i]['type'] !== 'T_DOC_COMMENT_TAG') {
-                continue;
-            }
-            if (!in_array($tokens[$i]['content'], ['@var'], true)) {
-                continue;
-            }
-
-            $varIndex = $i;
-        }
-
-        if (!$varIndex) {
-            $this->handleMissingVar($phpCsFile, $docBlockEndIndex, $docBlockStartIndex, $defaultValueType);
-
-            return;
-        }
-
-        $classNameIndex = $varIndex + 2;
-
-        if ($tokens[$classNameIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
-            $this->handleMissingVarType($phpCsFile, $varIndex, $defaultValueType);
-
-            return;
-        }
-
-        $content = $tokens[$classNameIndex]['content'];
-
-        $appendix = '';
-        $spaceIndex = strpos($content, ' ');
-        if ($spaceIndex) {
-            $appendix = substr($content, $spaceIndex);
-            $content = substr($content, 0, $spaceIndex);
-        }
-
-        if (!$content) {
-            $error = 'Doc Block type for property annotation @var missing';
-            if ($defaultValueType) {
-                $error .= ', type `' . $defaultValueType . '` detected';
-            }
-            $phpCsFile->addError($error, $stackPointer, 'VarTypeEmpty');
-
-            return;
-        }
-
-        $comment = trim($appendix);
-        if (mb_substr($comment, 0, 1) === '$') {
-            $phpCsFile->addError('$var declaration only valid/needed inside inline doc blocks.', $stackPointer, 'CommentInvalid');
-        }
-
-        if ($defaultValueType === null) {
-            return;
-        }
-
-        $parts = explode('|', $content);
-        if (in_array($defaultValueType, $parts, true)) {
-            return;
-        }
-        if ($defaultValueType === 'array' && ($this->containsTypeArray($parts) || $this->containsTypeArray($parts, 'list'))) {
-            return;
-        }
-        if ($defaultValueType === 'false' && in_array('bool', $parts, true)) {
-            return;
-        }
-
-        if ($defaultValueType === 'false') {
-            $defaultValueType = 'bool';
-        }
-
-        if (count($parts) > 1 || $defaultValueType === 'null') {
-            $fix = $phpCsFile->addFixableError('Doc Block type for property annotation @var incorrect, type `' . $defaultValueType . '` missing', $stackPointer, 'VarTypeMissing');
-            if ($fix) {
-                $phpCsFile->fixer->replaceToken($classNameIndex, implode('|', $parts) . '|' . $defaultValueType . $appendix);
-            }
-
-            return;
-        }
-
-        $fix = $phpCsFile->addFixableError('Doc Block type `' . $content . '` for property annotation @var incorrect, type `' . $defaultValueType . '` expected', $stackPointer, 'VarTypeIncorrect');
-        if ($fix) {
-            $phpCsFile->fixer->replaceToken($classNameIndex, $defaultValueType . $appendix);
-        }
+        $this->handle($phpCsFile, $docBlockEndIndex, $stackPointer);
     }
 
     /**
@@ -286,5 +203,188 @@ class DocBlockVarSniff extends AbstractSniff
         }
 
         $phpCsFile->fixer->addContent($varIndex, ' ' . $defaultValueType);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param int $stackPointer
+     * @param array<string> $types
+     *
+     * @return void
+     */
+    protected function checkTyped(File $phpCsFile, int $stackPointer, array $types): void
+    {
+        foreach ($types as $key => $value) {
+            if ($value === '?') {
+                unset($types[$key]);
+                $types[] = 'null';
+            }
+            if ($value === '|') {
+                unset($types[$key]);
+            }
+        }
+
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+
+        if (!$docBlockEndIndex) {
+            return;
+        }
+
+        $this->handle($phpCsFile, $docBlockEndIndex, $stackPointer, $types);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param int $docBlockEndIndex
+     * @param int $stackPointer
+     * @param array<string> $types
+     *
+     * @return void
+     */
+    protected function handle(File $phpCsFile, int $docBlockEndIndex, int $stackPointer, array $types = []): void
+    {
+        $tokens = $phpCsFile->getTokens();
+
+        /** @var int $docBlockStartIndex */
+        $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
+
+        $defaultValueType = $this->findDefaultValueType($phpCsFile, $stackPointer);
+
+        $varIndex = null;
+        for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
+            if ($tokens[$i]['type'] !== 'T_DOC_COMMENT_TAG') {
+                continue;
+            }
+            if (!in_array($tokens[$i]['content'], ['@var'], true)) {
+                continue;
+            }
+
+            $varIndex = $i;
+        }
+
+        if (!$varIndex) {
+            if ($types) {
+                return;
+            }
+
+            $this->handleMissingVar($phpCsFile, $docBlockEndIndex, $docBlockStartIndex, $defaultValueType);
+
+            return;
+        }
+
+        $classNameIndex = $varIndex + 2;
+
+        if ($tokens[$classNameIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
+            $this->handleMissingVarType($phpCsFile, $varIndex, $defaultValueType);
+
+            return;
+        }
+
+        $content = $tokens[$classNameIndex]['content'];
+        if (str_contains($content, '{') || str_contains($content, '<')) {
+            return;
+        }
+
+        $appendix = '';
+        $spaceIndex = strpos($content, ' ');
+        if ($spaceIndex) {
+            $appendix = substr($content, $spaceIndex);
+            $content = substr($content, 0, $spaceIndex);
+        }
+
+        if (!$content) {
+            $error = 'Doc Block type for property annotation @var missing';
+            if ($defaultValueType) {
+                $error .= ', type `' . $defaultValueType . '` detected';
+            }
+            $phpCsFile->addError($error, $stackPointer, 'VarTypeEmpty');
+
+            return;
+        }
+
+        $comment = trim($appendix);
+        if (mb_substr($comment, 0, 1) === '$') {
+            $phpCsFile->addError('$var declaration only valid/needed inside inline doc blocks.', $stackPointer, 'CommentInvalid');
+        }
+
+        $this->handleDefaultValue($phpCsFile, $stackPointer, $defaultValueType, $content, $appendix, $classNameIndex);
+        $this->handleTypes($phpCsFile, $stackPointer, $types, $content, $appendix, $classNameIndex);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param int $stackPointer
+     * @param string|null $defaultValueType
+     * @param string $content
+     * @param string $appendix
+     * @param int $classNameIndex
+     *
+     * @return void
+     */
+    protected function handleDefaultValue(
+        File $phpCsFile,
+        int $stackPointer,
+        ?string $defaultValueType,
+        string $content,
+        string $appendix,
+        int $classNameIndex,
+    ): void {
+        if ($defaultValueType === null) {
+            return;
+        }
+
+        $parts = explode('|', $content);
+
+        if (in_array($defaultValueType, $parts, true)) {
+            return;
+        }
+        if ($defaultValueType === 'array' && ($this->containsTypeArray($parts) || $this->containsTypeArray($parts, 'list'))) {
+            return;
+        }
+        if ($defaultValueType === 'false' && in_array('bool', $parts, true)) {
+            return;
+        }
+
+        if ($defaultValueType === 'false') {
+            $defaultValueType = 'bool';
+        }
+
+        if (count($parts) > 1 || $defaultValueType === 'null') {
+            $fix = $phpCsFile->addFixableError('Doc Block type for property annotation @var incorrect, type `' . $defaultValueType . '` missing', $stackPointer, 'VarTypeMissing');
+            if ($fix) {
+                $phpCsFile->fixer->replaceToken($classNameIndex, implode('|', $parts) . '|' . $defaultValueType . $appendix);
+            }
+
+            return;
+        }
+
+        $fix = $phpCsFile->addFixableError('Doc Block type `' . $content . '` for property annotation @var incorrect, type `' . $defaultValueType . '` expected', $stackPointer, 'VarTypeIncorrect');
+        if ($fix) {
+            $phpCsFile->fixer->replaceToken($classNameIndex, $defaultValueType . $appendix);
+        }
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param int $stackPointer
+     * @param array<string> $types
+     * @param mixed $content
+     * @param string $appendix
+     * @param int $classNameIndex
+     *
+     * @return void
+     */
+    protected function handleTypes(File $phpCsFile, int $stackPointer, array $types, mixed $content, string $appendix, int $classNameIndex): void
+    {
+        foreach ($types as $type) {
+            if (str_contains($content, $type)) {
+                continue;
+            }
+
+            $fix = $phpCsFile->addFixableError('Doc Block type `' . $content . '` for property annotation @var incorrect, type `' . $type . '` missing', $stackPointer, 'VarTypeMissing');
+            if ($fix) {
+                $phpCsFile->fixer->replaceToken($classNameIndex, $content . '|' . $type . $appendix);
+            }
+        }
     }
 }
