@@ -77,6 +77,9 @@ class DocBlockThrowsSniff extends AbstractSniff
 
             return;
         }
+        if ($this->containsCatchToken($tokens, $tokens[$stackPointer]['scope_opener'], $tokens[$stackPointer]['scope_closer'])) {
+            return;
+        }
 
         $this->compareExceptionsAndAnnotations($phpCsFile, $exceptions, $annotations, $docBlockEndIndex);
     }
@@ -460,6 +463,26 @@ class DocBlockThrowsSniff extends AbstractSniff
             }
 
             if ($tokens[$i + 2]['code'] !== T_VARIABLE) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $tokens
+     * @param int $scopeOpener
+     * @param int $scopeCloser
+     *
+     * @return bool
+     */
+    protected function containsCatchToken(array $tokens, int $scopeOpener, int $scopeCloser): bool
+    {
+        for ($i = $scopeOpener + 1; $i < $scopeCloser; $i++) {
+            if ($tokens[$i]['code'] !== T_CATCH) {
                 continue;
             }
 
