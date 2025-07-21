@@ -75,13 +75,22 @@ class DocBlockParamNotJustNullSniff extends AbstractSniff
             }
 
             $content = $tokens[$classNameIndex]['content'];
-
-            //$appendix = '';
-            $spaceIndex = strpos($content, ' ');
-            if ($spaceIndex) {
-                //$appendix = substr($content, $spaceIndex);
-                $content = substr($content, 0, $spaceIndex);
+            if (!$content) {
+                continue;
             }
+
+            $varIndex = strpos($content, '$');
+            if ($varIndex === false) {
+                continue;
+            }
+
+            $content = trim(substr($content, 0, $varIndex));
+            if (!$content) {
+                $phpCsFile->addError('Param type is empty', $classNameIndex, 'EmptyType');
+
+                continue;
+            }
+
             if ($content !== 'null') {
                 continue;
             }

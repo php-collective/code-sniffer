@@ -74,8 +74,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
             $classNameIndex = $i + 2;
 
             if ($tokens[$classNameIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
-                $phpCsFile->addError('Missing type in param doc block', $i, 'TypeMissing');
-
+                // Let DocBlockParam sniff handle this
                 continue;
             }
 
