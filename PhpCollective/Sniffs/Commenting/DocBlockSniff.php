@@ -14,7 +14,7 @@ use PhpCollective\Traits\CommentingTrait;
 use PhpCollective\Traits\SignatureTrait;
 
 /**
- * Methods always need doc blocks.
+ * Methods always need doc blocks if they are using non-typed params/return.
  * Constructor and destructor may not have one if they do not have arguments.
  */
 class DocBlockSniff extends AbstractSniff
@@ -57,6 +57,10 @@ class DocBlockSniff extends AbstractSniff
 
         $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPtr);
         if ($docBlockEndIndex) {
+            return;
+        }
+
+        if ($this->isFullyTyped($phpcsFile, $stackPtr)) {
             return;
         }
 
@@ -134,31 +138,6 @@ class DocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpcsFile
-     * @param int $docBlockStartIndex
-     * @param int $docBlockEndIndex
-     *
-     * @return int|null
-     */
-    protected function findDocBlockReturn(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): ?int
-    {
-        $tokens = $phpcsFile->getTokens();
-
-        for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
-            if (!$this->isGivenKind(T_DOC_COMMENT_TAG, $tokens[$i])) {
-                continue;
-            }
-            if ($tokens[$i]['content'] !== '@return') {
-                continue;
-            }
-
-            return $i;
-        }
-
-        return null;
-    }
-
-    /**
      * For right now we only try to detect void.
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
@@ -201,5 +180,37 @@ class DocBlockSniff extends AbstractSniff
         }
 
         return $type;
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return bool
+     */
+    protected function isFullyTyped(File $phpcsFile, int $stackPtr): bool
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        // Get the function's parameter tokens
+        $params = $phpcsFile->getMethodParameters($stackPtr);
+        // Check all parameters have a type hint
+        foreach ($params as $param) {
+            if (empty($param['type_hint'])) {
+                return false;
+            }
+        }
+
+        // Check for return type
+        $hasReturnType = isset($tokens[$stackPtr]['parenthesis_closer']) &&
+            isset($tokens[$stackPtr]['scope_opener']);
+
+        $colonPtr = $phpcsFile->findNext(T_COLON, $tokens[$stackPtr]['parenthesis_closer'], $tokens[$stackPtr]['scope_opener']);
+
+        if ($colonPtr === false) {
+            return false; // No return type
+        }
+
+        return true;
     }
 }
