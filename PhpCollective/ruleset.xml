@@ -18,7 +18,7 @@
     <exclude-pattern>*\.txt</exclude-pattern>
     <exclude-pattern>*\.json</exclude-pattern>
 
-    <config name="installed_paths" value="../../slevomat/coding-standard"/>
+    <config name="installed_paths" value="../../slevomat/coding-standard,../../phpcsstandards/phpcsextra"/>
 
     <rule ref="SlevomatCodingStandard.Namespaces.NamespaceDeclaration"/>
     <rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation"/>
@@ -249,6 +249,14 @@
     <rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
 
     <rule ref="Squiz.WhiteSpace.SemicolonSpacing"/>
+
+    <rule ref="Universal.Constants.LowercaseClassResolutionKeyword"/>
+    <rule ref="Universal.Constants.UppercaseMagicConstants"/>
+    <rule ref="Universal.WhiteSpace.PrecisionAlignment"/>
+    <rule ref="Universal.Operators.ConcatPosition"/>
+    <rule ref="Universal.UseStatements.NoUselessAliases"/>
+    <rule ref="Modernize.FunctionCalls.Dirname"/>
+    <rule ref="NormalizedArrays.Arrays.ArrayBraceSpacing"/>
 
     <!-- PHP 8 specific, only relevant for those PHP 8.0+ -->
     <rule ref="SlevomatCodingStandard.TypeHints.DNFTypeHintFormat">
