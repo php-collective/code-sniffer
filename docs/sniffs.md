@@ -1,10 +1,11 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 232 sniffs
+The PhpCollectiveStrict standard contains 233 sniffs
 
-Generic (26 sniffs)
+Generic (27 sniffs)
 -------------------
+- Generic.Arrays.ArrayIndent
 - Generic.Arrays.DisallowLongArraySyntax
 - Generic.CodeAnalysis.ForLoopShouldBeWhileLoop
 - Generic.CodeAnalysis.ForLoopWithTestFunctionCall

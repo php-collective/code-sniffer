@@ -52,7 +52,7 @@ class Tokenizer
             throw new Exception('Please provide a valid file.');
         }
 
-        $this->root = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR;
+        $this->root = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR;
         $this->path = $file;
         $this->verbose = !empty($argv[2]) && in_array($argv[2], ['--verbose', '-v']);
     }
