@@ -27,8 +27,25 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
      * @var array<string>
      */
     public static array $whitelistedTypes = [
-        'string', 'int', 'integer', 'float', 'bool', 'boolean', 'resource', 'null', 'void', 'callable',
-        'array', 'iterable', 'mixed', 'object', 'false', 'true', 'self', 'static', '$this',
+        'string',
+        'int',
+        'integer',
+        'float',
+        'bool',
+        'boolean',
+        'resource',
+        'null',
+        'void',
+        'callable',
+        'array',
+        'iterable',
+        'mixed',
+        'object',
+        'false',
+        'true',
+        'self',
+        'static',
+        '$this',
     ];
 
     /**
