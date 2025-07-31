@@ -509,10 +509,14 @@ class ArrayDeclarationSniff implements Sniff
                             $tokens[$searchIdx]['line'] > $tokens[$arrayStart]['line'] &&
                             !in_array($tokens[$searchIdx]['code'], Tokens::$emptyTokens, true)
                         ) {
-                            // Extract actual indentation from the line
+                            // Extract actual indentation from the line (only leading whitespace)
                             $lineStart = $phpcsFile->findFirstOnLine([], $searchIdx);
                             if ($lineStart !== false && $lineStart < $searchIdx) {
-                                $baseIndent = $phpcsFile->getTokensAsString($lineStart, $searchIdx - $lineStart);
+                                $indentContent = $phpcsFile->getTokensAsString($lineStart, $searchIdx - $lineStart);
+                                // Only keep leading whitespace (tabs and spaces), remove any other characters
+                                if (preg_match('/^[\t ]*/', $indentContent, $matches)) {
+                                    $baseIndent = $matches[0];
+                                }
                             } else {
                                 // Fallback to column-based calculation
                                 $indentLevel = $tokens[$searchIdx]['column'] - 1;
@@ -571,6 +575,16 @@ class ArrayDeclarationSniff implements Sniff
                         }
 
                         $targetPtr = $p['key'] ?? $p['value'];
+
+                        // Find any whitespace before the target token and remove it
+                        $prevToken = $targetPtr - 1;
+                        while ($prevToken >= $arrayStart && in_array($tokens[$prevToken]['code'], [T_WHITESPACE, T_COMMA], true)) {
+                            if ($tokens[$prevToken]['code'] === T_WHITESPACE) {
+                                $phpcsFile->fixer->replaceToken($prevToken, '');
+                            }
+                            $prevToken--;
+                        }
+
                         $phpcsFile->fixer->addContentBefore($targetPtr, "\n" . $baseIndent);
                     }
                     $phpcsFile->fixer->endChangeset();
