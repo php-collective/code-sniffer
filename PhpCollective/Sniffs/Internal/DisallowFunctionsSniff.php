@@ -42,8 +42,7 @@ class DisallowFunctionsSniff extends AbstractSniff
     /**
      * @var array<string, array<string>>
      */
-    protected static array $methods = [
-    ];
+    protected static array $methods = [];
 
     /**
      * @var bool|null

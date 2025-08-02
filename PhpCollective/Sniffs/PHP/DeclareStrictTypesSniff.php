@@ -18,7 +18,13 @@ class DeclareStrictTypesSniff implements Sniff
      * @var array<int|string>
      */
     protected const TOKEN_CODES_TO_CHECK = [
-        T_OPEN_PARENTHESIS, T_STRING, T_EQUAL, T_LNUMBER, T_CLOSE_PARENTHESIS, T_SEMICOLON, T_COMMENT,
+        T_OPEN_PARENTHESIS,
+        T_STRING,
+        T_EQUAL,
+        T_LNUMBER,
+        T_CLOSE_PARENTHESIS,
+        T_SEMICOLON,
+        T_COMMENT,
     ];
 
     /**

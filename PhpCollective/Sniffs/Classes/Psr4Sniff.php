@@ -142,8 +142,8 @@ class Psr4Sniff implements Sniff
 
         $phpcsFile->addError(
             sprintf(
-                'Class name is not compliant with PSR-4 configuration. ' .
-                'It should be `%s` instead of `%s`.',
+                'Class name is not compliant with PSR-4 configuration. '
+                . 'It should be `%s` instead of `%s`.',
                 $result->getExpectedClassName(),
                 $result->getActualClassName(),
             ),
