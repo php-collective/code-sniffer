@@ -25,6 +25,17 @@ use PHP_CodeSniffer\Util\Tokens;
 class ArrayDeclarationSniff implements Sniff
 {
     /**
+     * Controls when multi-line indentation rules are applied.
+     *
+     * Options:
+     * - 'assoc' (default): Only enforce one item per line for associative arrays
+     * - 'all': Enforce one item per line for all arrays (both associative and indexed)
+     *
+     * @var string
+     */
+    public string $multiLineIndentationMode = 'assoc';
+
+    /**
      * @inheritDoc
      */
     public function register(): array
@@ -331,7 +342,7 @@ class ArrayDeclarationSniff implements Sniff
         }
     }
 
-    public function processMultiLineIndentation(File $phpcsFile, int $arrayStart, int $arrayEnd): void
+    protected function processMultiLineIndentation(File $phpcsFile, int $arrayStart, int $arrayEnd): void
     {
         $tokens = $phpcsFile->getTokens();
         $pairs = [];
@@ -414,6 +425,7 @@ class ArrayDeclarationSniff implements Sniff
                     'value' => $valueStart,
                     'value_end' => $valueEnd,
                     'line' => $tokens[$keyStart]['line'],
+                    'is_associative' => true,
                 ];
 
                 $i = $phpcsFile->findNext([T_COMMA], $valueEnd + 1, $arrayEnd);
@@ -466,6 +478,7 @@ class ArrayDeclarationSniff implements Sniff
                     'value' => $i,
                     'value_end' => $valueEnd,
                     'line' => $tokens[$i]['line'],
+                    'is_associative' => false,
                 ];
 
                 $i = $phpcsFile->findNext([T_COMMA], $valueEnd + 1, $arrayEnd);
@@ -494,7 +507,31 @@ class ArrayDeclarationSniff implements Sniff
                 continue;
             }
 
+            // Check if we should process these items based on configuration
+            $shouldProcess = false;
+            if ($this->multiLineIndentationMode === 'all') {
+                $shouldProcess = true;
+            } else {
+                // In 'assoc' mode, only process if at least one item on this line is associative
+                foreach ($items as $item) {
+                    if ($item['is_associative']) {
+                        $shouldProcess = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (!$shouldProcess) {
+                continue;
+            }
+
             foreach ($items as $i => $pair) {
+                // In 'assoc' mode, only flag associative items
+                if ($this->multiLineIndentationMode === 'assoc' && !$pair['is_associative']) {
+                    continue;
+                }
+
                 $ptr = $pair['key'] ?? $pair['value'];
                 $error = 'Each array item must be on its own line in a multi-line array';
                 $fix = $phpcsFile->addFixableError($error, $ptr, 'MultipleItemsPerLine');
@@ -571,6 +608,11 @@ class ArrayDeclarationSniff implements Sniff
                     $phpcsFile->fixer->beginChangeset();
                     foreach ($items as $j => $p) {
                         if ($j === 0) {
+                            continue;
+                        }
+
+                        // In 'assoc' mode, only fix associative items
+                        if ($this->multiLineIndentationMode === 'assoc' && !$p['is_associative']) {
                             continue;
                         }
 
