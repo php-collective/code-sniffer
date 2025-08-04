@@ -17,7 +17,7 @@ class MethodSpacingSniffTest extends TestCase
      */
     public function testMethodSpacingSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new MethodSpacingSniff(), 2);
+        $this->assertSnifferFindsErrors(new MethodSpacingSniff(), 3);
     }
 
     /**
