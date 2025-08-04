@@ -194,7 +194,7 @@ class InlineDocBlockSniff extends AbstractSniff
         $comment = $tokens[$contentIndex]['content'];
 
         // SKip for complex arrays until next major
-        if (str_contains($comment, '<') || str_starts_with($comment, 'array{')) {
+        if (str_contains($comment, '<') || str_starts_with($comment, 'array{') || str_starts_with($comment, 'object{')) {
             return [];
         }
 
