@@ -28,5 +28,9 @@ class FixMe
 
         /** @var string $foo */
         $foo = $_indices['z'];
+
+        /** @var object{user_id: int, home_id: int} $row */
+        $row = new \stdClass();
+        $user_id = $row->user_id;
     }
 }

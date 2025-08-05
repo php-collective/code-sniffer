@@ -88,7 +88,23 @@ class MethodSpacingSniff extends AbstractSniff
             $error = 'There should be no extra newline at the end of a method';
             $fix = $phpcsFile->addFixableError($error, $stackPtr, 'ContentBeforeClose');
             if ($fix === true) {
-                $phpcsFile->fixer->replaceToken($lastContentIndex + 1, '');
+                // Find all whitespace tokens between last content and closing brace
+                $phpcsFile->fixer->beginChangeset();
+                for ($i = $lastContentIndex + 1; $i < $braceEndIndex; $i++) {
+                    if ($tokens[$i]['code'] === T_WHITESPACE) {
+                        if ($tokens[$i]['line'] === $tokens[$lastContentIndex]['line']) {
+                            // Keep whitespace on the same line as last content
+                            continue;
+                        }
+                        if ($tokens[$i]['line'] === $tokens[$braceEndIndex]['line']) {
+                            // Keep indentation before closing brace
+                            continue;
+                        }
+                        // Remove extra blank lines
+                        $phpcsFile->fixer->replaceToken($i, '');
+                    }
+                }
+                $phpcsFile->fixer->endChangeset();
             }
         }
     }
