@@ -13,8 +13,20 @@ class FixMe
                 'z' => 'a',
             ],
             'c' => __FILE__,
-            'd' => Xyz::class, 'r',
+            'd' => Xyz::class,
             'content' => $this->getContent($tokens, $i, $tagEnd),
+        ];
+
+        // Test case for nested arrays - should NOT be flagged
+        $config = [
+            'levels' => ['notice', 'info', 'debug'],
+            'other' => 'value',
+        ];
+
+        // Multiple items with nested arrays - SHOULD be flagged
+        $multi = [
+            'first' => ['a', 'b'],
+            'second' => ['c', 'd'],
         ];
     }
 }

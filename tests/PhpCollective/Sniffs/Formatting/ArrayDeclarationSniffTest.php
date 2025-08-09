@@ -17,7 +17,7 @@ class ArrayDeclarationSniffTest extends TestCase
      */
     public function testDocBlockConstSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new ArrayDeclarationSniff(), 2);
+        $this->assertSnifferFindsErrors(new ArrayDeclarationSniff(), 3);
     }
 
     /**
