@@ -363,6 +363,8 @@ class ArrayDeclarationSniff implements Sniff
 
                 continue;
             }
+            // Note: Nested arrays are processed separately by their own process() call,
+            // so we should skip them here to avoid double-processing
             if ($token['code'] === T_OPEN_SHORT_ARRAY && isset($token['bracket_closer'])) {
                 $i = $token['bracket_closer'] + 1;
 
@@ -440,6 +442,15 @@ class ArrayDeclarationSniff implements Sniff
 
             // Handle single value (non-associative)
             if ($token['code'] !== T_COMMA) {
+                // Check if this might be a key by looking ahead for =>
+                $nextNonEmpty = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, $arrayEnd, true);
+                if ($nextNonEmpty !== false && $tokens[$nextNonEmpty]['code'] === T_DOUBLE_ARROW) {
+                    // This is actually a key, not a standalone value
+                    // The T_DOUBLE_ARROW will be handled in the next iteration
+                    $i++;
+
+                    continue;
+                }
                 // Find the end of this value expression (handles function calls, etc.)
                 $valueEnd = $i;
                 $depth = 0;
@@ -487,6 +498,7 @@ class ArrayDeclarationSniff implements Sniff
                 }
                 $i++;
             } else {
+                // Skip the comma and continue
                 $i++;
             }
         }

@@ -13,8 +13,7 @@ class FixMe
                 'z' => 'a',
             ],
             'c' => __FILE__,
-            'd' => Xyz::class,
-            'r',
+            'd' => Xyz::class, 'r',
             'content' => $this->getContent($tokens, $i, $tagEnd),
         ];
     }
