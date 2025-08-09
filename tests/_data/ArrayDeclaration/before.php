@@ -31,5 +31,15 @@ class FixMe
             'action' => 'view', $uuid,
             '?' => ['pdf' => 1],
         ];
+
+        // Non-associative array exceeding default limit of 10 items - SHOULD be flagged
+        $longArray = [
+            'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7', 'item8', 'item9', 'item10', 'item11',
+        ];
+
+        // Non-associative array at limit of 10 items - should NOT be flagged
+        $limitArray = [
+            'item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7', 'item8', 'item9', 'item10',
+        ];
     }
 }

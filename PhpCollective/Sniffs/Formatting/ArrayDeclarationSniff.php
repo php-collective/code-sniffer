@@ -37,6 +37,26 @@ class ArrayDeclarationSniff implements Sniff
     public string $multiLineIndentationMode = 'assoc';
 
     /**
+     * Maximum number of non-associative items allowed on a single line.
+     * When exceeded, items will be split to multiple lines.
+     * Set to 0 to disable this check.
+     *
+     * @var int
+     */
+    public int $maxNonAssocItemsPerLine = 10;
+
+    /**
+     * Action to take when non-associative items exceed the limit.
+     *
+     * Options:
+     * - 'chunk' (default): Group items into chunks of maxNonAssocItemsPerLine
+     * - 'split': Put each item on its own line
+     *
+     * @var string
+     */
+    public string $nonAssocExceedAction = 'chunk';
+
+    /**
      * @inheritDoc
      */
     public function register(): array
@@ -555,17 +575,26 @@ class ArrayDeclarationSniff implements Sniff
 
             // Check if we should process these items based on configuration
             $shouldProcess = false;
+            $hasAssociative = false;
+            $nonAssocCount = 0;
+
+            // Count associative and non-associative items
+            foreach ($items as $item) {
+                if ($item['is_associative']) {
+                    $hasAssociative = true;
+                } else {
+                    $nonAssocCount++;
+                }
+            }
+
             if ($this->multiLineIndentationMode === 'all') {
                 $shouldProcess = true;
-            } else {
-                // In 'assoc' mode, only process if at least one item on this line is associative
-                foreach ($items as $item) {
-                    if ($item['is_associative']) {
-                        $shouldProcess = true;
-
-                        break;
-                    }
-                }
+            } elseif ($this->multiLineIndentationMode === 'assoc' && $hasAssociative) {
+                // In 'assoc' mode with associative items
+                $shouldProcess = true;
+            } elseif ($this->maxNonAssocItemsPerLine > 0 && $nonAssocCount > $this->maxNonAssocItemsPerLine) {
+                // Check if non-associative items exceed the limit
+                $shouldProcess = true;
             }
 
             if (!$shouldProcess) {
@@ -573,8 +602,22 @@ class ArrayDeclarationSniff implements Sniff
             }
 
             foreach ($items as $i => $pair) {
-                // In 'assoc' mode, only flag associative items
-                if ($this->multiLineIndentationMode === 'assoc' && !$pair['is_associative']) {
+                // Determine if this item should be flagged
+                $shouldFlag = false;
+
+                if ($this->multiLineIndentationMode === 'all') {
+                    $shouldFlag = true;
+                } elseif ($this->multiLineIndentationMode === 'assoc' && $hasAssociative) {
+                    // In 'assoc' mode with mixed items, only skip non-associative if no limit exceeded
+                    if ($pair['is_associative'] || ($this->maxNonAssocItemsPerLine > 0 && $nonAssocCount > $this->maxNonAssocItemsPerLine)) {
+                        $shouldFlag = true;
+                    }
+                } elseif ($this->maxNonAssocItemsPerLine > 0 && $nonAssocCount > $this->maxNonAssocItemsPerLine) {
+                    // Non-associative array exceeds limit
+                    $shouldFlag = true;
+                }
+
+                if (!$shouldFlag) {
                     continue;
                 }
 
@@ -652,26 +695,53 @@ class ArrayDeclarationSniff implements Sniff
                     }
 
                     $phpcsFile->fixer->beginChangeset();
+
+                    // Determine if we should use chunking for this line
+                    $useChunking = false;
+                    if (
+                        $this->nonAssocExceedAction === 'chunk' &&
+                        $this->maxNonAssocItemsPerLine > 0 &&
+                        $nonAssocCount > $this->maxNonAssocItemsPerLine &&
+                        !$hasAssociative
+                    ) {
+                        // Use chunking only for pure non-associative arrays
+                        $useChunking = true;
+                    }
+
+                    $nonAssocIndex = 0;
                     foreach ($items as $j => $p) {
                         if ($j === 0) {
                             continue;
                         }
 
-                        // In 'assoc' mode, when we have mixed items on a line, we need to fix all of them
-                        // Don't skip non-associative items when they're on the same line as associative ones
-
                         $targetPtr = $p['key'] ?? $p['value'];
 
-                        // Find any whitespace before the target token and remove it
-                        $prevToken = $targetPtr - 1;
-                        while ($prevToken >= $arrayStart && in_array($tokens[$prevToken]['code'], [T_WHITESPACE, T_COMMA], true)) {
-                            if ($tokens[$prevToken]['code'] === T_WHITESPACE) {
-                                $phpcsFile->fixer->replaceToken($prevToken, '');
+                        // Determine if we should add a newline before this item
+                        $shouldAddNewline = false;
+
+                        if ($useChunking && !$p['is_associative']) {
+                            // For chunking non-associative items
+                            $nonAssocIndex++;
+                            if ($nonAssocIndex % $this->maxNonAssocItemsPerLine === 0) {
+                                $shouldAddNewline = true;
                             }
-                            $prevToken--;
+                        } else {
+                            // Default behavior: newline before each item (except first)
+                            $shouldAddNewline = true;
                         }
 
-                        $phpcsFile->fixer->addContentBefore($targetPtr, "\n" . $baseIndent);
+                        if ($shouldAddNewline) {
+                            // Find any whitespace before the target token and remove it
+                            $prevToken = $targetPtr - 1;
+                            while ($prevToken >= $arrayStart && in_array($tokens[$prevToken]['code'], [T_WHITESPACE, T_COMMA], true)) {
+                                if ($tokens[$prevToken]['code'] === T_WHITESPACE) {
+                                    $phpcsFile->fixer->replaceToken($prevToken, '');
+                                }
+                                $prevToken--;
+                            }
+
+                            $phpcsFile->fixer->addContentBefore($targetPtr, "\n" . $baseIndent);
+                        }
                     }
                     $phpcsFile->fixer->endChangeset();
                 }
