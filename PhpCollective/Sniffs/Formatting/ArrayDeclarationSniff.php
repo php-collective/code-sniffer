@@ -25,6 +25,18 @@ use PHP_CodeSniffer\Util\Tokens;
 class ArrayDeclarationSniff implements Sniff
 {
     /**
+     * Controls when multi-line indentation rules are applied.
+     *
+     * Options:
+     * - 'assoc' (default): Only enforce one item per line for associative arrays
+     * - 'all': Enforce one item per line for all arrays (both associative and indexed)
+     * - 'none': Disable multi-line indentation checks
+     *
+     * @var string
+     */
+    public string $multiLineIndentationMode = 'assoc';
+
+    /**
      * @inheritDoc
      */
     public function register(): array
@@ -54,6 +66,7 @@ class ArrayDeclarationSniff implements Sniff
             $this->processSingleLineArray($phpcsFile, $arrayStart, $arrayEnd);
         } else {
             $this->processMultiLineArray($phpcsFile, $stackPtr, $arrayStart, $arrayEnd);
+            $this->processMultiLineIndentation($phpcsFile, $arrayStart, $arrayEnd);
         }
     }
 
@@ -293,33 +306,6 @@ class ArrayDeclarationSniff implements Sniff
             }
         }
 
-        /*
-            Below the actual indentation of the array is checked.
-            Errors will be thrown when a key is not aligned, when
-            a double arrow is not aligned, and when a value is not
-            aligned correctly.
-            If an error is found in one of the above areas, then errors
-            are not reported for the rest of the line to avoid reporting
-            spaces and columns incorrectly. Often fixing the first
-            problem will fix the other 2 anyway.
-
-            For example:
-
-            $a = array(
-                  'index'  => '2',
-                 );
-
-            or
-
-            $a = [
-                  'index'  => '2',
-                 ];
-
-            In this array, the double arrow is indented too far, but this
-            will also cause an error in the value's alignment. If the arrow were
-            to be moved back one space however, then both errors would be fixed.
-        */
-
         $numValues = count($indices);
 
         foreach ($indices as $index) {
@@ -353,6 +339,344 @@ class ArrayDeclarationSniff implements Sniff
                 if ($fix === true) {
                     $phpcsFile->fixer->addNewlineBefore($index['index']);
                 }
+            }
+        }
+    }
+
+    protected function processMultiLineIndentation(File $phpcsFile, int $arrayStart, int $arrayEnd): void
+    {
+        // Early return if mode is 'none'
+        if ($this->multiLineIndentationMode === 'none') {
+            return;
+        }
+
+        $tokens = $phpcsFile->getTokens();
+        $pairs = [];
+
+        $i = $arrayStart + 1;
+        while ($i < $arrayEnd) {
+            $token = $tokens[$i];
+
+            if (in_array($token['code'], Tokens::$emptyTokens, true)) {
+                $i++;
+
+                continue;
+            }
+
+            // Skip over nested structures (function calls, arrays, etc.)
+            if ($token['code'] === T_OPEN_PARENTHESIS && isset($token['parenthesis_closer'])) {
+                $i = $token['parenthesis_closer'] + 1;
+
+                continue;
+            }
+            // Note: Nested arrays are processed separately by their own process() call,
+            // so we should skip them here to avoid double-processing
+            if ($token['code'] === T_OPEN_SHORT_ARRAY && isset($token['bracket_closer'])) {
+                $i = $token['bracket_closer'] + 1;
+
+                continue;
+            }
+            if ($token['code'] === T_ARRAY && isset($token['parenthesis_closer'])) {
+                $i = $token['parenthesis_closer'] + 1;
+
+                continue;
+            }
+
+            // Handle key => value
+            if ($token['code'] === T_DOUBLE_ARROW) {
+                $keyEnd = $phpcsFile->findPrevious(T_WHITESPACE, $i - 1, $arrayStart, true);
+                if ($keyEnd === false) {
+                    break;
+                }
+                $keyStart = $phpcsFile->findStartOfStatement($keyEnd);
+
+                $valueStart = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, $arrayEnd, true);
+                if ($valueStart === false) {
+                    break;
+                }
+
+                // Find the end of the value expression (handles function calls, etc.)
+                $valueEnd = $valueStart;
+                $depth = 0;
+
+                for ($j = $valueStart; $j < $arrayEnd; $j++) {
+                    $currentToken = $tokens[$j];
+
+                    // Handle string literals
+                    if (in_array($currentToken['code'], [T_CONSTANT_ENCAPSED_STRING, T_DOUBLE_QUOTED_STRING], true)) {
+                        $valueEnd = $j;
+
+                        continue;
+                    }
+
+                    // Handle nested arrays - if we hit an array opener, skip to its closer
+                    if ($currentToken['code'] === T_OPEN_SHORT_ARRAY && isset($currentToken['bracket_closer'])) {
+                        $valueEnd = $currentToken['bracket_closer'];
+                        $j = $valueEnd;
+
+                        continue;
+                    }
+                    if ($currentToken['code'] === T_ARRAY && isset($currentToken['parenthesis_closer'])) {
+                        $valueEnd = $currentToken['parenthesis_closer'];
+                        $j = $valueEnd;
+
+                        continue;
+                    }
+
+                    // Track parentheses depth
+                    if ($currentToken['code'] === T_OPEN_PARENTHESIS) {
+                        $depth++;
+                    } elseif ($currentToken['code'] === T_CLOSE_PARENTHESIS) {
+                        $depth--;
+                    }
+
+                    // Stop at comma when we're at depth 0 (not inside function call)
+                    if ($currentToken['code'] === T_COMMA && $depth === 0) {
+                        break;
+                    }
+
+                    // Skip whitespace and comments when determining end
+                    if (!in_array($currentToken['code'], Tokens::$emptyTokens, true)) {
+                        $valueEnd = $j;
+                    }
+                }
+
+                $pairs[] = [
+                    'key' => $keyStart,
+                    'arrow' => $i,
+                    'value' => $valueStart,
+                    'value_end' => $valueEnd,
+                    'line' => $tokens[$keyStart]['line'],
+                    'is_associative' => true,
+                ];
+
+                $i = $phpcsFile->findNext([T_COMMA], $valueEnd + 1, $arrayEnd);
+                if ($i === false) {
+                    break;
+                }
+
+                $i++;
+
+                continue;
+            }
+
+            // Handle single value (non-associative)
+            if ($token['code'] !== T_COMMA) {
+                // Check if this might be a key by looking ahead for =>
+                $nextNonEmpty = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, $arrayEnd, true);
+                if ($nextNonEmpty !== false && $tokens[$nextNonEmpty]['code'] === T_DOUBLE_ARROW) {
+                    // This is actually a key, not a standalone value
+                    // The T_DOUBLE_ARROW will be handled in the next iteration
+                    $i++;
+
+                    continue;
+                }
+                // Find the end of this value expression (handles function calls, etc.)
+                $valueEnd = $i;
+                $depth = 0;
+
+                for ($j = $i; $j < $arrayEnd; $j++) {
+                    $currentToken = $tokens[$j];
+
+                    // Handle string literals
+                    if (in_array($currentToken['code'], [T_CONSTANT_ENCAPSED_STRING, T_DOUBLE_QUOTED_STRING], true)) {
+                        $valueEnd = $j;
+
+                        continue;
+                    }
+
+                    // Handle nested arrays - if we hit an array opener, skip to its closer
+                    if ($currentToken['code'] === T_OPEN_SHORT_ARRAY && isset($currentToken['bracket_closer'])) {
+                        $valueEnd = $currentToken['bracket_closer'];
+                        $j = $valueEnd;
+
+                        continue;
+                    }
+                    if ($currentToken['code'] === T_ARRAY && isset($currentToken['parenthesis_closer'])) {
+                        $valueEnd = $currentToken['parenthesis_closer'];
+                        $j = $valueEnd;
+
+                        continue;
+                    }
+
+                    // Track parentheses depth
+                    if ($currentToken['code'] === T_OPEN_PARENTHESIS) {
+                        $depth++;
+                    } elseif ($currentToken['code'] === T_CLOSE_PARENTHESIS) {
+                        $depth--;
+                    }
+
+                    // Stop at comma when we're at depth 0 (not inside function call)
+                    if ($currentToken['code'] === T_COMMA && $depth === 0) {
+                        break;
+                    }
+
+                    // Skip whitespace and comments when determining end
+                    if (!in_array($currentToken['code'], Tokens::$emptyTokens, true)) {
+                        $valueEnd = $j;
+                    }
+                }
+
+                $pairs[] = [
+                    'key' => null,
+                    'arrow' => null,
+                    'value' => $i,
+                    'value_end' => $valueEnd,
+                    'line' => $tokens[$i]['line'],
+                    'is_associative' => false,
+                ];
+
+                $i = $phpcsFile->findNext([T_COMMA], $valueEnd + 1, $arrayEnd);
+                if ($i === false) {
+                    break;
+                }
+                $i++;
+            } else {
+                // Skip the comma and continue
+                $i++;
+            }
+        }
+
+        // Group by line, but only if fully single-line expressions
+        $lineCounts = [];
+        foreach ($pairs as $pair) {
+            $startLine = $tokens[$pair['key'] ?? $pair['value']]['line'];
+            $endLine = $tokens[$pair['value_end'] ?: $pair['value']]['line'];
+
+            if ($startLine === $endLine) {
+                $lineCounts[$startLine][] = $pair;
+            }
+        }
+
+        foreach ($lineCounts as $line => $items) {
+            if (count($items) < 2) {
+                continue;
+            }
+
+            // Check if we should process these items based on configuration
+            $shouldProcess = false;
+            if ($this->multiLineIndentationMode === 'all') {
+                $shouldProcess = true;
+            } else {
+                // In 'assoc' mode, only process if at least one item on this line is associative
+                foreach ($items as $item) {
+                    if ($item['is_associative']) {
+                        $shouldProcess = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (!$shouldProcess) {
+                continue;
+            }
+
+            foreach ($items as $i => $pair) {
+                // In 'assoc' mode, only flag associative items
+                if ($this->multiLineIndentationMode === 'assoc' && !$pair['is_associative']) {
+                    continue;
+                }
+
+                $ptr = $pair['key'] ?? $pair['value'];
+                $error = 'Each array item must be on its own line in a multi-line array';
+                $fix = $phpcsFile->addFixableError($error, $ptr, 'MultipleItemsPerLine');
+
+                if ($fix) {
+                    // Calculate proper indentation by looking at existing properly indented items in this array
+                    $baseIndent = '';
+
+                    // Look for the first properly indented item in this array to match its indentation
+                    for ($searchIdx = $arrayStart + 1; $searchIdx < $arrayEnd; $searchIdx++) {
+                        if (
+                            $tokens[$searchIdx]['line'] > $tokens[$arrayStart]['line'] &&
+                            !in_array($tokens[$searchIdx]['code'], Tokens::$emptyTokens, true)
+                        ) {
+                            // Extract actual indentation from the line (only leading whitespace)
+                            $lineStart = $phpcsFile->findFirstOnLine([], $searchIdx);
+                            if ($lineStart !== false && $lineStart < $searchIdx) {
+                                $indentContent = $phpcsFile->getTokensAsString($lineStart, $searchIdx - $lineStart);
+                                // Only keep leading whitespace (tabs and spaces), remove any other characters
+                                if (preg_match('/^[\t ]*/', $indentContent, $matches)) {
+                                    $baseIndent = $matches[0];
+                                }
+                            } else {
+                                // Fallback to column-based calculation
+                                $indentLevel = $tokens[$searchIdx]['column'] - 1;
+                                $baseIndent = str_repeat(' ', $indentLevel);
+                            }
+
+                            break;
+                        }
+                    }
+
+                    // Fallback: detect indentation style and calculate based on array position
+                    if ($baseIndent === '') {
+                        // Detect if file uses tabs or spaces by looking at existing indentation
+                        $usesTabs = false;
+                        $indentSize = 4; // Default to 4 spaces
+
+                        // Scan the file to detect indentation style
+                        $count = count($tokens);
+                        for ($detectIdx = 0; $detectIdx < $count; $detectIdx++) {
+                            if (
+                                $tokens[$detectIdx]['code'] === T_WHITESPACE &&
+                                $tokens[$detectIdx]['line'] !== $tokens[$detectIdx - 1]['line']
+                            ) {
+                                $whitespace = $tokens[$detectIdx]['content'];
+                                if (str_contains($whitespace, "\t")) {
+                                    $usesTabs = true;
+
+                                    break;
+                                } elseif (strlen($whitespace) > 0) {
+                                    // Count spaces to determine indent size
+                                    $spaceCount = strlen(str_replace(["\n", "\r"], '', $whitespace));
+                                    if ($spaceCount > 0 && $spaceCount % 4 === 0) {
+                                        $indentSize = 4;
+                                    } elseif ($spaceCount > 0 && $spaceCount % 2 === 0) {
+                                        $indentSize = 2;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Calculate indentation based on array nesting
+                        $arrayColumn = $tokens[$arrayStart]['column'];
+                        $indentLevel = (int)(($arrayColumn + 3) / ($usesTabs ? 1 : $indentSize));
+
+                        if ($usesTabs) {
+                            $baseIndent = str_repeat("\t", $indentLevel);
+                        } else {
+                            $baseIndent = str_repeat(' ', $arrayColumn + 3);
+                        }
+                    }
+
+                    $phpcsFile->fixer->beginChangeset();
+                    foreach ($items as $j => $p) {
+                        if ($j === 0) {
+                            continue;
+                        }
+
+                        // In 'assoc' mode, when we have mixed items on a line, we need to fix all of them
+                        // Don't skip non-associative items when they're on the same line as associative ones
+
+                        $targetPtr = $p['key'] ?? $p['value'];
+
+                        // Find any whitespace before the target token and remove it
+                        $prevToken = $targetPtr - 1;
+                        while ($prevToken >= $arrayStart && in_array($tokens[$prevToken]['code'], [T_WHITESPACE, T_COMMA], true)) {
+                            if ($tokens[$prevToken]['code'] === T_WHITESPACE) {
+                                $phpcsFile->fixer->replaceToken($prevToken, '');
+                            }
+                            $prevToken--;
+                        }
+
+                        $phpcsFile->fixer->addContentBefore($targetPtr, "\n" . $baseIndent);
+                    }
+                    $phpcsFile->fixer->endChangeset();
+                }
+
+                break; // Only one error per line
             }
         }
     }

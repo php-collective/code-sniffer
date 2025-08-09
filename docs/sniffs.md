@@ -1,10 +1,11 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 225 sniffs
+The PhpCollectiveStrict standard contains 233 sniffs
 
-Generic (26 sniffs)
+Generic (27 sniffs)
 -------------------
+- Generic.Arrays.ArrayIndent
 - Generic.Arrays.DisallowLongArraySyntax
 - Generic.CodeAnalysis.ForLoopShouldBeWhileLoop
 - Generic.CodeAnalysis.ForLoopWithTestFunctionCall
@@ -31,6 +32,14 @@ Generic (26 sniffs)
 - Generic.WhiteSpace.IncrementDecrementSpacing
 - Generic.WhiteSpace.LanguageConstructSpacing
 - Generic.WhiteSpace.ScopeIndent
+
+Modernize (1 sniff)
+-------------------
+- Modernize.FunctionCalls.Dirname
+
+NormalizedArrays (1 sniff)
+--------------------------
+- NormalizedArrays.Arrays.ArrayBraceSpacing
 
 PEAR (4 sniffs)
 ---------------
@@ -253,6 +262,14 @@ Squiz (27 sniffs)
 - Squiz.WhiteSpace.ScopeKeywordSpacing
 - Squiz.WhiteSpace.SemicolonSpacing
 - Squiz.WhiteSpace.SuperfluousWhitespace
+
+Universal (5 sniffs)
+--------------------
+- Universal.Constants.LowercaseClassResolutionKeyword
+- Universal.Constants.UppercaseMagicConstants
+- Universal.Operators.ConcatPosition
+- Universal.UseStatements.NoUselessAliases
+- Universal.WhiteSpace.PrecisionAlignment
 
 Zend (1 sniff)
 --------------
