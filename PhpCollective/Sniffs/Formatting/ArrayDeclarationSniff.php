@@ -657,10 +657,8 @@ class ArrayDeclarationSniff implements Sniff
                             continue;
                         }
 
-                        // In 'assoc' mode, only fix associative items
-                        if ($this->multiLineIndentationMode === 'assoc' && !$p['is_associative']) {
-                            continue;
-                        }
+                        // In 'assoc' mode, when we have mixed items on a line, we need to fix all of them
+                        // Don't skip non-associative items when they're on the same line as associative ones
 
                         $targetPtr = $p['key'] ?? $p['value'];
 

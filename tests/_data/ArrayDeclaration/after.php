@@ -28,5 +28,13 @@ class FixMe
             'first' => ['a', 'b'],
             'second' => ['c', 'd'],
         ];
+
+        // Mixed associative and non-associative items - SHOULD be flagged
+        $url = [
+            'controller' => 'ControllerName',
+            'action' => 'view',
+            $uuid,
+            '?' => ['pdf' => 1],
+        ];
     }
 }
