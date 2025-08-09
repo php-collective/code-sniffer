@@ -40,9 +40,9 @@ class FixMe
     protected MailerMessage $message;
 
     /**
-     * @var \Some\Other\Class
+     * @var \Some\Other\MyClass|null
      */
-    protected Class $class;
+    protected ?MyClass $class;
 
     /**
      * @var \Yet\Another\Thing
