@@ -352,9 +352,6 @@ class ArrayDeclarationSniff implements Sniff
 
         $tokens = $phpcsFile->getTokens();
         $pairs = [];
-        
-        // Debug: identify which array we're processing
-        // file_put_contents('/tmp/array_debug.log', "\nProcessing array from {$tokens[$arrayStart]['line']} to {$tokens[$arrayEnd]['line']}\n", FILE_APPEND);
 
         $i = $arrayStart + 1;
         while ($i < $arrayEnd) {
@@ -416,11 +413,13 @@ class ArrayDeclarationSniff implements Sniff
                     if ($currentToken['code'] === T_OPEN_SHORT_ARRAY && isset($currentToken['bracket_closer'])) {
                         $valueEnd = $currentToken['bracket_closer'];
                         $j = $valueEnd;
+
                         continue;
                     }
                     if ($currentToken['code'] === T_ARRAY && isset($currentToken['parenthesis_closer'])) {
                         $valueEnd = $currentToken['parenthesis_closer'];
                         $j = $valueEnd;
+
                         continue;
                     }
 
@@ -490,11 +489,13 @@ class ArrayDeclarationSniff implements Sniff
                     if ($currentToken['code'] === T_OPEN_SHORT_ARRAY && isset($currentToken['bracket_closer'])) {
                         $valueEnd = $currentToken['bracket_closer'];
                         $j = $valueEnd;
+
                         continue;
                     }
                     if ($currentToken['code'] === T_ARRAY && isset($currentToken['parenthesis_closer'])) {
                         $valueEnd = $currentToken['parenthesis_closer'];
                         $j = $valueEnd;
+
                         continue;
                     }
 
