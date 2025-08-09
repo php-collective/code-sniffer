@@ -11,6 +11,7 @@ use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
+use PhpCollective\Traits\UseStatementsTrait;
 
 /**
  * Ensures Doc Blocks for variables exist and are correct.
@@ -21,6 +22,7 @@ use PhpCollective\Traits\CommentingTrait;
 class DocBlockVarSniff extends AbstractSniff
 {
     use CommentingTrait;
+    use UseStatementsTrait;
 
     /**
      * @inheritDoc
@@ -377,7 +379,7 @@ class DocBlockVarSniff extends AbstractSniff
     protected function handleTypes(File $phpCsFile, int $stackPointer, array $types, mixed $content, string $appendix, int $classNameIndex): void
     {
         foreach ($types as $type) {
-            if (str_contains($content, $type)) {
+            if ($this->typesMatch($phpCsFile, $content, $type)) {
                 continue;
             }
 
@@ -386,5 +388,36 @@ class DocBlockVarSniff extends AbstractSniff
                 $phpCsFile->fixer->replaceToken($classNameIndex, $content . '|' . $type . $appendix);
             }
         }
+    }
+
+    /**
+     * Check if two types match, considering use statement aliases.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param string $docBlockType
+     * @param string $propertyType
+     *
+     * @return bool
+     */
+    protected function typesMatch(File $phpCsFile, string $docBlockType, string $propertyType): bool
+    {
+        // Direct match
+        if (str_contains($docBlockType, $propertyType)) {
+            return true;
+        }
+
+        // Get use statements
+        $useStatements = $this->getUseStatements($phpCsFile);
+
+        // Check if the property type is an alias
+        if (isset($useStatements[$propertyType])) {
+            $fullClassName = $useStatements[$propertyType]['fullName'];
+            // Check if doc block contains the full class name (with or without leading backslash)
+            if (str_contains($docBlockType, '\\' . $fullClassName) || str_contains($docBlockType, $fullClassName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -2,6 +2,10 @@
 
 namespace PhpCollective;
 
+use Tools\Mailer\Message as MailerMessage;
+use Some\Other\Class;
+use Yet\Another\Thing as AnotherAlias;
+
 class FixMe
 {
     protected $x = [];
@@ -29,4 +33,19 @@ class FixMe
      * @var list<string|null>
      */
     protected $left = [];
+
+    /**
+     * @var \Tools\Mailer\Message
+     */
+    protected MailerMessage $message;
+
+    /**
+     * @var \Some\Other\Class
+     */
+    protected Class $class;
+
+    /**
+     * @var \Yet\Another\Thing
+     */
+    protected AnotherAlias $another;
 }
