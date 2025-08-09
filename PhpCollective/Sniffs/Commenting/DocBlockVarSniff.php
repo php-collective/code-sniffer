@@ -406,6 +406,11 @@ class DocBlockVarSniff extends AbstractSniff
             return true;
         }
 
+        // Check if property type is 'array' and doc block contains array syntax
+        if ($propertyType === 'array' && $this->containsTypeArray([$docBlockType])) {
+            return true;
+        }
+
         // Get use statements
         $useStatements = $this->getUseStatements($phpCsFile);
 
