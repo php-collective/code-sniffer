@@ -32,7 +32,7 @@ class FixMe
      *
      * @var list<string|null>
      */
-    protected $left = [];
+    protected array $left = [];
 
     /**
      * @var \Tools\Mailer\Message
@@ -48,4 +48,26 @@ class FixMe
      * @var \Yet\Another\Thing
      */
     protected AnotherAlias $another;
+
+    /**
+     * @var string[]
+     */
+    protected array $fixtures = [
+        'plugin.QueueScheduler.SchedulerRows',
+    ];
+
+    /**
+     * @var int[]
+     */
+    protected array $numbers = [1, 2, 3];
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $config = [];
+
+    /**
+     * @var MyClass[]
+     */
+    protected array $objects;
 }
