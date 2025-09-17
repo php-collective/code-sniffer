@@ -35,7 +35,7 @@ trait BasicsTrait
     /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
-     * @return array<string, mixed>>
+     * @return array<string, mixed>
      */
     protected function getNamespaceStatement(File $phpcsFile): array
     {
