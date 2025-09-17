@@ -23,7 +23,14 @@ class DocBlockSpacingSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_CLASS, T_INTERFACE, T_TRAIT, T_FUNCTION, T_PROPERTY];
+        $tokens = [T_CLASS, T_INTERFACE, T_TRAIT, T_FUNCTION];
+
+        // T_PROPERTY was introduced in PHP 8.4 for property hooks
+        if (defined('T_PROPERTY')) {
+            $tokens[] = T_PROPERTY;
+        }
+
+        return $tokens;
     }
 
     /**

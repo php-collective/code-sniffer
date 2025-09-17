@@ -51,7 +51,12 @@ class DocBlockThrowsSniff extends AbstractSniff
             return;
         }
 
-        if ($phpCsFile->getDeclarationName($stackPointer) === null) {
+        try {
+            $name = $phpCsFile->getDeclarationName($stackPointer);
+        } catch (Exception $e) {
+            return;
+        }
+        if (!$name) {
             return;
         }
 

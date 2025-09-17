@@ -169,7 +169,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function fixAnnotation(File $phpcsFile, Annotation $annotation, string $fixedAnnotation): void
     {
-        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|mixed $value */
+        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode $value */
         $value = $annotation->getNode()->value;
         $parameterName = $value->parameterName ?? '';
         $variableName = $value->variableName ?? '';
@@ -220,9 +220,9 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 /**
                  * @param \PHPStan\PhpDocParser\Ast\Node $node
                  *
-                 * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
+                 * @return int|null
                  */
-                public function enterNode(Node $node): Node|array|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
+                public function enterNode(Node $node): int|null
                 {
                     if ($node instanceof ArrayTypeNode) {
                         $this->nodes[] = $node;

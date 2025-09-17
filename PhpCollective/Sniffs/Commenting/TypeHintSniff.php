@@ -126,7 +126,7 @@ class TypeHintSniff extends AbstractSniff
                 continue;
             }
 
-            /** @phpstan-var \PHPStan\PhpDocParser\Ast\Type\GenericTypeNode|\PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode $valueNode */
+            /** @phpstan-var \PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode $valueNode */
             if ($valueNode->type instanceof UnionTypeNode) {
                 $types = $valueNode->type->types;
             } elseif ($valueNode->type instanceof ArrayTypeNode) {
