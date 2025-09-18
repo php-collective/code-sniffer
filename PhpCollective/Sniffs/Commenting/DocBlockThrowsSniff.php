@@ -51,7 +51,12 @@ class DocBlockThrowsSniff extends AbstractSniff
             return;
         }
 
-        if ($phpCsFile->getDeclarationName($stackPointer) === null) {
+        try {
+            $name = $phpCsFile->getDeclarationName($stackPointer);
+        } catch (Exception $e) {
+            return;
+        }
+        if (!$name) {
             return;
         }
 
@@ -139,6 +144,12 @@ class DocBlockThrowsSniff extends AbstractSniff
                     continue;
                 }
 
+                // Handle the case where there's no namespace separator, string token, or fully qualified name token
+                // (e.g., for parenthesis after 'new')
+                if (!$this->isGivenKind([T_NS_SEPARATOR, T_STRING, T_NAME_FULLY_QUALIFIED], $tokens[$contentIndex])) {
+                    continue;
+                }
+
                 $exceptions[] = $this->extractException($phpCsFile, $contentIndex);
 
                 continue;
@@ -223,9 +234,17 @@ class DocBlockThrowsSniff extends AbstractSniff
         $fullClass = '';
 
         $position = $contentIndex;
-        while ($this->isGivenKind([T_NS_SEPARATOR, T_STRING], $tokens[$position])) {
-            $fullClass .= $tokens[$position]['content'];
+
+        // Handle T_NAME_FULLY_QUALIFIED token (e.g., \BadMethodCallException)
+        // or separate tokens (T_NS_SEPARATOR and T_STRING)
+        if ($this->isGivenKind([T_NAME_FULLY_QUALIFIED], $tokens[$position])) {
+            $fullClass = $tokens[$position]['content'];
             ++$position;
+        } else {
+            while ($this->isGivenKind([T_NS_SEPARATOR, T_STRING], $tokens[$position])) {
+                $fullClass .= $tokens[$position]['content'];
+                ++$position;
+            }
         }
 
         $class = $fullClass = ltrim($fullClass, '\\');

@@ -320,7 +320,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
             $typehint = '?' . $typehint;
         }
 
-        if ($documentedReturnType !== 'void' && $typeHintIndex !== 'void') {
+        if ($documentedReturnType !== 'void' && $typehint !== 'void') {
             return;
         }
         if ($documentedReturnType === $typehint) {
