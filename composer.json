@@ -24,7 +24,7 @@
     "require": {
         "php": ">=8.1",
         "phpcsstandards/phpcsextra": "dev-develop",
-        "slevomat/coding-standard": "dev-phpcs4",
+        "slevomat/coding-standard": "^8.23.0",
         "squizlabs/php_codesniffer": "^4.0.0"
     },
     "require-dev": {
