@@ -639,32 +639,45 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        $lastIndex = null;
-        $j = $startIndex;
-        $extractedUseStatement = '';
-        $lastSeparatorIndex = null;
-        while (true) {
-            if (!$this->isGivenKind([T_NS_SEPARATOR, T_STRING], $tokens[$j])) {
-                break;
-            }
-
-            $lastIndex = $j;
-            $extractedUseStatement .= $tokens[$j]['content'];
-            if ($this->isGivenKind([T_NS_SEPARATOR], $tokens[$j])) {
-                $lastSeparatorIndex = $j;
-            }
-            ++$j;
-        }
-
-        if ($lastIndex === null || $lastSeparatorIndex === null) {
-            return;
-        }
-
-        $extractedUseStatement = ltrim($extractedUseStatement, '\\');
-
+        // Handle T_NAME_FULLY_QUALIFIED token (PHP CodeSniffer v4)
         $className = '';
-        for ($k = $lastSeparatorIndex + 1; $k <= $lastIndex; ++$k) {
-            $className .= $tokens[$k]['content'];
+        if ($tokens[$startIndex]['code'] === T_NAME_FULLY_QUALIFIED) {
+            $extractedUseStatement = ltrim($tokens[$startIndex]['content'], '\\');
+            if (strpos($extractedUseStatement, '\\') === false) {
+                return; // Not a namespaced class
+            }
+            $lastSeparatorPos = strrpos($extractedUseStatement, '\\');
+            $className = substr($extractedUseStatement, $lastSeparatorPos + 1);
+            $lastIndex = $startIndex;
+            $lastSeparatorIndex = null; // No separate separator token in v4
+        } else {
+            // Handle separate tokens (T_NS_SEPARATOR and T_STRING)
+            $lastIndex = null;
+            $j = $startIndex;
+            $extractedUseStatement = '';
+            $lastSeparatorIndex = null;
+            while (true) {
+                if (!$this->isGivenKind([T_NS_SEPARATOR, T_STRING], $tokens[$j])) {
+                    break;
+                }
+
+                $lastIndex = $j;
+                $extractedUseStatement .= $tokens[$j]['content'];
+                if ($this->isGivenKind([T_NS_SEPARATOR], $tokens[$j])) {
+                    $lastSeparatorIndex = $j;
+                }
+                ++$j;
+            }
+
+            if ($lastIndex === null || $lastSeparatorIndex === null) {
+                return;
+            }
+
+            $extractedUseStatement = ltrim($extractedUseStatement, '\\');
+            $className = '';
+            for ($k = $lastSeparatorIndex + 1; $k <= $lastIndex; ++$k) {
+                $className .= $tokens[$k]['content'];
+            }
         }
 
         $error = 'Use statement ' . $extractedUseStatement . ' for class ' . $className . ' should be in use block.';
@@ -677,13 +690,23 @@ class UseStatementSniff implements Sniff
 
         $addedUseStatement = $this->addUseStatement($phpcsFile, $className, $extractedUseStatement);
 
-        for ($k = $lastSeparatorIndex; $k > $startIndex; --$k) {
-            $phpcsFile->fixer->replaceToken($k, '');
-        }
-        $phpcsFile->fixer->replaceToken($startIndex, '');
+        if ($lastSeparatorIndex !== null) {
+            // Legacy: remove individual tokens
+            for ($k = $lastSeparatorIndex; $k > $startIndex; --$k) {
+                $phpcsFile->fixer->replaceToken($k, '');
+            }
+            $phpcsFile->fixer->replaceToken($startIndex, '');
 
-        if ($addedUseStatement['alias'] !== null) {
-            $phpcsFile->fixer->replaceToken($lastIndex, $addedUseStatement['alias']);
+            if ($addedUseStatement['alias'] !== null) {
+                $phpcsFile->fixer->replaceToken($lastIndex, $addedUseStatement['alias']);
+            }
+        } else {
+            // PHP CodeSniffer v4: replace single T_NAME_FULLY_QUALIFIED token
+            if ($addedUseStatement['alias'] !== null) {
+                $phpcsFile->fixer->replaceToken($startIndex, $addedUseStatement['alias']);
+            } else {
+                $phpcsFile->fixer->replaceToken($startIndex, $className);
+            }
         }
 
         $phpcsFile->fixer->endChangeset();
