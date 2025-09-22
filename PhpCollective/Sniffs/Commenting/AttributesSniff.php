@@ -38,7 +38,7 @@ class AttributesSniff implements Sniff
 
         $tokens = $phpCsFile->getTokens();
 
-        if ($tokens[$nextIndex]['code'] === T_NS_SEPARATOR) {
+        if ($tokens[$nextIndex]['code'] === T_NS_SEPARATOR || $tokens[$nextIndex]['code'] === T_NAME_FULLY_QUALIFIED) {
             return;
         }
 
