@@ -7,3 +7,7 @@ parameters:
         - '%rootDir%/../../../tests/bootstrap.php'
     ignoreErrors:
         - identifier: missingType.generics
+        - identifier: trait.unused
+        -
+            message: '#Parameter \#1 \$settings of static method SlevomatCodingStandard\\Helpers\\SniffSettingsHelper::normalizeArray\(\) expects list<string>, array<string> given#'
+            path: PhpCollective/Sniffs/Commenting/DisallowArrayTypeHintSyntaxSniff.php

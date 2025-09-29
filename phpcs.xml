@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <ruleset name="code-sniffer">
-    <config name="installed_paths" value="../../php-collective/code-sniffer"/>
     <config name="php_version" value="80100"/>
 
     <arg name="tab-width" value="4"/>

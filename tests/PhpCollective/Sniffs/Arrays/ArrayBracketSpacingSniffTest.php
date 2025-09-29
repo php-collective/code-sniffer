@@ -17,7 +17,8 @@ class ArrayBracketSpacingSniffTest extends TestCase
      */
     public function testArrayBracketSpacingSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new ArrayBracketSpacingSniff(), 4);
+        // 4 original errors + 1 new error from array with comments
+        $this->assertSnifferFindsErrors(new ArrayBracketSpacingSniff(), 5);
     }
 
     /**

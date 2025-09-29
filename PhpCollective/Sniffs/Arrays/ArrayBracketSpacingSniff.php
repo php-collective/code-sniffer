@@ -70,6 +70,15 @@ class ArrayBracketSpacingSniff implements Sniff
         // Any extra blank lines should be removed
         if ($closerLine - $lastContentLine > 1) {
             $error = 'Extra blank lines found before array closing bracket';
+
+            // Check if the last content is a comment - these are problematic for auto-fixing
+            if ($tokens[$lastContentPtr]['code'] === T_COMMENT) {
+                // Report as non-fixable error when last element is a comment
+                $phpcsFile->addError($error, $closerPtr, 'ExtraBlankLineBeforeCloser');
+
+                return;
+            }
+
             $fix = $phpcsFile->addFixableError($error, $closerPtr, 'ExtraBlankLineBeforeCloser');
 
             if ($fix === true) {
@@ -90,13 +99,33 @@ class ArrayBracketSpacingSniff implements Sniff
                     }
                 }
 
-                // Remove all tokens between last content and closer
+                // Find whitespace tokens between last content and closer
+                $whitespaceTokens = [];
                 for ($i = $lastContentPtr + 1; $i < $closerPtr; $i++) {
-                    $phpcsFile->fixer->replaceToken($i, '');
+                    if ($tokens[$i]['code'] === T_WHITESPACE) {
+                        $whitespaceTokens[] = $i;
+                    }
                 }
 
-                // Add a single newline with proper indentation after the last content
-                $phpcsFile->fixer->addContent($lastContentPtr, "\n" . $indent);
+                // Find the position to insert the newline
+                // If there's already whitespace, replace it; otherwise add new
+                $nextToken = $lastContentPtr + 1;
+
+                if ($nextToken < $closerPtr && $tokens[$nextToken]['code'] === T_WHITESPACE) {
+                    // There's whitespace right after the last content
+                    // Replace it with a single newline and indent
+                    $phpcsFile->fixer->replaceToken($nextToken, "\n" . $indent);
+
+                    // Remove any additional whitespace tokens
+                    for ($i = $nextToken + 1; $i < $closerPtr; $i++) {
+                        if ($tokens[$i]['code'] === T_WHITESPACE) {
+                            $phpcsFile->fixer->replaceToken($i, '');
+                        }
+                    }
+                } else {
+                    // No whitespace immediately after, need to add it
+                    $phpcsFile->fixer->addContent($lastContentPtr, "\n" . $indent);
+                }
 
                 $phpcsFile->fixer->endChangeset();
             }

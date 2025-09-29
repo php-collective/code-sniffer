@@ -291,39 +291,37 @@ class ArrayDeclarationSniff implements Sniff
                 continue;
             }
 
-            if ($tokens[$nextToken]['code'] === T_DOUBLE_ARROW) {
-                $currentEntry['arrow'] = $nextToken;
-                $keyUsed = true;
+            $currentEntry['arrow'] = $nextToken;
+            $keyUsed = true;
 
-                // Find the start of index that uses this double arrow.
-                $indexEnd = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($nextToken - 1), $arrayStart, true);
-                $indexStart = $phpcsFile->findStartOfStatement($indexEnd);
+            // Find the start of index that uses this double arrow.
+            $indexEnd = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($nextToken - 1), $arrayStart, true);
+            $indexStart = $phpcsFile->findStartOfStatement($indexEnd);
 
-                if ($indexStart === $indexEnd) {
-                    $currentEntry['index'] = $indexEnd;
-                    $currentEntry['index_content'] = $tokens[$indexEnd]['content'];
-                } else {
-                    $currentEntry['index'] = $indexStart;
-                    $currentEntry['index_content'] = $phpcsFile->getTokensAsString($indexStart, ($indexEnd - $indexStart + 1));
-                }
-
-                $indexLength = strlen($currentEntry['index_content']);
-                if ($maxLength < $indexLength) {
-                    $maxLength = $indexLength;
-                }
-
-                // Find the value of this index.
-                $nextContent = $phpcsFile->findNext(
-                    Tokens::$emptyTokens,
-                    ($nextToken + 1),
-                    $arrayEnd,
-                    true,
-                );
-
-                $currentEntry['value'] = $nextContent;
-                $indices[] = $currentEntry;
-                $lastToken = $nextToken;
+            if ($indexStart === $indexEnd) {
+                $currentEntry['index'] = $indexEnd;
+                $currentEntry['index_content'] = $tokens[$indexEnd]['content'];
+            } else {
+                $currentEntry['index'] = $indexStart;
+                $currentEntry['index_content'] = $phpcsFile->getTokensAsString($indexStart, ($indexEnd - $indexStart + 1));
             }
+
+            $indexLength = strlen($currentEntry['index_content']);
+            if ($maxLength < $indexLength) {
+                $maxLength = $indexLength;
+            }
+
+            // Find the value of this index.
+            $nextContent = $phpcsFile->findNext(
+                Tokens::$emptyTokens,
+                ($nextToken + 1),
+                $arrayEnd,
+                true,
+            );
+
+            $currentEntry['value'] = $nextContent;
+            $indices[] = $currentEntry;
+            $lastToken = $nextToken;
         }
 
         $numValues = count($indices);

@@ -48,5 +48,14 @@ class FixMe
             'item2',
 
         ];
+
+        // Array with comment as last element followed by blank lines
+        // This should report an error but NOT be auto-fixable
+        $array7 = [
+            'key' => 'value',
+            //'conditions' => array('ConversationUsers.status <'=>ConversationUser::STATUS_REMOVED),
+            //'group' => array('ConversationUser.conversation_id HAVING SUM(...)'), //HAVING COUNT(*) = '.count($users).'
+
+        ];
     }
 }

@@ -24,7 +24,6 @@ use SlevomatCodingStandard\Helpers\Annotation;
 use SlevomatCodingStandard\Helpers\AnnotationHelper;
 use SlevomatCodingStandard\Helpers\AnnotationTypeHelper;
 use SlevomatCodingStandard\Helpers\DocCommentHelper;
-use SlevomatCodingStandard\Helpers\FixerHelper;
 use SlevomatCodingStandard\Helpers\FunctionHelper;
 use SlevomatCodingStandard\Helpers\NamespaceHelper;
 use SlevomatCodingStandard\Helpers\SniffSettingsHelper;
@@ -143,21 +142,44 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                         new IdentifierTypeNode($genericIdentifier),
                         [$this->fixArrayNode($arrayTypeNode->type)],
                     );
-                    $this->fixAnnotation($phpcsFile, $annotation, $genericTypeNode);
+                    $this->fixAnnotation($phpcsFile, $annotation, AnnotationTypeHelper::print($genericTypeNode));
 
                     continue;
                 }
 
-                $phpcsFile->fixer->beginChangeset();
-                FixerHelper::change(
+                $this->applyFixWithoutTabConversion(
                     $phpcsFile,
                     $parsedDocComment->getOpenPointer(),
                     $parsedDocComment->getClosePointer(),
                     $fixedDocComment,
                 );
-                $phpcsFile->fixer->endChangeset();
             }
         }
+    }
+
+    /**
+     * Apply a fix without converting spaces to tabs
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $startPointer
+     * @param int $endPointer
+     * @param string $content
+     *
+     * @return void
+     */
+    protected function applyFixWithoutTabConversion(File $phpcsFile, int $startPointer, int $endPointer, string $content): void
+    {
+        $phpcsFile->fixer->beginChangeset();
+
+        // Remove all tokens between start and end
+        for ($i = $startPointer; $i <= $endPointer; $i++) {
+            $phpcsFile->fixer->replaceToken($i, '');
+        }
+
+        // Add the new content without tab conversion
+        $phpcsFile->fixer->replaceToken($startPointer, $content);
+
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
@@ -169,7 +191,7 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function fixAnnotation(File $phpcsFile, Annotation $annotation, string $fixedAnnotation): void
     {
-        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode|mixed $value */
+        /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagValueNode $value */
         $value = $annotation->getNode()->value;
         $parameterName = $value->parameterName ?? '';
         $variableName = $value->variableName ?? '';
@@ -220,9 +242,9 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
                 /**
                  * @param \PHPStan\PhpDocParser\Ast\Node $node
                  *
-                 * @return \PHPStan\PhpDocParser\Ast\Node|list<\PHPStan\PhpDocParser\Ast\Node>|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
+                 * @return int|null
                  */
-                public function enterNode(Node $node): Node|array|\PHPStan\PhpDocParser\Ast\NodeTraverser|int|null
+                public function enterNode(Node $node): int|null
                 {
                     if ($node instanceof ArrayTypeNode) {
                         $this->nodes[] = $node;
