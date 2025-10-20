@@ -17,7 +17,7 @@ class ControlStructureEmptyStatementSniffTest extends TestCase
      */
     public function testControlStructureEmptyStatementSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new ControlStructureEmptyStatementSniff(), 5);
+        $this->assertSnifferFindsErrors(new ControlStructureEmptyStatementSniff(), 6);
     }
 
     /**

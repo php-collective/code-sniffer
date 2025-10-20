@@ -54,6 +54,23 @@ class ControlStructureEmptyStatementSniff extends AbstractSniff
             return;
         }
 
+        // For T_WHILE, check if it's the closing while of a do-while loop
+        // In do-while loops, the semicolon after while(...) is required syntax
+        if ($tokens[$stackPtr]['code'] === T_WHILE) {
+            // Look backwards for a closing brace, which would be the end of the do block
+            $prevNonEmpty = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+            if ($prevNonEmpty !== false && $tokens[$prevNonEmpty]['code'] === T_CLOSE_CURLY_BRACKET) {
+                // Check if this closing brace belongs to a do statement
+                if (isset($tokens[$prevNonEmpty]['scope_condition'])) {
+                    $scopeCondition = $tokens[$prevNonEmpty]['scope_condition'];
+                    if ($tokens[$scopeCondition]['code'] === T_DO) {
+                        // This is a do-while loop, semicolon is required
+                        return;
+                    }
+                }
+            }
+        }
+
         $closer = $tokens[$stackPtr]['parenthesis_closer'];
 
         // Find the next non-whitespace token after the closing parenthesis
