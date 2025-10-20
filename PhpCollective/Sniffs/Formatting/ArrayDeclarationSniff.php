@@ -282,6 +282,9 @@ class ArrayDeclarationSniff implements Sniff
                         $nextToken,
                         true,
                     );
+                    if ($valueContent === false) {
+                        continue;
+                    }
 
                     $indices[] = ['value' => $valueContent];
                 }
@@ -318,6 +321,10 @@ class ArrayDeclarationSniff implements Sniff
                 $arrayEnd,
                 true,
             );
+
+            if ($nextContent === false) {
+                continue;
+            }
 
             $currentEntry['value'] = $nextContent;
             $indices[] = $currentEntry;

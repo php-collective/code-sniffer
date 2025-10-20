@@ -69,7 +69,10 @@ class DocBlockVarNotJustNullSniff extends AbstractSniff
             return;
         }
 
-        $typeIndex = $varIndex + 2;
+        $typeIndex = (int)$varIndex + 2;
+        if (!isset($tokens[$typeIndex]) || !isset($tokens[$typeIndex]['content'])) {
+            return;
+        }
 
         $content = $tokens[$typeIndex]['content'];
         $spaceIndex = strpos($content, ' ');
