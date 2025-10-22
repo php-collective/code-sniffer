@@ -676,7 +676,8 @@ class ArrayDeclarationSniff implements Sniff
                                     $usesTabs = true;
 
                                     break;
-                                } elseif (strlen($whitespace) > 0) {
+                                }
+                                if (strlen($whitespace) > 0) {
                                     // Count spaces to determine indent size
                                     $spaceCount = strlen(str_replace(["\n", "\r"], '', $whitespace));
                                     if ($spaceCount > 0 && $spaceCount % 4 === 0) {

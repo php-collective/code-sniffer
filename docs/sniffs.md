@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 235 sniffs
+The PhpCollectiveStrict standard contains 236 sniffs
 
 Generic (27 sniffs)
 -------------------
@@ -48,7 +48,7 @@ PEAR (4 sniffs)
 - PEAR.Functions.ValidDefaultValue
 - PEAR.NamingConventions.ValidClassName
 
-PhpCollective (82 sniffs)
+PhpCollective (83 sniffs)
 -------------------------
 - PhpCollective.Arrays.ArrayBracketSpacing
 - PhpCollective.Arrays.DisallowImplicitArrayCreation
@@ -100,6 +100,7 @@ PhpCollective (82 sniffs)
 - PhpCollective.ControlStructures.DisallowCloakingCheck
 - PhpCollective.ControlStructures.ElseIfDeclaration
 - PhpCollective.ControlStructures.NoInlineAssignment
+- PhpCollective.ControlStructures.UnneededElse
 - PhpCollective.Formatting.ArrayDeclaration
 - PhpCollective.Formatting.MethodSignatureParametersLineBreakMethod
 - PhpCollective.Internal.DisallowFunctions
