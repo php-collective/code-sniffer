@@ -214,8 +214,6 @@ class UnneededElseSniff extends AbstractSniff
      */
     protected function fixElseIfToIf(File $phpcsFile, int $stackPtr): void
     {
-        $tokens = $phpcsFile->getTokens();
-
         $phpcsFile->fixer->beginChangeset();
 
         $prevIndex = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
