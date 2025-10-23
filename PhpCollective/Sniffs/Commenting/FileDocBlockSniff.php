@@ -36,75 +36,75 @@ class FileDocBlockSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $license = $this->getLicense($phpCsFile);
+        $license = $this->getLicense($phpcsFile);
         if ($license === '') {
             return;
         }
 
-        $fileDocBlockPointer = $this->fileDocBlockPointer($phpCsFile, $stackPointer);
+        $fileDocBlockPointer = $this->fileDocBlockPointer($phpcsFile, $stackPointer);
         if ($fileDocBlockPointer === null) {
-            $this->addMissingFileDocBlock($phpCsFile, $stackPointer, $license);
+            $this->addMissingFileDocBlock($phpcsFile, $stackPointer, $license);
 
             return;
         }
 
-        $this->assertNewlineBefore($phpCsFile, $stackPointer);
-        $this->assertNewlineBefore($phpCsFile, $fileDocBlockPointer);
+        $this->assertNewlineBefore($phpcsFile, $stackPointer);
+        $this->assertNewlineBefore($phpcsFile, $fileDocBlockPointer);
 
-        if (!$this->isOwnFileDocBlock($phpCsFile, $fileDocBlockPointer)) {
+        if (!$this->isOwnFileDocBlock($phpcsFile, $fileDocBlockPointer)) {
             return;
         }
 
-        $currentLicenseLines = $this->getFileDocBlockLines($phpCsFile, $fileDocBlockPointer);
+        $currentLicenseLines = $this->getFileDocBlockLines($phpcsFile, $fileDocBlockPointer);
         $currentLicense = $this->buildLicense($currentLicenseLines);
 
         if ($this->isCorrectFileDocBlock($currentLicense, $license)) {
             return;
         }
 
-        $this->fixFileDocBlock($phpCsFile, $fileDocBlockPointer, $license);
+        $this->fixFileDocBlock($phpcsFile, $fileDocBlockPointer, $license);
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      * @param string $license
      *
      * @return void
      */
-    protected function addMissingFileDocBlock(File $phpCsFile, int $stackPointer, string $license): void
+    protected function addMissingFileDocBlock(File $phpcsFile, int $stackPointer, string $license): void
     {
         if (!$license) {
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('No file doc block', $stackPointer, 'FileDocBlockMissing');
+        $fix = $phpcsFile->addFixableError('No file doc block', $stackPointer, 'FileDocBlockMissing');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         $fileDocBlockStartPosition = $stackPointer - 1;
 
-        $phpCsFile->fixer->addContent($fileDocBlockStartPosition, $license);
-        $phpCsFile->fixer->addNewline($fileDocBlockStartPosition);
-        $phpCsFile->fixer->addNewline($fileDocBlockStartPosition);
+        $phpcsFile->fixer->addContent($fileDocBlockStartPosition, $license);
+        $phpcsFile->fixer->addNewline($fileDocBlockStartPosition);
+        $phpcsFile->fixer->addNewline($fileDocBlockStartPosition);
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $fileDocBlockStartPointer
      *
      * @return bool
      */
-    protected function isOwnFileDocBlock(File $phpCsFile, int $fileDocBlockStartPointer): bool
+    protected function isOwnFileDocBlock(File $phpcsFile, int $fileDocBlockStartPointer): bool
     {
-        $fileDockBlockLines = $this->getFileDocBlockLines($phpCsFile, $fileDocBlockStartPointer);
+        $fileDockBlockLines = $this->getFileDocBlockLines($phpcsFile, $fileDocBlockStartPointer);
         if (!$fileDockBlockLines) {
             return false;
         }
@@ -119,13 +119,13 @@ class FileDocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string
      */
-    protected function getLicense(File $phpCsFile): string
+    protected function getLicense(File $phpcsFile): string
     {
-        $customLicense = $this->findLicense($phpCsFile);
+        $customLicense = $this->findLicense($phpcsFile);
         if (!$customLicense) {
             return '';
         }
@@ -134,11 +134,11 @@ class FileDocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string|null
      */
-    protected function findLicense(File $phpCsFile): ?string
+    protected function findLicense(File $phpcsFile): ?string
     {
         $currentPath = getcwd() ?: '';
         if ($currentPath) {
@@ -178,68 +178,68 @@ class FileDocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $fileDocBlockStartPosition
      * @param string $license
      *
      * @return void
      */
-    protected function fixFileDocBlock(File $phpCsFile, int $fileDocBlockStartPosition, string $license): void
+    protected function fixFileDocBlock(File $phpcsFile, int $fileDocBlockStartPosition, string $license): void
     {
-        $fix = $phpCsFile->addFixableError('Wrong file doc block', $fileDocBlockStartPosition, 'FileDocBlockWrong');
+        $fix = $phpcsFile->addFixableError('Wrong file doc block', $fileDocBlockStartPosition, 'FileDocBlockWrong');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
-        $this->clearFileDocBlock($phpCsFile, $fileDocBlockStartPosition);
+        $this->clearFileDocBlock($phpcsFile, $fileDocBlockStartPosition);
 
         if ($license) {
-            $phpCsFile->fixer->addContent($fileDocBlockStartPosition, $license);
+            $phpcsFile->fixer->addContent($fileDocBlockStartPosition, $license);
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return int|null
      */
-    protected function fileDocBlockPointer(File $phpCsFile, int $stackPointer): ?int
+    protected function fileDocBlockPointer(File $phpcsFile, int $stackPointer): ?int
     {
-        $fileDocBlockStartPosition = $phpCsFile->findPrevious(T_DOC_COMMENT_OPEN_TAG, $stackPointer);
+        $fileDocBlockStartPosition = $phpcsFile->findPrevious(T_DOC_COMMENT_OPEN_TAG, $stackPointer);
 
         return $fileDocBlockStartPosition !== false ? $fileDocBlockStartPosition : null;
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $fileDocBlockStartPosition
      *
      * @return void
      */
-    protected function clearFileDocBlock(File $phpCsFile, int $fileDocBlockStartPosition): void
+    protected function clearFileDocBlock(File $phpcsFile, int $fileDocBlockStartPosition): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
         $fileDocBlockEndPosition = $tokens[$fileDocBlockStartPosition]['comment_closer'];
 
         for ($i = $fileDocBlockStartPosition; $i <= $fileDocBlockEndPosition + 1; $i++) {
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int|null $fileDocBlockStartPosition
      *
      * @return array<string>
      */
-    protected function getFileDocBlockLines(File $phpCsFile, ?int $fileDocBlockStartPosition): array
+    protected function getFileDocBlockLines(File $phpcsFile, ?int $fileDocBlockStartPosition): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
         $fileDocBlockEndPosition = $tokens[$fileDocBlockStartPosition]['comment_closer'];
 
         $result = [];

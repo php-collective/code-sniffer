@@ -78,20 +78,20 @@ class ReturnTypeHintSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return bool
      */
-    protected function isChainingMethod(File $phpCsFile, int $stackPointer): bool
+    protected function isChainingMethod(File $phpcsFile, int $stackPointer): bool
     {
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return false;
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
@@ -121,20 +121,20 @@ class ReturnTypeHintSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return void
      */
-    protected function assertNotThisOrStatic(File $phpCsFile, int $stackPointer): void
+    protected function assertNotThisOrStatic(File $phpcsFile, int $stackPointer): void
     {
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
@@ -157,12 +157,12 @@ class ReturnTypeHintSniff extends AbstractSniff
                 continue;
             }
 
-            $classNameWithNamespace = $this->getClassNameWithNamespace($phpCsFile);
+            $classNameWithNamespace = $this->getClassNameWithNamespace($phpcsFile);
             if ($content !== $classNameWithNamespace) {
                 continue;
             }
 
-            $phpCsFile->addError('Class name repeated, expected `self` or `$this`.', $classNameIndex, 'InvalidClass');
+            $phpcsFile->addError('Class name repeated, expected `self` or `$this`.', $classNameIndex, 'InvalidClass');
         }
     }
 }

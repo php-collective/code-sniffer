@@ -46,27 +46,27 @@ class DocBlockTagOrderSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPtr): void
+    public function process(File $phpcsFile, $stackPtr): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // Don't mess with closures
-        $prevIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+        $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
         if (!$this->isGivenKind(Tokens::$methodPrefixes, $tokens[$prevIndex])) {
             return;
         }
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPtr);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPtr);
         if (!$docBlockEndIndex) {
             return;
         }
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        $tags = $this->readTags($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $tags = $this->readTags($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
         $tags = $this->checkAnnotationTagOrder($tags);
 
-        $this->fixOrder($phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $tags);
+        $this->fixOrder($phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $tags);
     }
 
     /**
@@ -104,15 +104,15 @@ class DocBlockTagOrderSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function readTags(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): array
+    protected function readTags(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $tags = [];
 
@@ -202,14 +202,14 @@ class DocBlockTagOrderSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      * @param array<int, array<string, mixed>> $tags
      *
      * @return void
      */
-    protected function fixOrder(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $tags): void
+    protected function fixOrder(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $tags): void
     {
         $errors = [];
         foreach ($tags as $i => $tag) {
@@ -222,14 +222,14 @@ class DocBlockTagOrderSniff extends AbstractSniff
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('Invalid order of tags: ' . implode(', ', $errors), $docBlockEndIndex, 'OrderInvalid');
+        $fix = $phpcsFile->addFixableError('Invalid order of tags: ' . implode(', ', $errors), $docBlockEndIndex, 'OrderInvalid');
         if (!$fix) {
             return;
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         $order = $this->getTagOrderMap();
 
@@ -253,12 +253,12 @@ class DocBlockTagOrderSniff extends AbstractSniff
         $lastTagTokenIndex = $tags[count($tags) - 1]['end'];
 
         for ($i = $firstTagTokenIndex; $i < $lastTagTokenIndex; $i++) {
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->replaceToken($lastTagTokenIndex, $content);
+        $phpcsFile->fixer->replaceToken($lastTagTokenIndex, $content);
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**

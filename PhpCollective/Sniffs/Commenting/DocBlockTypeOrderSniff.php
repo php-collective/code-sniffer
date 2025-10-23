@@ -47,28 +47,28 @@ class DocBlockTypeOrderSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
         if (!$docBlockEndIndex) {
             return;
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
         $docBlockParams = $this->getDocBlockParams($tokens, $docBlockStartIndex, $docBlockEndIndex);
 
-        $this->assertOrder($phpCsFile, $docBlockParams);
+        $this->assertOrder($phpcsFile, $docBlockParams);
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<int, array<string, mixed>> $docBlockParams
      *
      * @return void
      */
-    protected function assertOrder(File $phpCsFile, array $docBlockParams): void
+    protected function assertOrder(File $phpcsFile, array $docBlockParams): void
     {
         foreach ($docBlockParams as $docBlockParam) {
             $docBlockParamTypes = explode('|', $docBlockParam['type']);
@@ -77,7 +77,7 @@ class DocBlockTypeOrderSniff extends AbstractSniff
             }
             $unique = array_unique($docBlockParamTypes);
             if (count($docBlockParamTypes) !== count($unique)) {
-                $phpCsFile->addError('Duplicate type in `' . $docBlockParam['type'] . '`', $docBlockParam['index'], 'Duplicate');
+                $phpcsFile->addError('Duplicate type in `' . $docBlockParam['type'] . '`', $docBlockParam['index'], 'Duplicate');
 
                 continue;
             }
@@ -86,17 +86,17 @@ class DocBlockTypeOrderSniff extends AbstractSniff
                 continue;
             }
 
-            $fix = $phpCsFile->addFixableError('`null` and falsey values should be the last element', $docBlockParam['index'], 'WrongOrder');
+            $fix = $phpcsFile->addFixableError('`null` and falsey values should be the last element', $docBlockParam['index'], 'WrongOrder');
             if (!$fix) {
                 continue;
             }
 
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
             $content = implode('|', $expectedOrder) . $docBlockParam['appendix'];
-            $phpCsFile->fixer->replaceToken($docBlockParam['index'], $content);
+            $phpcsFile->fixer->replaceToken($docBlockParam['index'], $content);
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
         }
     }
 

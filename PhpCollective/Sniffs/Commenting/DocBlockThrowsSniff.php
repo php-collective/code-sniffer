@@ -40,11 +40,11 @@ class DocBlockThrowsSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         // We skip if no doc block found yet
         if (!$docBlockEndIndex) {
@@ -52,7 +52,7 @@ class DocBlockThrowsSniff extends AbstractSniff
         }
 
         try {
-            $name = $phpCsFile->getDeclarationName($stackPointer);
+            $name = $phpcsFile->getDeclarationName($stackPointer);
         } catch (Exception $e) {
             return;
         }
@@ -65,11 +65,11 @@ class DocBlockThrowsSniff extends AbstractSniff
             return;
         }
 
-        $exceptions = $this->extractExceptions($phpCsFile, $stackPointer);
+        $exceptions = $this->extractExceptions($phpcsFile, $stackPointer);
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        $annotations = $this->extractExceptionAnnotations($phpCsFile, $docBlockStartIndex);
+        $annotations = $this->extractExceptionAnnotations($phpcsFile, $docBlockStartIndex);
 
         $containsComplexThrowToken = $this->containsComplexThrowToken($tokens, $tokens[$stackPointer]['scope_opener'], $tokens[$stackPointer]['scope_closer']);
 
@@ -78,7 +78,7 @@ class DocBlockThrowsSniff extends AbstractSniff
                 return;
             }
 
-            $phpCsFile->addError('Throw token found, but no annotation for it.', $docBlockEndIndex, 'ThrowAnnotationMissing');
+            $phpcsFile->addError('Throw token found, but no annotation for it.', $docBlockEndIndex, 'ThrowAnnotationMissing');
 
             return;
         }
@@ -86,18 +86,18 @@ class DocBlockThrowsSniff extends AbstractSniff
             return;
         }
 
-        $this->compareExceptionsAndAnnotations($phpCsFile, $exceptions, $annotations, $docBlockEndIndex);
+        $this->compareExceptionsAndAnnotations($phpcsFile, $exceptions, $annotations, $docBlockEndIndex);
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function extractExceptions(File $phpCsFile, int $stackPointer): array
+    protected function extractExceptions(File $phpcsFile, int $stackPointer): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $exceptions = [];
 
@@ -117,7 +117,7 @@ class DocBlockThrowsSniff extends AbstractSniff
                 continue;
             }
 
-            $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $i + 1, $scopeCloser, true);
+            $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, $scopeCloser, true);
             if (!$nextIndex) {
                 continue;
             }
@@ -132,14 +132,14 @@ class DocBlockThrowsSniff extends AbstractSniff
                 $classIndex = $nextIndex;
             }
 
-            $doubleColonIndex = $phpCsFile->findNext(T_DOUBLE_COLON, $i + 1, $scopeCloser);
+            $doubleColonIndex = $phpcsFile->findNext(T_DOUBLE_COLON, $i + 1, $scopeCloser);
 
             if (!$newIndex && !$classIndex && !$doubleColonIndex) {
                 continue;
             }
 
             if ($newIndex) {
-                $contentIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $newIndex + 1, $scopeCloser, true);
+                $contentIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $newIndex + 1, $scopeCloser, true);
                 if (!$contentIndex) {
                     continue;
                 }
@@ -150,7 +150,7 @@ class DocBlockThrowsSniff extends AbstractSniff
                     continue;
                 }
 
-                $exceptions[] = $this->extractException($phpCsFile, $contentIndex);
+                $exceptions[] = $this->extractException($phpcsFile, $contentIndex);
 
                 continue;
             }
@@ -169,14 +169,14 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function extractExceptionAnnotations(File $phpCsFile, int $docBlockStartIndex): array
+    protected function extractExceptionAnnotations(File $phpcsFile, int $docBlockStartIndex): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $throwTags = [];
         foreach ($tokens[$docBlockStartIndex]['comment_tags'] as $index) {
@@ -222,14 +222,14 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $contentIndex
      *
      * @return array<string, mixed>
      */
-    protected function extractException(File $phpCsFile, int $contentIndex): array
+    protected function extractException(File $phpcsFile, int $contentIndex): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $fullClass = '';
 
@@ -262,7 +262,7 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<int, array<string, mixed>> $exceptions
      * @param array<int, array<string, mixed>> $annotations
      * @param int $docBlockEndIndex
@@ -270,12 +270,12 @@ class DocBlockThrowsSniff extends AbstractSniff
      * @return void
      */
     protected function compareExceptionsAndAnnotations(
-        File $phpCsFile,
+        File $phpcsFile,
         array $exceptions,
         array $annotations,
         int $docBlockEndIndex,
     ): void {
-        $useStatements = $this->getUseStatements($phpCsFile);
+        $useStatements = $this->getUseStatements($phpcsFile);
 
         foreach ($annotations as $annotation) {
             if ($this->isInCode($annotation, $exceptions, $useStatements)) {
@@ -286,16 +286,16 @@ class DocBlockThrowsSniff extends AbstractSniff
             }
 
             $error = '@throw annotation `' . $annotation['fullClass'] . '` superfluous and should be removed. Use `!` comment to keep.';
-            $fix = $phpCsFile->addFixableError($error, $annotation['index'], 'ThrowSuperfluous');
+            $fix = $phpcsFile->addFixableError($error, $annotation['index'], 'ThrowSuperfluous');
             if (!$fix) {
                 continue;
             }
 
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
-            $this->removeLine($phpCsFile, $annotation['index']);
+            $this->removeLine($phpcsFile, $annotation['index']);
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
         }
 
         $exceptionsToAdd = [];
@@ -303,7 +303,7 @@ class DocBlockThrowsSniff extends AbstractSniff
             $exception = $this->normalizeClassName($exception, $useStatements);
             if (empty($exception['fullClass'])) {
                 // We skip for complex scenarios
-                $phpCsFile->addError('Doc Block @throw annotation missing', $docBlockEndIndex, 'ThrowMissingManual');
+                $phpcsFile->addError('Doc Block @throw annotation missing', $docBlockEndIndex, 'ThrowMissingManual');
 
                 continue;
             }
@@ -313,7 +313,7 @@ class DocBlockThrowsSniff extends AbstractSniff
             }
 
             $error = 'Doc Block @throw annotation `' . $exception['fullClass'] . '` missing';
-            $fix = $phpCsFile->addFixableError($error, $docBlockEndIndex, 'ThrowMissing');
+            $fix = $phpcsFile->addFixableError($error, $docBlockEndIndex, 'ThrowMissing');
             if (!$fix) {
                 continue;
             }
@@ -323,7 +323,7 @@ class DocBlockThrowsSniff extends AbstractSniff
             $exceptionsToAdd[$fullClass] = $exception;
         }
 
-        $this->addAnnotationLines($phpCsFile, $exceptionsToAdd, $docBlockEndIndex);
+        $this->addAnnotationLines($phpcsFile, $exceptionsToAdd, $docBlockEndIndex);
     }
 
     /**
@@ -382,24 +382,24 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $position
      *
      * @return void
      */
-    protected function removeLine(File $phpCsFile, int $position): void
+    protected function removeLine(File $phpcsFile, int $position): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $index = $this->getFirstTokenOfLine($tokens, $position);
         while ($tokens[$index]['line'] === $tokens[$position]['line']) {
-            $phpCsFile->fixer->replaceToken($index, '');
+            $phpcsFile->fixer->replaceToken($index, '');
             $index++;
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<string, array<string, mixed>> $exceptions
      * @param int $docBlockEndIndex
      *
@@ -407,9 +407,9 @@ class DocBlockThrowsSniff extends AbstractSniff
      *
      * @return void
      */
-    protected function addAnnotationLines(File $phpCsFile, array $exceptions, int $docBlockEndIndex): void
+    protected function addAnnotationLines(File $phpcsFile, array $exceptions, int $docBlockEndIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
@@ -418,16 +418,16 @@ class DocBlockThrowsSniff extends AbstractSniff
             throw new Exception('Should not happen');
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         krsort($exceptions);
 
         foreach ($exceptions as $exception) {
-            $phpCsFile->fixer->addNewlineBefore($throwAnnotationIndex);
-            $phpCsFile->fixer->addContentBefore($throwAnnotationIndex, '     * @throws \\' . $exception['fullClass']);
+            $phpcsFile->fixer->addNewlineBefore($throwAnnotationIndex);
+            $phpcsFile->fixer->addContentBefore($throwAnnotationIndex, '     * @throws \\' . $exception['fullClass']);
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
@@ -532,14 +532,14 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      *
      * @return bool
      */
-    protected function isApiMethod(File $phpCsFile, int $docBlockStartIndex): bool
+    protected function isApiMethod(File $phpcsFile, int $docBlockStartIndex): bool
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         foreach ($tokens[$docBlockStartIndex]['comment_tags'] as $index) {
             if ($tokens[$index]['content'] === '@api') {

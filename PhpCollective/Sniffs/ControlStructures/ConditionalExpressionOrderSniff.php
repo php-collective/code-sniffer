@@ -30,16 +30,16 @@ class ConditionalExpressionOrderSniff implements Sniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer)
+    public function process(File $phpcsFile, $stackPointer)
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $prevIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, ($stackPointer - 1), null, true);
+        $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPointer - 1), null, true);
         if (!in_array($tokens[$prevIndex]['code'], [T_TRUE, T_FALSE, T_NULL, T_LNUMBER, T_CONSTANT_ENCAPSED_STRING])) {
             return;
         }
 
-        $prevIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, ($prevIndex - 1), null, true);
+        $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($prevIndex - 1), null, true);
         if (!$prevIndex) {
             return;
         }
@@ -59,7 +59,7 @@ class ConditionalExpressionOrderSniff implements Sniff
             && $prevContent !== '('
         ) {
             // Not fixable
-            $phpCsFile->addError($error, $stackPointer, 'YodaNotAllowed');
+            $phpcsFile->addError($error, $stackPointer, 'YodaNotAllowed');
 
             return;
         }

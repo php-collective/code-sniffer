@@ -15,24 +15,24 @@ use PHP_CodeSniffer\Files\File;
 trait SignatureTrait
 {
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function getMethodSignature(File $phpCsFile, int $stackPtr): array
+    protected function getMethodSignature(File $phpcsFile, int $stackPtr): array
     {
-        $parameters = $phpCsFile->getMethodParameters($stackPtr);
-        $tokens = $phpCsFile->getTokens();
+        $parameters = $phpcsFile->getMethodParameters($stackPtr);
+        $tokens = $phpcsFile->getTokens();
 
         $arguments = [];
         foreach ($parameters as $parameter) {
             $defaultIndex = $default = null;
 
-            $possibleEqualIndex = $phpCsFile->findNext([T_EQUAL], $parameter['token'] + 1, $parameter['token'] + 3);
+            $possibleEqualIndex = $phpcsFile->findNext([T_EQUAL], $parameter['token'] + 1, $parameter['token'] + 3);
             if ($possibleEqualIndex) {
                 $whitelist = [T_CONSTANT_ENCAPSED_STRING, T_TRUE, T_FALSE, T_NULL, T_OPEN_SHORT_ARRAY, T_LNUMBER, T_DNUMBER];
-                $possibleDefaultValue = $phpCsFile->findNext($whitelist, $possibleEqualIndex + 1, $possibleEqualIndex + 3);
+                $possibleDefaultValue = $phpcsFile->findNext($whitelist, $possibleEqualIndex + 1, $possibleEqualIndex + 3);
                 if ($possibleDefaultValue) {
                     $defaultIndex = $possibleDefaultValue;
                     $default = null;

@@ -31,11 +31,11 @@ class DocBlockReturnSelfSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
@@ -70,22 +70,22 @@ class DocBlockReturnSelfSniff extends AbstractSniff
                 continue;
             }
 
-            if ($this->isStaticMethod($phpCsFile, $stackPointer)) {
+            if ($this->isStaticMethod($phpcsFile, $stackPointer)) {
                 continue;
             }
 
             $parts = explode('|', $content);
-            $returnTypes = $this->getReturnTypes($phpCsFile, $stackPointer);
+            $returnTypes = $this->getReturnTypes($phpcsFile, $stackPointer);
 
-            $this->assertCorrectDocBlockParts($phpCsFile, $classNameIndex, $parts, $returnTypes, $appendix);
+            $this->assertCorrectDocBlockParts($phpcsFile, $classNameIndex, $parts, $returnTypes, $appendix);
 
-            $this->assertChainableReturnType($phpCsFile, $stackPointer, $parts, $returnTypes);
-            $this->fixClassToThis($phpCsFile, $classNameIndex, $parts, $appendix, $returnTypes);
+            $this->assertChainableReturnType($phpcsFile, $stackPointer, $parts, $returnTypes);
+            $this->fixClassToThis($phpcsFile, $classNameIndex, $parts, $appendix, $returnTypes);
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $classNameIndex
      * @param array<string> $parts
      * @param array<string> $returnTypes
@@ -94,7 +94,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
      * @return void
      */
     protected function assertCorrectDocBlockParts(
-        File $phpCsFile,
+        File $phpcsFile,
         int $classNameIndex,
         array $parts,
         array $returnTypes,
@@ -122,22 +122,22 @@ class DocBlockReturnSelfSniff extends AbstractSniff
             $message[] = $part . ' => ' . $useStatement;
         }
 
-        $fix = $phpCsFile->addFixableError(implode(', ', $message), $classNameIndex, 'SelfVsThis');
+        $fix = $phpcsFile->addFixableError(implode(', ', $message), $classNameIndex, 'SelfVsThis');
         if ($fix) {
             $newContent = implode('|', $parts);
-            $phpCsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
+            $phpcsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return int|null Stackpointer value of docblock end tag, or null if cannot be found
      */
-    protected function findRelatedDocBlock(File $phpCsFile, int $stackPointer): ?int
+    protected function findRelatedDocBlock(File $phpcsFile, int $stackPointer): ?int
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $line = $tokens[$stackPointer]['line'];
         $beginningOfLine = $stackPointer;
@@ -153,26 +153,26 @@ class DocBlockReturnSelfSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return bool
      */
-    protected function isStaticMethod(File $phpCsFile, int $stackPointer): bool
+    protected function isStaticMethod(File $phpcsFile, int $stackPointer): bool
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         if (!in_array($tokens[$stackPointer]['code'], [T_FUNCTION], true)) {
             return false;
         }
 
-        $methodProperties = $phpCsFile->getMethodProperties($stackPointer);
+        $methodProperties = $phpcsFile->getMethodProperties($stackPointer);
 
         return $methodProperties['is_static'];
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $classNameIndex
      * @param array<string> $parts
      * @param string $appendix
@@ -181,13 +181,13 @@ class DocBlockReturnSelfSniff extends AbstractSniff
      * @return void
      */
     protected function fixClassToThis(
-        File $phpCsFile,
+        File $phpcsFile,
         int $classNameIndex,
         array $parts,
         string $appendix,
         array $returnTypes,
     ): void {
-        $ownClassName = '\\' . $this->getClassName($phpCsFile);
+        $ownClassName = '\\' . $this->getClassName($phpcsFile);
 
         $result = [];
         foreach ($parts as $key => $part) {
@@ -213,24 +213,24 @@ class DocBlockReturnSelfSniff extends AbstractSniff
             $message[] = $part . ' => ' . $useStatement;
         }
 
-        $fix = $phpCsFile->addFixableError(implode(', ', $message), $classNameIndex, 'ClassVsThis');
+        $fix = $phpcsFile->addFixableError(implode(', ', $message), $classNameIndex, 'ClassVsThis');
         if ($fix) {
             $newContent = implode('|', $parts);
-            $phpCsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
+            $phpcsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
         }
     }
 
     /**
      * We want to skip for static or other non chainable use cases.
      *
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return array<string>
      */
-    protected function getReturnTypes(File $phpCsFile, int $stackPointer): array
+    protected function getReturnTypes(File $phpcsFile, int $stackPointer): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // We skip for interface methods
         if (empty($tokens[$stackPointer]['scope_opener']) || empty($tokens[$stackPointer]['scope_closer'])) {
@@ -250,7 +250,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
                 continue;
             }
 
-            $contentIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $i + 1, $scopeCloser, true);
+            $contentIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, $scopeCloser, true);
             if (!$contentIndex) {
                 continue;
             }
@@ -258,14 +258,14 @@ class DocBlockReturnSelfSniff extends AbstractSniff
             if ($tokens[$contentIndex]['code'] === T_PARENT) {
                 $parentMethodName = $tokens[$contentIndex + 2]['content'];
 
-                if ($parentMethodName === FunctionHelper::getName($phpCsFile, $stackPointer)) {
+                if ($parentMethodName === FunctionHelper::getName($phpcsFile, $stackPointer)) {
                     continue;
                 }
             }
 
             $content = $tokens[$contentIndex]['content'];
 
-            $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $contentIndex + 1, $scopeCloser, true);
+            $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $contentIndex + 1, $scopeCloser, true);
             if (!$nextIndex) {
                 continue;
             }
@@ -284,7 +284,7 @@ class DocBlockReturnSelfSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      * @param array<string> $parts
      * @param array<string> $returnTypes
@@ -292,13 +292,13 @@ class DocBlockReturnSelfSniff extends AbstractSniff
      * @return void
      */
     protected function assertChainableReturnType(
-        File $phpCsFile,
+        File $phpcsFile,
         int $stackPointer,
         array $parts,
         array $returnTypes,
     ): void {
         if ($returnTypes && $parts === ['$this'] && $returnTypes !== ['$this']) {
-            $phpCsFile->addError('Chainable method (@return $this) cannot have multiple return types in code.', $stackPointer, 'InvalidChainable');
+            $phpcsFile->addError('Chainable method (@return $this) cannot have multiple return types in code.', $stackPointer, 'InvalidChainable');
         }
     }
 }

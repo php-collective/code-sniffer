@@ -77,13 +77,13 @@ class MethodTypeHintSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string
      */
-    protected function getCurrentClassName(File $phpCsFile): string
+    protected function getCurrentClassName(File $phpcsFile): string
     {
-        $fullClassName = parent::getClassName($phpCsFile);
+        $fullClassName = parent::getClassName($phpcsFile);
 
         return substr($fullClassName, strrpos($fullClassName, '\\') + 1);
     }

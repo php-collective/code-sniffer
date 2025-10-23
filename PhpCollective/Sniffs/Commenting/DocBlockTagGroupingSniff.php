@@ -34,49 +34,49 @@ class DocBlockTagGroupingSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPtr): void
+    public function process(File $phpcsFile, $stackPtr): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         if ($tokens[$stackPtr]['code'] === T_FUNCTION) {
             // Don't mess with closures
-            $prevIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+            $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
             if (!$this->isGivenKind(Tokens::$methodPrefixes, $tokens[$prevIndex])) {
                 return;
             }
         }
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPtr);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPtr);
         if (!$docBlockEndIndex) {
             return;
         }
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        $this->checkFirstAnnotationTag($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
-        $this->checkLastAnnotationTag($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
-        $this->checkAnnotationTagGrouping($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $this->checkFirstAnnotationTag($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $this->checkLastAnnotationTag($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $this->checkAnnotationTagGrouping($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return void
      */
-    protected function checkFirstAnnotationTag(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
+    protected function checkFirstAnnotationTag(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $nextIndex = $phpCsFile->findNext(T_DOC_COMMENT_TAG, $docBlockStartIndex + 1, $docBlockEndIndex);
+        $nextIndex = $phpcsFile->findNext(T_DOC_COMMENT_TAG, $docBlockStartIndex + 1, $docBlockEndIndex);
         if (!$nextIndex) {
             return;
         }
 
-        $prevIndex = $phpCsFile->findPrevious(T_DOC_COMMENT_STRING, $nextIndex - 1, $docBlockStartIndex + 1);
+        $prevIndex = $phpcsFile->findPrevious(T_DOC_COMMENT_STRING, $nextIndex - 1, $docBlockStartIndex + 1);
         if (!$prevIndex) {
-            $this->checkBeginningOfDocBlock($phpCsFile, $docBlockStartIndex, $nextIndex);
+            $this->checkBeginningOfDocBlock($phpcsFile, $docBlockStartIndex, $nextIndex);
 
             return;
         }
@@ -86,22 +86,22 @@ class DocBlockTagGroupingSniff extends AbstractSniff
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('Expected 1 extra new line before tags, got ' . ($diff - 1), $nextIndex, 'ExtraLineMissing');
+        $fix = $phpcsFile->addFixableError('Expected 1 extra new line before tags, got ' . ($diff - 1), $nextIndex, 'ExtraLineMissing');
         if (!$fix) {
             return;
         }
 
         if ($diff > 2) {
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
             for ($i = $prevIndex; $i < $nextIndex; $i++) {
                 if ($tokens[$i]['line'] <= $tokens[$prevIndex]['line'] + 1 || $tokens[$i]['line'] >= $tokens[$nextIndex]['line']) {
                     continue;
                 }
-                $phpCsFile->fixer->replaceToken($i, '');
+                $phpcsFile->fixer->replaceToken($i, '');
             }
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
 
             return;
         }
@@ -111,27 +111,27 @@ class DocBlockTagGroupingSniff extends AbstractSniff
             $i--;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
-        $indentation = $this->getIndentationWhitespace($phpCsFile, $docBlockEndIndex);
-        $phpCsFile->fixer->addContentBefore($i, $indentation . '*');
-        $phpCsFile->fixer->addNewlineBefore($i);
+        $indentation = $this->getIndentationWhitespace($phpcsFile, $docBlockEndIndex);
+        $phpcsFile->fixer->addContentBefore($i, $indentation . '*');
+        $phpcsFile->fixer->addNewlineBefore($i);
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return void
      */
-    protected function checkLastAnnotationTag(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
+    protected function checkLastAnnotationTag(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $prevIndex = $phpCsFile->findPrevious([T_DOC_COMMENT_TAG, T_DOC_COMMENT_STRING], $docBlockEndIndex - 1, $docBlockStartIndex);
+        $prevIndex = $phpcsFile->findPrevious([T_DOC_COMMENT_TAG, T_DOC_COMMENT_STRING], $docBlockEndIndex - 1, $docBlockStartIndex);
         if (!$prevIndex) {
             return;
         }
@@ -141,66 +141,66 @@ class DocBlockTagGroupingSniff extends AbstractSniff
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('Expected no extra blank line after tags, got ' . ($diff - 1), $prevIndex, 'NoExtraNewlineAfterTags');
+        $fix = $phpcsFile->addFixableError('Expected no extra blank line after tags, got ' . ($diff - 1), $prevIndex, 'NoExtraNewlineAfterTags');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         for ($i = $prevIndex; $i < $docBlockEndIndex; $i++) {
             if ($tokens[$i]['line'] <= $tokens[$prevIndex]['line'] || $tokens[$i]['line'] >= $tokens[$docBlockEndIndex]['line']) {
                 continue;
             }
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $nextIndex
      *
      * @return void
      */
-    protected function checkBeginningOfDocBlock(File $phpCsFile, int $docBlockStartIndex, int $nextIndex): void
+    protected function checkBeginningOfDocBlock(File $phpcsFile, int $docBlockStartIndex, int $nextIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $diff = $tokens[$nextIndex]['line'] - $tokens[$docBlockStartIndex]['line'];
         if ($diff < 2) {
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('Expected no extra blank line before tags, got ' . ($diff - 1), $nextIndex, 'NoExtraNewlineBeforeTags');
+        $fix = $phpcsFile->addFixableError('Expected no extra blank line before tags, got ' . ($diff - 1), $nextIndex, 'NoExtraNewlineBeforeTags');
         if ($fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         for ($i = $docBlockStartIndex; $i < $nextIndex; $i++) {
             if ($tokens[$i]['line'] <= $tokens[$docBlockStartIndex]['line'] || $tokens[$i]['line'] >= $tokens[$nextIndex]['line']) {
                 continue;
             }
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return void
      */
-    protected function checkAnnotationTagGrouping(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
+    protected function checkAnnotationTagGrouping(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
     {
-        $tags = $this->readTags($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $tags = $this->readTags($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
 
         $currentTag = null;
         foreach ($tags as $i => $tag) {
@@ -211,26 +211,26 @@ class DocBlockTagGroupingSniff extends AbstractSniff
             }
 
             if ($currentTag === $tag['tag'] || str_starts_with($tag['tag'], $currentTag)) {
-                $this->assertNoSpacing($phpCsFile, $tags[$i - 1], $tag);
+                $this->assertNoSpacing($phpcsFile, $tags[$i - 1], $tag);
 
                 continue;
             }
 
-            $this->assertSpacing($phpCsFile, $tags[$i - 1], $tag);
+            $this->assertSpacing($phpcsFile, $tags[$i - 1], $tag);
             $currentTag = $tag['tag'];
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function readTags(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): array
+    protected function readTags(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $tags = [];
 
@@ -320,15 +320,15 @@ class DocBlockTagGroupingSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<string, mixed> $first
      * @param array<string, mixed> $second
      *
      * @return void
      */
-    protected function assertNoSpacing(File $phpCsFile, array $first, array $second): void
+    protected function assertNoSpacing(File $phpcsFile, array $first, array $second): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $lastIndexOfFirst = $first['tagEnd'];
         $lastLineOfFirst = $tokens[$lastIndexOfFirst]['line'];
@@ -340,34 +340,34 @@ class DocBlockTagGroupingSniff extends AbstractSniff
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('No newline expected between tags of the same type `' . $first['tag'] . '`', $tagIndexOfSecond, 'NoNewlineBetweenSameType');
+        $fix = $phpcsFile->addFixableError('No newline expected between tags of the same type `' . $first['tag'] . '`', $tagIndexOfSecond, 'NoNewlineBetweenSameType');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         for ($i = $first['tagEnd'] + 1; $i < $second['start']; $i++) {
             if ($tokens[$i]['line'] <= $lastLineOfFirst || $tokens[$i]['line'] >= $firstLineOfSecond) {
                 continue;
             }
 
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<string, mixed> $first
      * @param array<string, mixed> $second
      *
      * @return void
      */
-    protected function assertSpacing(File $phpCsFile, array $first, array $second): void
+    protected function assertSpacing(File $phpcsFile, array $first, array $second): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $lastIndexOfFirst = $first['tagEnd'];
         $lastLineOfFirst = $tokens[$lastIndexOfFirst]['line'];
@@ -380,33 +380,33 @@ class DocBlockTagGroupingSniff extends AbstractSniff
         }
 
         $error = 'A single newline expected between tags of different types `' . $first['tag'] . '`/`' . $second['tag'] . '`';
-        $fix = $phpCsFile->addFixableError($error, $tagIndexOfSecond, 'NewlineBetweenDifferentTypes');
+        $fix = $phpcsFile->addFixableError($error, $tagIndexOfSecond, 'NewlineBetweenDifferentTypes');
         if (!$fix) {
             return;
         }
 
         if ($lastLineOfFirst > $firstLineOfSecond - 2) {
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
-            $indentation = $this->getIndentationWhitespace($phpCsFile, $tagIndexOfSecond);
-            $phpCsFile->fixer->addNewlineBefore($second['start']);
-            $phpCsFile->fixer->addContentBefore($second['start'], $indentation . '*');
+            $indentation = $this->getIndentationWhitespace($phpcsFile, $tagIndexOfSecond);
+            $phpcsFile->fixer->addNewlineBefore($second['start']);
+            $phpcsFile->fixer->addContentBefore($second['start'], $indentation . '*');
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
 
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         for ($i = $first['tagEnd'] + 1; $i < $second['start']; $i++) {
             if ($tokens[$i]['line'] <= $firstLineOfSecond - 2) {
                 continue;
             }
 
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 }

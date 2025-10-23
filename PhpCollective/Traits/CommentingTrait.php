@@ -141,16 +141,16 @@ trait CommentingTrait
      * Looks for either `@inheritDoc` or `{@inheritDoc}`.
      * Also allows `@inheritdoc` or `{@inheritdoc}` aliases.
      *
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      * @param string $check
      *
      * @return bool
      */
-    protected function hasInheritDoc(File $phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $check = '@inheritDoc')
+    protected function hasInheritDoc(File $phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $check = '@inheritDoc')
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; ++$i) {
             if (empty($tokens[$i]['content'])) {

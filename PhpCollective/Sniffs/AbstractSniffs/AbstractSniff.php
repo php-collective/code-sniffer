@@ -29,14 +29,14 @@ abstract class AbstractSniff implements Sniff
     ];
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      *
      * @return bool
      */
-    protected function isPhpStormMarker(File $phpCsFile, int $stackPtr): bool
+    protected function isPhpStormMarker(File $phpcsFile, int $stackPtr): bool
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
         $line = $tokens[$stackPtr]['line'];
         if ($tokens[$stackPtr]['type'] !== 'T_DOC_COMMENT_OPEN_TAG') {
             return false;
@@ -46,7 +46,7 @@ abstract class AbstractSniff implements Sniff
             return false; // Not an inline comment
         }
         foreach (static::$phpStormMarkers as $marker) {
-            if ($phpCsFile->findNext(T_DOC_COMMENT_TAG, $stackPtr + 1, $end, false, $marker) !== false) {
+            if ($phpcsFile->findNext(T_DOC_COMMENT_TAG, $stackPtr + 1, $end, false, $marker) !== false) {
                 return true;
             }
         }
@@ -79,60 +79,60 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string
      */
-    protected function getNamespace(File $phpCsFile): string
+    protected function getNamespace(File $phpcsFile): string
     {
-        $className = $this->getClassName($phpCsFile);
+        $className = $this->getClassName($phpcsFile);
         $classNameParts = explode('\\', $className);
 
         return $classNameParts[0];
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string|null
      */
-    protected function getClassNameWithNamespace(File $phpCsFile): ?string
+    protected function getClassNameWithNamespace(File $phpcsFile): ?string
     {
         try {
-            $lastToken = TokenHelper::getLastTokenPointer($phpCsFile);
+            $lastToken = TokenHelper::getLastTokenPointer($phpcsFile);
         } catch (EmptyFileException $e) {
             return null;
         }
 
-        if (!NamespaceHelper::findCurrentNamespaceName($phpCsFile, $lastToken)) {
+        if (!NamespaceHelper::findCurrentNamespaceName($phpcsFile, $lastToken)) {
             return null;
         }
 
-        $prevIndex = $phpCsFile->findPrevious([T_CLASS, T_TRAIT, T_INTERFACE, T_ENUM], $lastToken);
+        $prevIndex = $phpcsFile->findPrevious([T_CLASS, T_TRAIT, T_INTERFACE, T_ENUM], $lastToken);
         if (!$prevIndex) {
             return null;
         }
 
         return ClassHelper::getFullyQualifiedName(
-            $phpCsFile,
+            $phpcsFile,
             $prevIndex,
         );
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      *
      * @return string
      */
-    protected function getClassName(File $phpCsFile): string
+    protected function getClassName(File $phpcsFile): string
     {
-        $namespace = $this->getClassNameWithNamespace($phpCsFile);
+        $namespace = $this->getClassNameWithNamespace($phpcsFile);
 
         if ($namespace) {
             return trim($namespace, '\\');
         }
 
-        $fileName = $phpCsFile->getFilename();
+        $fileName = $phpcsFile->getFilename();
         $fileNameParts = explode(DIRECTORY_SEPARATOR, $fileName);
         $directoryPosition = array_search('src', $fileNameParts, true);
         if (!$directoryPosition) {
@@ -229,18 +229,18 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return int|null Stackpointer value of docblock end tag, or null if cannot be found
      */
-    protected function findRelatedDocBlock(File $phpCsFile, int $stackPointer): ?int
+    protected function findRelatedDocBlock(File $phpcsFile, int $stackPointer): ?int
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $beginningOfLine = $this->getFirstTokenOfLine($tokens, $stackPointer);
 
-        $prevContentIndex = $phpCsFile->findPrevious(T_WHITESPACE, $beginningOfLine - 1, null, true);
+        $prevContentIndex = $phpcsFile->findPrevious(T_WHITESPACE, $beginningOfLine - 1, null, true);
         if (!$prevContentIndex) {
             return null;
         }
@@ -390,13 +390,13 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<int, array<string, mixed>> $tokens
      * @param int $stackPointer
      *
      * @return bool
      */
-    protected function isMarkedAsDeprecated(File $phpCsFile, array $tokens, int $stackPointer): bool
+    protected function isMarkedAsDeprecated(File $phpcsFile, array $tokens, int $stackPointer): bool
     {
         $begin = $tokens[$stackPointer]['scope_opener'] + 1;
         $end = $tokens[$stackPointer]['scope_closer'] - 1;
@@ -409,7 +409,7 @@ abstract class AbstractSniff implements Sniff
             }
         }
 
-        if ($this->isMarkedDeprecatedInDocBlock($phpCsFile, $tokens, $stackPointer)) {
+        if ($this->isMarkedDeprecatedInDocBlock($phpcsFile, $tokens, $stackPointer)) {
             return true;
         }
 
@@ -417,15 +417,15 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param array<int, array<string, mixed>> $tokens
      * @param int $stackPointer
      *
      * @return bool
      */
-    protected function isMarkedDeprecatedInDocBlock(File $phpCsFile, array $tokens, int $stackPointer): bool
+    protected function isMarkedDeprecatedInDocBlock(File $phpcsFile, array $tokens, int $stackPointer): bool
     {
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
         if (!$docBlockEndIndex) {
             return false;
         }
@@ -445,14 +445,14 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return array<string>
      */
-    protected function getDocBlockReturnTypes(File $phpCsFile, int $stackPointer): array
+    protected function getDocBlockReturnTypes(File $phpcsFile, int $stackPointer): array
     {
-        $docBlock = DocCommentHelper::getDocComment($phpCsFile, $stackPointer);
+        $docBlock = DocCommentHelper::getDocComment($phpcsFile, $stackPointer);
 
         if ($docBlock === null) {
             return [];
@@ -472,38 +472,38 @@ abstract class AbstractSniff implements Sniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $fileDocBlockStartPosition
      *
      * @return void
      */
-    protected function assertNewlineBefore(File $phpCsFile, int $fileDocBlockStartPosition): void
+    protected function assertNewlineBefore(File $phpcsFile, int $fileDocBlockStartPosition): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $prevIndex = $phpCsFile->findPrevious(T_WHITESPACE, $fileDocBlockStartPosition - 1, 0, true);
+        $prevIndex = $phpcsFile->findPrevious(T_WHITESPACE, $fileDocBlockStartPosition - 1, 0, true);
         if ($prevIndex === false || $tokens[$prevIndex]['line'] === $tokens[$fileDocBlockStartPosition]['line'] - 2) {
             return;
         }
 
-        $fix = $phpCsFile->addFixableError('Whitespace issue around file doc block', $fileDocBlockStartPosition, 'FileDocBlockSpacing');
+        $fix = $phpcsFile->addFixableError('Whitespace issue around file doc block', $fileDocBlockStartPosition, 'FileDocBlockSpacing');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         if ($tokens[$prevIndex]['line'] > $tokens[$fileDocBlockStartPosition]['line'] - 2) {
-            $phpCsFile->fixer->addNewline($prevIndex);
+            $phpcsFile->fixer->addNewline($prevIndex);
         } else {
             $index = $prevIndex;
             while ($index < $fileDocBlockStartPosition - 1) {
                 $index++;
-                $phpCsFile->fixer->replaceToken($index, '');
+                $phpcsFile->fixer->replaceToken($index, '');
             }
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**

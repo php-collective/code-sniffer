@@ -37,43 +37,43 @@ class DocBlockConstSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
         if (!$docBlockEndIndex) {
-            $defaultValueType = $this->findDefaultValueType($phpCsFile, $stackPointer);
+            $defaultValueType = $this->findDefaultValueType($phpcsFile, $stackPointer);
             if ($defaultValueType === null) {
                 // Let's ignore for now
-                //$phpCsFile->addError('Doc Block for const missing', $stackPointer, 'VarDocBlockMissing');
+                //$phpcsFile->addError('Doc Block for const missing', $stackPointer, 'VarDocBlockMissing');
 
                 return;
             }
 
             if ($defaultValueType === 'null') {
-                $phpCsFile->addError('Doc Block `@var` with type `...|' . $defaultValueType . '` for const missing', $stackPointer, 'VarDocBlockMissing');
+                $phpcsFile->addError('Doc Block `@var` with type `...|' . $defaultValueType . '` for const missing', $stackPointer, 'VarDocBlockMissing');
 
                 return;
             }
 
-            $fix = $phpCsFile->addFixableError('Doc Block for const missing', $stackPointer, 'VarDocBlockMissing');
+            $fix = $phpcsFile->addFixableError('Doc Block for const missing', $stackPointer, 'VarDocBlockMissing');
             if (!$fix) {
                 return;
             }
 
-            $this->addDocBlock($phpCsFile, $stackPointer, $defaultValueType);
+            $this->addDocBlock($phpcsFile, $stackPointer, $defaultValueType);
 
             return;
         }
 
         /** @var int $docBlockStartIndex */
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
-        if ($this->hasInheritDoc($phpCsFile, $docBlockStartIndex, $docBlockEndIndex)) {
+        if ($this->hasInheritDoc($phpcsFile, $docBlockStartIndex, $docBlockEndIndex)) {
             return;
         }
 
-        $defaultValueType = $this->findDefaultValueType($phpCsFile, $stackPointer);
+        $defaultValueType = $this->findDefaultValueType($phpcsFile, $stackPointer);
 
         $tagIndex = null;
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
@@ -88,7 +88,7 @@ class DocBlockConstSniff extends AbstractSniff
         }
 
         if (!$tagIndex) {
-            $this->handleMissingVar($phpCsFile, $docBlockEndIndex, $docBlockStartIndex, $defaultValueType);
+            $this->handleMissingVar($phpcsFile, $docBlockEndIndex, $docBlockStartIndex, $defaultValueType);
 
             return;
         }
@@ -96,7 +96,7 @@ class DocBlockConstSniff extends AbstractSniff
         $typeIndex = $tagIndex + 2;
 
         if ($tokens[$typeIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
-            $this->handleMissingVarType($phpCsFile, $tagIndex, $defaultValueType);
+            $this->handleMissingVarType($phpcsFile, $tagIndex, $defaultValueType);
 
             return;
         }
@@ -104,11 +104,11 @@ class DocBlockConstSniff extends AbstractSniff
         $tagIndexContent = $tokens[$tagIndex]['content'];
         $requiresTagUpdate = $tagIndexContent !== '@var';
         if ($requiresTagUpdate) {
-            $fix = $phpCsFile->addFixableError(sprintf('Wrong tag used, expected `%s`, got `%s`', '@var', $tagIndexContent), $tagIndex, 'WrongTag');
+            $fix = $phpcsFile->addFixableError(sprintf('Wrong tag used, expected `%s`, got `%s`', '@var', $tagIndexContent), $tagIndex, 'WrongTag');
             if ($fix) {
-                $phpCsFile->fixer->beginChangeset();
-                $phpCsFile->fixer->replaceToken($tagIndex, '@var');
-                $phpCsFile->fixer->endChangeset();
+                $phpcsFile->fixer->beginChangeset();
+                $phpcsFile->fixer->replaceToken($tagIndex, '@var');
+                $phpcsFile->fixer->endChangeset();
             }
         }
 
@@ -118,7 +118,7 @@ class DocBlockConstSniff extends AbstractSniff
             if ($defaultValueType) {
                 $error .= ', type `' . $defaultValueType . '` detected';
             }
-            $phpCsFile->addError($error, $stackPointer, 'VarTypeEmpty');
+            $phpcsFile->addError($error, $stackPointer, 'VarTypeEmpty');
 
             return;
         }
@@ -148,7 +148,7 @@ class DocBlockConstSniff extends AbstractSniff
             $defaultValueType = 'bool';
         }
 
-        $fix = $phpCsFile->addFixableError('Doc Block type `' . $content . '` for property annotation @var incorrect, type `' . $defaultValueType . '` expected', $stackPointer, 'VarTypeIncorrect');
+        $fix = $phpcsFile->addFixableError('Doc Block type `' . $content . '` for property annotation @var incorrect, type `' . $defaultValueType . '` expected', $stackPointer, 'VarTypeIncorrect');
         if ($fix) {
             $newComment = trim(sprintf(
                 '%s %s %s',
@@ -156,33 +156,33 @@ class DocBlockConstSniff extends AbstractSniff
                 $valueNode->variableName,
                 $valueNode->description,
             ));
-            $phpCsFile->fixer->beginChangeset();
-            $phpCsFile->fixer->replaceToken($typeIndex, $newComment);
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->replaceToken($typeIndex, $newComment);
+            $phpcsFile->fixer->endChangeset();
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return string|null
      */
-    protected function findDefaultValueType(File $phpCsFile, int $stackPointer): ?string
+    protected function findDefaultValueType(File $phpcsFile, int $stackPointer): ?string
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $nameIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $stackPointer + 1, null, true);
+        $nameIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPointer + 1, null, true);
         if (!$nameIndex || !$this->isGivenKind(T_STRING, $tokens[$nameIndex])) {
             return null;
         }
 
-        $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $nameIndex + 1, null, true);
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $nameIndex + 1, null, true);
         if (!$nextIndex || !$this->isGivenKind(T_EQUAL, $tokens[$nextIndex])) {
             return null;
         }
 
-        $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $nextIndex + 1, null, true);
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $nextIndex + 1, null, true);
         if (!$nextIndex) {
             return null;
         }
@@ -225,7 +225,7 @@ class DocBlockConstSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockEndIndex
      * @param int $docBlockStartIndex
      * @param string|null $defaultValueType
@@ -233,7 +233,7 @@ class DocBlockConstSniff extends AbstractSniff
      * @return void
      */
     protected function handleMissingVar(
-        File $phpCsFile,
+        File $phpcsFile,
         int $docBlockEndIndex,
         int $docBlockStartIndex,
         ?string $defaultValueType,
@@ -242,7 +242,7 @@ class DocBlockConstSniff extends AbstractSniff
 
         if ($defaultValueType === null) {
             // Let's skip for now for non-trivial cases
-            //$phpCsFile->addError($error, $docBlockEndIndex, 'DocBlockMissing');
+            //$phpcsFile->addError($error, $docBlockEndIndex, 'DocBlockMissing');
 
             return;
         }
@@ -254,41 +254,41 @@ class DocBlockConstSniff extends AbstractSniff
         $error .= ', type `' . $defaultValueType . '` detected';
 
         if ($defaultValueType === 'null') {
-            $phpCsFile->addError($error, $docBlockEndIndex, 'TypeMissing');
+            $phpcsFile->addError($error, $docBlockEndIndex, 'TypeMissing');
 
             return;
         }
 
-        $fix = $phpCsFile->addFixableError($error, $docBlockEndIndex, 'WrongType');
+        $fix = $phpcsFile->addFixableError($error, $docBlockEndIndex, 'WrongType');
         if (!$fix) {
             return;
         }
 
-        $index = $phpCsFile->findPrevious(T_DOC_COMMENT_WHITESPACE, $docBlockEndIndex - 1, $docBlockStartIndex, true);
+        $index = $phpcsFile->findPrevious(T_DOC_COMMENT_WHITESPACE, $docBlockEndIndex - 1, $docBlockStartIndex, true);
         if (!$index) {
             $index = $docBlockStartIndex;
         }
 
-        $whitespace = $this->getIndentationWhitespace($phpCsFile, $index);
+        $whitespace = $this->getIndentationWhitespace($phpcsFile, $index);
 
-        $phpCsFile->fixer->beginChangeset();
-        $phpCsFile->fixer->addNewline($index);
-        $phpCsFile->fixer->addContent($index, $whitespace . '* @var ' . $defaultValueType);
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->addNewline($index);
+        $phpcsFile->fixer->addContent($index, $whitespace . '* @var ' . $defaultValueType);
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $varIndex
      * @param string|null $defaultValueType
      *
      * @return void
      */
-    protected function handleMissingVarType(File $phpCsFile, int $varIndex, ?string $defaultValueType): void
+    protected function handleMissingVarType(File $phpcsFile, int $varIndex, ?string $defaultValueType): void
     {
         $error = 'Doc Block type for property annotation @var missing';
         if ($defaultValueType === null) {
-            $phpCsFile->addError($error, $varIndex, 'VarTypeMissing');
+            $phpcsFile->addError($error, $varIndex, 'VarTypeMissing');
 
             return;
         }
@@ -298,34 +298,34 @@ class DocBlockConstSniff extends AbstractSniff
         }
 
         $error .= ', type `' . $defaultValueType . '` detected';
-        $fix = $phpCsFile->addFixableError($error, $varIndex, 'WrongType');
+        $fix = $phpcsFile->addFixableError($error, $varIndex, 'WrongType');
         if (!$fix) {
             return;
         }
 
-        $phpCsFile->fixer->beginChangeset();
-        $phpCsFile->fixer->addContent($varIndex, ' ' . $defaultValueType);
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->addContent($varIndex, ' ' . $defaultValueType);
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      * @param string $defaultValueType
      *
      * @return void
      */
-    protected function addDocBlock(File $phpCsFile, int $stackPointer, string $defaultValueType): void
+    protected function addDocBlock(File $phpcsFile, int $stackPointer, string $defaultValueType): void
     {
         if ($defaultValueType === 'false') {
             $defaultValueType = 'bool';
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $firstTokenOfLine = $this->getFirstTokenOfLine($tokens, $stackPointer);
 
-        $prevContentIndex = $phpCsFile->findPrevious(T_WHITESPACE, $firstTokenOfLine - 1, null, true);
+        $prevContentIndex = $phpcsFile->findPrevious(T_WHITESPACE, $firstTokenOfLine - 1, null, true);
         if (!$prevContentIndex) {
             return;
         }
@@ -334,16 +334,16 @@ class DocBlockConstSniff extends AbstractSniff
             $firstTokenOfLine = $this->getFirstTokenOfLine($tokens, $prevContentIndex);
         }
 
-        $indentation = $this->getIndentationWhitespace($phpCsFile, $stackPointer);
+        $indentation = $this->getIndentationWhitespace($phpcsFile, $stackPointer);
 
-        $phpCsFile->fixer->beginChangeset();
-        $phpCsFile->fixer->addNewlineBefore($firstTokenOfLine);
-        $phpCsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . ' */');
-        $phpCsFile->fixer->addNewlineBefore($firstTokenOfLine);
-        $phpCsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . ' * @var ' . $defaultValueType);
-        $phpCsFile->fixer->addNewlineBefore($firstTokenOfLine);
-        $phpCsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . '/**');
+        $phpcsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->addNewlineBefore($firstTokenOfLine);
+        $phpcsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . ' */');
+        $phpcsFile->fixer->addNewlineBefore($firstTokenOfLine);
+        $phpcsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . ' * @var ' . $defaultValueType);
+        $phpcsFile->fixer->addNewlineBefore($firstTokenOfLine);
+        $phpcsFile->fixer->addContentBefore($firstTokenOfLine, $indentation . '/**');
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 }

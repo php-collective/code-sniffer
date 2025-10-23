@@ -36,33 +36,33 @@ class DocBlockReturnNullSniff implements Sniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // Don't mess with closures
-        $prevIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $stackPointer - 1, null, true);
+        $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPointer - 1, null, true);
         if (!$this->isGivenKind(Tokens::$methodPrefixes, $tokens[$prevIndex])) {
             return;
         }
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
         }
 
-        $returnTypes = $this->extractReturnTypes($phpCsFile, $stackPointer);
+        $returnTypes = $this->extractReturnTypes($phpcsFile, $stackPointer);
         if (!$returnTypes) {
             return;
         }
         if (count($returnTypes) === 2 && in_array('', $returnTypes, true) && in_array('null', $returnTypes, true)) {
-            $phpCsFile->addError('Void mixed with null is discouraged, use only `null` instead', $docBlockEndIndex, 'NullVoidMixed');
+            $phpcsFile->addError('Void mixed with null is discouraged, use only `null` instead', $docBlockEndIndex, 'NullVoidMixed');
 
             return;
         }
         if (count($returnTypes) > 1 && in_array('', $returnTypes, true)) {
-            $phpCsFile->addWarning('Void mixed with other return types is discouraged, use `null` instead', $docBlockEndIndex, 'InvalidVoid');
+            $phpcsFile->addWarning('Void mixed with other return types is discouraged, use `null` instead', $docBlockEndIndex, 'InvalidVoid');
 
             return;
         }
@@ -95,12 +95,12 @@ class DocBlockReturnNullSniff implements Sniff
             }
             $parts = $this->valueNodeParts($valueNode);
 
-            $this->fixParts($phpCsFile, $classNameIndex, $returnTypes, $parts, $valueNode->description);
+            $this->fixParts($phpcsFile, $classNameIndex, $returnTypes, $parts, $valueNode->description);
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $classNameIndex
      * @param array<string> $returnTypes
      * @param array<string> $parts
@@ -108,7 +108,7 @@ class DocBlockReturnNullSniff implements Sniff
      *
      * @return void
      */
-    protected function fixParts(File $phpCsFile, int $classNameIndex, array $returnTypes, array $parts, string $appendix): void
+    protected function fixParts(File $phpcsFile, int $classNameIndex, array $returnTypes, array $parts, string $appendix): void
     {
         if (!in_array('null', $returnTypes, true)) {
             // For now only "return null", later we can add all values to comparison
@@ -123,24 +123,24 @@ class DocBlockReturnNullSniff implements Sniff
 
         $newContent = implode('|', $newParts);
 
-        $fix = $phpCsFile->addFixableError('Missing nullable type in `' . implode('|', $parts) . '` return annotation, expected `' . $newContent . '`', $classNameIndex, 'MissingNullable');
+        $fix = $phpcsFile->addFixableError('Missing nullable type in `' . implode('|', $parts) . '` return annotation, expected `' . $newContent . '`', $classNameIndex, 'MissingNullable');
         if ($fix) {
             if ($appendix !== '') {
                 $appendix = ' ' . $appendix;
             }
-            $phpCsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
+            $phpcsFile->fixer->replaceToken($classNameIndex, $newContent . $appendix);
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPointer
      *
      * @return int|null Stackpointer value of docblock end tag, or null if cannot be found
      */
-    protected function findRelatedDocBlock(File $phpCsFile, int $stackPointer): ?int
+    protected function findRelatedDocBlock(File $phpcsFile, int $stackPointer): ?int
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $line = $tokens[$stackPointer]['line'];
         $beginningOfLine = $stackPointer;
@@ -158,14 +158,14 @@ class DocBlockReturnNullSniff implements Sniff
     /**
      * For right now we only try to detect basic types.
      *
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $index
      *
      * @return array<string>
      */
-    protected function extractReturnTypes(File $phpCsFile, int $index): array
+    protected function extractReturnTypes(File $phpcsFile, int $index): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         if (empty($tokens[$index]['scope_opener']) || empty($tokens[$index]['scope_closer'])) {
             return [];
@@ -192,11 +192,11 @@ class DocBlockReturnNullSniff implements Sniff
                 continue;
             }
 
-            $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $i + 1, null, true);
+            $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, null, true);
             if (!$nextIndex) {
                 continue;
             }
-            $lastIndex = $phpCsFile->findNext(T_SEMICOLON, $nextIndex);
+            $lastIndex = $phpcsFile->findNext(T_SEMICOLON, $nextIndex);
 
             $type = '';
             for ($j = $nextIndex; $j < $lastIndex; $j++) {

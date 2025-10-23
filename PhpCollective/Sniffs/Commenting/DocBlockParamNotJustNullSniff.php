@@ -36,17 +36,17 @@ class DocBlockParamNotJustNullSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
         }
 
-        $methodSignature = $this->getMethodSignature($phpCsFile, $stackPointer);
+        $methodSignature = $this->getMethodSignature($phpcsFile, $stackPointer);
         if (!$methodSignature) {
             return;
         }
@@ -86,7 +86,7 @@ class DocBlockParamNotJustNullSniff extends AbstractSniff
 
             $content = trim(substr($content, 0, $varIndex));
             if (!$content) {
-                $phpCsFile->addError('Param type is empty', $classNameIndex, 'EmptyType');
+                $phpcsFile->addError('Param type is empty', $classNameIndex, 'EmptyType');
 
                 continue;
             }
@@ -95,7 +95,7 @@ class DocBlockParamNotJustNullSniff extends AbstractSniff
                 continue;
             }
 
-            $phpCsFile->addError('"null" as only param type does not make sense', $classNameIndex, 'NotJustNull');
+            $phpcsFile->addError('"null" as only param type does not make sense', $classNameIndex, 'NotJustNull');
         }
     }
 }

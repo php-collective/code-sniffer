@@ -29,31 +29,31 @@ class InlineDocBlockSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
-        $startIndex = $phpCsFile->findNext(T_OPEN_CURLY_BRACKET, $stackPointer + 1);
+        $tokens = $phpcsFile->getTokens();
+        $startIndex = $phpcsFile->findNext(T_OPEN_CURLY_BRACKET, $stackPointer + 1);
         if (!$startIndex || empty($tokens[$startIndex]['bracket_closer'])) {
             return;
         }
 
         $endIndex = $tokens[$startIndex]['bracket_closer'];
 
-        $this->fixDocCommentOpenTags($phpCsFile, $startIndex, $endIndex);
+        $this->fixDocCommentOpenTags($phpcsFile, $startIndex, $endIndex);
 
-        $this->checkInlineComments($phpCsFile, $startIndex, $endIndex);
+        $this->checkInlineComments($phpcsFile, $startIndex, $endIndex);
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $startIndex
      * @param int $endIndex
      *
      * @return void
      */
-    protected function fixDocCommentOpenTags(File $phpCsFile, int $startIndex, int $endIndex): void
+    protected function fixDocCommentOpenTags(File $phpcsFile, int $startIndex, int $endIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         for ($i = $startIndex + 1; $i < $endIndex; $i++) {
             if ($tokens[$i]['code'] !== T_COMMENT) {
@@ -64,30 +64,30 @@ class InlineDocBlockSniff extends AbstractSniff
                 continue;
             }
 
-            $fix = $phpCsFile->addFixableError('Inline Doc Block comment should be using `/** ... */`', $i, 'InlineDocBlock');
+            $fix = $phpcsFile->addFixableError('Inline Doc Block comment should be using `/** ... */`', $i, 'InlineDocBlock');
             if ($fix) {
-                $phpCsFile->fixer->beginChangeset();
+                $phpcsFile->fixer->beginChangeset();
 
                 $comment = $tokens[$i]['content'];
                 $comment = str_replace('/*', '/**', $comment);
 
-                $phpCsFile->fixer->replaceToken($i, $comment);
+                $phpcsFile->fixer->replaceToken($i, $comment);
 
-                $phpCsFile->fixer->endChangeset();
+                $phpcsFile->fixer->endChangeset();
             }
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $startIndex
      * @param int $endIndex
      *
      * @return void
      */
-    protected function checkInlineComments(File $phpCsFile, int $startIndex, int $endIndex): void
+    protected function checkInlineComments(File $phpcsFile, int $startIndex, int $endIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         for ($i = $startIndex + 1; $i < $endIndex; $i++) {
             if ($tokens[$i]['code'] !== T_DOC_COMMENT_OPEN_TAG) {
@@ -96,7 +96,7 @@ class InlineDocBlockSniff extends AbstractSniff
 
             $commentEndTagIndex = $tokens[$i]['comment_closer'];
 
-            if ($this->isNotInline($phpCsFile, $commentEndTagIndex)) {
+            if ($this->isNotInline($phpcsFile, $commentEndTagIndex)) {
                 continue;
             }
 
@@ -108,7 +108,7 @@ class InlineDocBlockSniff extends AbstractSniff
             $typeTag = $this->findTagIndex($tokens, $i, $commentEndTagIndex, T_DOC_COMMENT_TAG);
             $contentTag = $typeTag ? $this->findTagIndex($tokens, $typeTag, $commentEndTagIndex, T_DOC_COMMENT_STRING) : null;
             if ($typeTag === null || $contentTag === null && !$this->isAllowedTag($tokens[$typeTag]['content'])) {
-                $phpCsFile->addError('Invalid Inline Doc Block', $i, 'DocBlockInvalid');
+                $phpcsFile->addError('Invalid Inline Doc Block', $i, 'DocBlockInvalid');
 
                 continue;
             }
@@ -118,18 +118,18 @@ class InlineDocBlockSniff extends AbstractSniff
                 continue;
             }
 
-            $errors = $this->findErrors($phpCsFile, $contentTag, $isSingleLine);
+            $errors = $this->findErrors($phpcsFile, $contentTag, $isSingleLine);
 
             if (!$errors) {
                 continue;
             }
 
-            $fix = $phpCsFile->addFixableError('Invalid Inline Doc Block content: ' . implode(', ', $errors), $i, 'DocBlockContentInvalid');
+            $fix = $phpcsFile->addFixableError('Invalid Inline Doc Block content: ' . implode(', ', $errors), $i, 'DocBlockContentInvalid');
             if (!$fix) {
                 continue;
             }
 
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
             $comment = $tokens[$contentTag]['content'];
 
@@ -141,9 +141,9 @@ class InlineDocBlockSniff extends AbstractSniff
                 $comment = preg_replace('|^(.+?)\s+(.+?)\s*$|', '\2 \1 ', $comment);
             }
 
-            $phpCsFile->fixer->replaceToken($contentTag, $comment);
+            $phpcsFile->fixer->replaceToken($contentTag, $comment);
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
         }
     }
 
@@ -181,15 +181,15 @@ class InlineDocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $contentIndex
      * @param bool $isSingleLine
      *
      * @return array<string>
      */
-    protected function findErrors(File $phpCsFile, int $contentIndex, bool $isSingleLine): array
+    protected function findErrors(File $phpcsFile, int $contentIndex, bool $isSingleLine): array
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         $comment = $tokens[$contentIndex]['content'];
 
@@ -200,11 +200,11 @@ class InlineDocBlockSniff extends AbstractSniff
 
         preg_match('#^(.+?)(\s+)(.+?)\s*$#', $comment, $contentMatches);
         if (!$contentMatches || empty($contentMatches[1]) || empty($contentMatches[2]) || empty($contentMatches[3])) {
-            if ($this->hasReturnAsFollowingToken($phpCsFile, $contentIndex)) {
+            if ($this->hasReturnAsFollowingToken($phpcsFile, $contentIndex)) {
                 return [];
             }
 
-            $phpCsFile->addError('Invalid Inline Doc Block content, expected `{Type} ${var}` style', $contentIndex, 'ContentInvalid');
+            $phpcsFile->addError('Invalid Inline Doc Block content, expected `{Type} ${var}` style', $contentIndex, 'ContentInvalid');
 
             return [];
         }
@@ -223,34 +223,34 @@ class InlineDocBlockSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $contentIndex
      *
      * @return bool
      */
-    protected function hasReturnAsFollowingToken(File $phpCsFile, int $contentIndex): bool
+    protected function hasReturnAsFollowingToken(File $phpcsFile, int $contentIndex): bool
     {
-        $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $contentIndex + 1, null, true);
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $contentIndex + 1, null, true);
         if (!$nextIndex) {
             return false;
         }
 
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         return $tokens[$nextIndex]['code'] === T_RETURN;
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $commentEndTagIndex
      *
      * @return bool
      */
-    protected function isNotInline(File $phpCsFile, int $commentEndTagIndex): bool
+    protected function isNotInline(File $phpcsFile, int $commentEndTagIndex): bool
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $nextIndex = $phpCsFile->findNext(Tokens::$emptyTokens, $commentEndTagIndex + 1, null, true);
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $commentEndTagIndex + 1, null, true);
         if ($nextIndex && $tokens[$nextIndex]['code'] === T_STATIC) {
             return true;
         }

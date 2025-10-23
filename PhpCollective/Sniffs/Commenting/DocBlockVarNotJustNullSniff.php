@@ -32,20 +32,20 @@ class DocBlockVarNotJustNullSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $previousIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $stackPointer - 1, null, true);
+        $previousIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPointer - 1, null, true);
         if ($previousIndex && $tokens[$previousIndex]['code'] === T_STATIC) {
-            $previousIndex = $phpCsFile->findPrevious(Tokens::$emptyTokens, $previousIndex - 1, null, true);
+            $previousIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $previousIndex - 1, null, true);
         }
 
         if (!$this->isGivenKind([T_PUBLIC, T_PROTECTED, T_PRIVATE], $tokens[$previousIndex])) {
             return;
         }
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
@@ -88,6 +88,6 @@ class DocBlockVarNotJustNullSniff extends AbstractSniff
             return;
         }
 
-        $phpCsFile->addError('Doc Block type `' . $content . '` for annotation @var not enough.', $stackPointer, 'VarTypeIncorrect');
+        $phpcsFile->addError('Doc Block type `' . $content . '` for annotation @var not enough.', $stackPointer, 'VarTypeIncorrect');
     }
 }

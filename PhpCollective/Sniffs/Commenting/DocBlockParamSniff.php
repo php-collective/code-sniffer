@@ -36,11 +36,11 @@ class DocBlockParamSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
@@ -48,13 +48,13 @@ class DocBlockParamSniff extends AbstractSniff
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        if ($this->hasInheritDoc($phpCsFile, $docBlockStartIndex, $docBlockEndIndex)) {
+        if ($this->hasInheritDoc($phpcsFile, $docBlockStartIndex, $docBlockEndIndex)) {
             return;
         }
 
-        $methodSignature = $this->getMethodSignature($phpCsFile, $stackPointer);
+        $methodSignature = $this->getMethodSignature($phpcsFile, $stackPointer);
         if (!$methodSignature) {
-            $this->assertNoParams($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
+            $this->assertNoParams($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
 
             return;
         }
@@ -72,7 +72,7 @@ class DocBlockParamSniff extends AbstractSniff
             $classNameIndex = $i + 2;
 
             if ($tokens[$classNameIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
-                $phpCsFile->addError('Missing type in param doc block', $i, 'MissingType');
+                $phpcsFile->addError('Missing type in param doc block', $i, 'MissingType');
                 $hasMissingTypes = true;
 
                 continue;
@@ -82,7 +82,7 @@ class DocBlockParamSniff extends AbstractSniff
 
             // Check if the content starts with $ (missing type)
             if (str_starts_with($content, '$')) {
-                $phpCsFile->addError('Missing type in param doc block', $i, 'MissingType');
+                $phpcsFile->addError('Missing type in param doc block', $i, 'MissingType');
                 $hasMissingTypes = true;
 
                 continue;
@@ -116,18 +116,18 @@ class DocBlockParamSniff extends AbstractSniff
 
         if (count($docBlockParams) !== count($methodSignature)) {
             // Check if we can fix by adding missing params (when all method params are typed and no missing types in existing params)
-            if (!$hasMissingTypes && count($docBlockParams) < count($methodSignature) && $this->canAddMissingParams($phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $docBlockParams, $methodSignature)) {
+            if (!$hasMissingTypes && count($docBlockParams) < count($methodSignature) && $this->canAddMissingParams($phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $docBlockParams, $methodSignature)) {
                 return;
             }
 
             // Check if we have extra params that can be removed
             if (count($docBlockParams) > count($methodSignature)) {
-                $this->handleExtraParams($phpCsFile, $docBlockStartIndex, $docBlockEndIndex, $docBlockParams, $methodSignature);
+                $this->handleExtraParams($phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $docBlockParams, $methodSignature);
 
                 return;
             }
 
-            $phpCsFile->addError('Doc Block params do not match method signature', $stackPointer, 'SignatureMismatch');
+            $phpcsFile->addError('Doc Block params do not match method signature', $stackPointer, 'SignatureMismatch');
 
             return;
         }
@@ -147,20 +147,20 @@ class DocBlockParamSniff extends AbstractSniff
 
             $error = 'Doc Block param variable `' . $docBlockParam['variable'] . '` should be `' . $variableName . '`';
             // For now just report (buggy yet)
-            $phpCsFile->addError($error, $docBlockParam['index'], 'VariableWrong');
+            $phpcsFile->addError($error, $docBlockParam['index'], 'VariableWrong');
         }
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return void
      */
-    protected function assertNoParams(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
+    protected function assertNoParams(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
             if ($tokens[$i]['type'] !== 'T_DOC_COMMENT_TAG') {
@@ -170,10 +170,10 @@ class DocBlockParamSniff extends AbstractSniff
                 continue;
             }
 
-            $fix = $phpCsFile->addFixableError('Doc Block param does not match method signature and should be removed', $i, 'ExtraParam');
+            $fix = $phpcsFile->addFixableError('Doc Block param does not match method signature and should be removed', $i, 'ExtraParam');
 
             if ($fix === true) {
-                $this->removeParamLine($phpCsFile, $i);
+                $this->removeParamLine($phpcsFile, $i);
             }
         }
     }
@@ -198,7 +198,7 @@ class DocBlockParamSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      * @param array<array<string, mixed>> $docBlockParams
@@ -206,9 +206,9 @@ class DocBlockParamSniff extends AbstractSniff
      *
      * @return bool
      */
-    protected function canAddMissingParams(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $docBlockParams, array $methodSignature): bool
+    protected function canAddMissingParams(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $docBlockParams, array $methodSignature): bool
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // Check if all params have types so we can add them
         foreach ($methodSignature as $param) {
@@ -235,10 +235,10 @@ class DocBlockParamSniff extends AbstractSniff
             }
         }
 
-        $fix = $phpCsFile->addFixableError('Doc Block params do not match method signature', $docBlockStartIndex + 1, 'SignatureMismatch');
+        $fix = $phpcsFile->addFixableError('Doc Block params do not match method signature', $docBlockStartIndex + 1, 'SignatureMismatch');
 
         if ($fix === true) {
-            $phpCsFile->fixer->beginChangeset();
+            $phpcsFile->fixer->beginChangeset();
 
             // Build list of existing param variables
             $existingVars = [];
@@ -250,30 +250,30 @@ class DocBlockParamSniff extends AbstractSniff
             foreach ($methodSignature as $methodParam) {
                 $variable = $tokens[$methodParam['variableIndex']]['content'];
                 if (!in_array($variable, $existingVars, true)) {
-                    $indent = $this->getIndentForParam($phpCsFile, $docBlockStartIndex, $docBlockEndIndex);
+                    $indent = $this->getIndentForParam($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
                     $paramLine = "\n" . $indent . '* @param ' . $methodParam['typehintFull'] . ' ' . $variable;
 
-                    $phpCsFile->fixer->addContentBefore($insertPosition, $paramLine);
+                    $phpcsFile->fixer->addContentBefore($insertPosition, $paramLine);
                 }
             }
 
-            $phpCsFile->fixer->endChangeset();
+            $phpcsFile->fixer->endChangeset();
         }
 
         return true;
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $paramTagIndex
      *
      * @return void
      */
-    protected function removeParamLine(File $phpCsFile, int $paramTagIndex): void
+    protected function removeParamLine(File $phpcsFile, int $paramTagIndex): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $phpCsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->beginChangeset();
 
         // Find the start of the line
         $lineStart = $paramTagIndex;
@@ -296,22 +296,22 @@ class DocBlockParamSniff extends AbstractSniff
 
         // Remove the entire line
         for ($i = $lineStart; $i <= $lineEnd; $i++) {
-            $phpCsFile->fixer->replaceToken($i, '');
+            $phpcsFile->fixer->replaceToken($i, '');
         }
 
-        $phpCsFile->fixer->endChangeset();
+        $phpcsFile->fixer->endChangeset();
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      *
      * @return string
      */
-    protected function getIndentForParam(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex): string
+    protected function getIndentForParam(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex): string
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // Find an existing @param or use the doc block start
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
@@ -333,7 +333,7 @@ class DocBlockParamSniff extends AbstractSniff
     }
 
     /**
-     * @param \PHP_CodeSniffer\Files\File $phpCsFile
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      * @param array<array<string, mixed>> $docBlockParams
@@ -341,9 +341,9 @@ class DocBlockParamSniff extends AbstractSniff
      *
      * @return void
      */
-    protected function handleExtraParams(File $phpCsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $docBlockParams, array $methodSignature): void
+    protected function handleExtraParams(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $docBlockParams, array $methodSignature): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // Build list of expected param variables
         $expectedVars = [];
@@ -380,17 +380,17 @@ class DocBlockParamSniff extends AbstractSniff
 
             // If this param is not in the expected list, mark for removal
             if ($variable && !in_array($variable, $expectedVars, true)) {
-                $fix = $phpCsFile->addFixableError('Doc Block param does not match method signature and should be removed', $i, 'ExtraParam');
+                $fix = $phpcsFile->addFixableError('Doc Block param does not match method signature and should be removed', $i, 'ExtraParam');
 
                 if ($fix === true) {
                     $hasFixableError = true;
-                    $this->removeParamLine($phpCsFile, $i);
+                    $this->removeParamLine($phpcsFile, $i);
                 }
             }
         }
 
         if (!$hasFixableError) {
-            $phpCsFile->addError('Doc Block params do not match method signature', $docBlockStartIndex + 1, 'SignatureMismatch');
+            $phpcsFile->addError('Doc Block params do not match method signature', $docBlockStartIndex + 1, 'SignatureMismatch');
         }
     }
 }

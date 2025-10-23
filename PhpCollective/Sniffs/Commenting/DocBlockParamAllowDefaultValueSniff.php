@@ -39,17 +39,17 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
     /**
      * @inheritDoc
      */
-    public function process(File $phpCsFile, $stackPointer): void
+    public function process(File $phpcsFile, $stackPointer): void
     {
-        $tokens = $phpCsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpCsFile, $stackPointer);
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
         }
 
-        $methodSignature = $this->getMethodSignature($phpCsFile, $stackPointer);
+        $methodSignature = $this->getMethodSignature($phpcsFile, $stackPointer);
         if (!$methodSignature) {
             return;
         }
@@ -108,7 +108,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 ) {
                     $parts[] = $type;
                     $error = 'Possible doc block error: `' . $content . '` seems to be missing type `' . $type . '`.';
-                    $fix = $phpCsFile->addFixableError($error, $classNameIndex, 'Typehint');
+                    $fix = $phpcsFile->addFixableError($error, $classNameIndex, 'Typehint');
                     if ($fix) {
                         $newComment = trim(sprintf(
                             '%s %s%s %s',
@@ -117,7 +117,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                             $valueNode->parameterName,
                             $valueNode->description,
                         ));
-                        $phpCsFile->fixer->replaceToken($classNameIndex, $newComment);
+                        $phpcsFile->fixer->replaceToken($classNameIndex, $newComment);
                     }
                 }
             }
@@ -132,7 +132,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 ) {
                     $parts[] = $type;
                     $error = 'Possible doc block error: `' . $content . '` seems to be missing type `' . $type . '`.';
-                    $fix = $phpCsFile->addFixableError($error, $classNameIndex, 'Default');
+                    $fix = $phpcsFile->addFixableError($error, $classNameIndex, 'Default');
                     if ($fix) {
                         $newComment = trim(sprintf(
                             '%s %s%s %s',
@@ -141,7 +141,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                             $valueNode->parameterName,
                             $valueNode->description,
                         ));
-                        $phpCsFile->fixer->replaceToken($classNameIndex, $newComment);
+                        $phpcsFile->fixer->replaceToken($classNameIndex, $newComment);
                     }
                 }
             }
@@ -151,7 +151,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 if (!in_array($type, $parts, true) && !$this->hasShorthand($parts)) {
                     $parts[] = $type;
                     $error = 'Doc block error: `' . $content . '` seems to be missing type `' . $type . '`.';
-                    $fix = $phpCsFile->addFixableError($error, $classNameIndex, 'Nullable');
+                    $fix = $phpcsFile->addFixableError($error, $classNameIndex, 'Nullable');
                     if ($fix) {
                         $newComment = trim(sprintf(
                             '%s %s%s %s',
@@ -160,7 +160,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                             $valueNode->parameterName,
                             $valueNode->description,
                         ));
-                        $phpCsFile->fixer->replaceToken($classNameIndex, $newComment);
+                        $phpcsFile->fixer->replaceToken($classNameIndex, $newComment);
                     }
                 }
             }
@@ -171,7 +171,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 }
 
                 $error = 'Doc block error: `' . $content . '` seems to be having a wrong `null` type hinted, argument is not nullable though.';
-                $fix = $phpCsFile->addFixableError($error, $classNameIndex, 'WrongNullable');
+                $fix = $phpcsFile->addFixableError($error, $classNameIndex, 'WrongNullable');
                 if ($fix) {
                     foreach ($parts as $k => $v) {
                         if ($v === 'null') {
@@ -185,7 +185,7 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                         $valueNode->parameterName,
                         $valueNode->description,
                     ));
-                    $phpCsFile->fixer->replaceToken($classNameIndex, $newComment);
+                    $phpcsFile->fixer->replaceToken($classNameIndex, $newComment);
                 }
             }
         }
