@@ -101,4 +101,11 @@ class FixMe
         // Another comment
             ->limit(10);
     }
+
+    public function nullCoalesceShouldNotBeFlagged($params): ?int
+    {
+        return $this->AuthUser->get('User.home_id')
+            ?? $params['home_id']
+            ?? null;
+    }
 }

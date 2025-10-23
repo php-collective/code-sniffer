@@ -67,60 +67,89 @@ class ConsistentIndentSniff extends AbstractSniff
         // Get the expected indentation based on scope
         $expectedIndent = $this->getExpectedIndent($tokens[$nextToken]);
 
-        // Skip if we're inside a closure - PHPCS doesn't track closure conditions properly
+        // Skip anything that could be intentional (most things)
         if ($this->isInsideClosure($phpcsFile, $nextToken, $tokens)) {
             return;
         }
-
-        // Skip if we're inside a complex array structure
         if ($this->isInsideArray($phpcsFile, $nextToken, $tokens)) {
             return;
         }
-
-        // Skip if we're inside a switch/case block (they have special indentation rules per PER)
         if ($this->isInsideSwitchCase($phpcsFile, $nextToken, $tokens)) {
             return;
         }
-
-        // Skip standalone comments (often intentionally positioned between method chains)
         if ($tokens[$nextToken]['code'] === T_COMMENT || $tokens[$nextToken]['code'] === T_DOC_COMMENT_OPEN_TAG) {
             return;
         }
+        if ($this->startsWithContinuationOperator($nextToken, $tokens)) {
+            return;
+        }
 
-        // Check if line is over-indented (more than expected for its scope)
+        // Find previous content line
+        $prevLine = $this->findPreviousContentLine($phpcsFile, $stackPtr, $tokens);
+        if ($prevLine === null) {
+            return;
+        }
+
+        // Only flag if:
+        // 1. Previous line is a closing brace or semicolon (not in middle of multi-line construct)
+        // 2. Current line is over-indented by MORE than expected
+        // 3. Previous line doesn't indicate continuation
+        if (!$this->isPreviousLineComplete($prevLine, $tokens)) {
+            return; // Previous line suggests continuation
+        }
+
+        if ($this->isValidContinuation($prevLine, $tokens)) {
+            return; // Previous line ends with continuation token
+        }
+
+        // Skip if we're in a multi-line condition or complex structure
+        if ($this->isInMultiLineConstruct($phpcsFile, $nextToken, $tokens)) {
+            return;
+        }
+
+        // Additional safety: if this looks like it could be in a case block, skip it
+        // Case blocks don't show up in conditions, so expected might be wrong
+        if ($this->couldBeInCaseBlock($phpcsFile, $stackPtr, $tokens)) {
+            return;
+        }
+
+        // Skip return/break/continue after closing brace ONLY if inside a switch (case blocks have special rules)
+        if (in_array($tokens[$nextToken]['code'], [T_RETURN, T_BREAK, T_CONTINUE], true)) {
+            if ($tokens[$prevLine]['code'] === T_CLOSE_CURLY_BRACKET) {
+                // Check if we're actually inside a switch statement
+                $conditions = $tokens[$nextToken]['conditions'] ?? [];
+                foreach ($conditions as $condPtr => $condCode) {
+                    if ($condCode === T_SWITCH) {
+                        return; // Inside switch - too risky to flag
+                    }
+                }
+            }
+        }
+
+        // Only flag if significantly over-indented (more than expected)
         if ($currentIndent > $expectedIndent) {
-            // Check if this line starts with a continuation operator
-            if ($this->startsWithContinuationOperator($nextToken, $tokens)) {
-                return; // Valid continuation line
+            // Detect indentation type
+            $indentChar = $this->getIndentationCharacter($tokens[$stackPtr]['content']);
+            $isTab = ($indentChar === "\t");
+
+            if ($isTab) {
+                $error = 'Line indented incorrectly; expected %d tabs, found %d tabs';
+                $data = [$expectedIndent, $currentIndent];
+            } else {
+                $error = 'Line indented incorrectly; expected %d spaces, found %d spaces';
+                $data = [$expectedIndent * 4, $currentIndent * 4];
             }
 
-            $prevLine = $this->findPreviousContentLine($phpcsFile, $stackPtr, $tokens);
+            $fix = $phpcsFile->addFixableError($error, $stackPtr, 'Incorrect', $data);
 
-            // Check if this is a valid continuation line or incorrectly indented
-            if ($prevLine !== null && !$this->isValidContinuation($prevLine, $tokens)) {
-                // Detect indentation type (tab or space)
-                $indentChar = $this->getIndentationCharacter($tokens[$stackPtr]['content']);
-                $isTab = ($indentChar === "\t");
-
+            if ($fix) {
+                $phpcsFile->fixer->beginChangeset();
                 if ($isTab) {
-                    $error = 'Line indented incorrectly; expected %d tabs, found %d tabs';
-                    $data = [$expectedIndent, $currentIndent];
+                    $phpcsFile->fixer->replaceToken($stackPtr, str_repeat("\t", $expectedIndent));
                 } else {
-                    $error = 'Line indented incorrectly; expected %d spaces, found %d spaces';
-                    $data = [$expectedIndent * 4, $currentIndent * 4];
+                    $phpcsFile->fixer->replaceToken($stackPtr, str_repeat('    ', $expectedIndent));
                 }
-
-                $fix = $phpcsFile->addFixableError($error, $stackPtr, 'Incorrect', $data);
-
-                if ($fix) {
-                    $phpcsFile->fixer->beginChangeset();
-                    if ($isTab) {
-                        $phpcsFile->fixer->replaceToken($stackPtr, str_repeat("\t", $expectedIndent));
-                    } else {
-                        $phpcsFile->fixer->replaceToken($stackPtr, str_repeat('    ', $expectedIndent));
-                    }
-                    $phpcsFile->fixer->endChangeset();
-                }
+                $phpcsFile->fixer->endChangeset();
             }
         }
     }
@@ -213,6 +242,7 @@ class ConsistentIndentSniff extends AbstractSniff
             T_DIVIDE,
             T_INLINE_THEN,
             T_INLINE_ELSE,
+            T_COALESCE,
         ];
 
         return in_array($tokens[$nextToken]['code'], $continuationStarters, true);
@@ -407,6 +437,101 @@ class ConsistentIndentSniff extends AbstractSniff
 
             // Stop if we've gone too far back
             if ($stackPtr - $i > 500) {
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the previous line is "complete" (ends with statement terminator or closing brace).
+     * If not, the next line might be a continuation.
+     *
+     * @param int $prevToken
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return bool
+     */
+    protected function isPreviousLineComplete(int $prevToken, array $tokens): bool
+    {
+        $prevCode = $tokens[$prevToken]['code'];
+
+        // Line is complete if it ends with:
+        $completeTokens = [
+            T_SEMICOLON,
+            T_CLOSE_CURLY_BRACKET,
+            T_CLOSE_PARENTHESIS, // Could be end of condition
+            T_COLON, // Could be end of case label
+        ];
+
+        return in_array($prevCode, $completeTokens, true);
+    }
+
+    /**
+     * Check if we're in a multi-line construct (condition, array, etc.).
+     * Look for unmatched opening parentheses/brackets.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return bool
+     */
+    protected function isInMultiLineConstruct(File $phpcsFile, int $stackPtr, array $tokens): bool
+    {
+        // Check if we have unmatched parentheses on previous lines
+        $currentLine = $tokens[$stackPtr]['line'];
+        $openParens = 0;
+        $openBrackets = 0;
+
+        // Look backward on the same statement to check for unmatched parens/brackets
+        for ($i = $stackPtr - 1; $i >= 0; $i--) {
+            // Stop at statement boundaries
+            if ($tokens[$i]['code'] === T_SEMICOLON || $tokens[$i]['code'] === T_OPEN_CURLY_BRACKET) {
+                break;
+            }
+
+            // Count parentheses and brackets
+            if ($tokens[$i]['code'] === T_OPEN_PARENTHESIS) {
+                $openParens++;
+            } elseif ($tokens[$i]['code'] === T_CLOSE_PARENTHESIS) {
+                $openParens--;
+            } elseif ($tokens[$i]['code'] === T_OPEN_SQUARE_BRACKET || $tokens[$i]['code'] === T_OPEN_SHORT_ARRAY) {
+                $openBrackets++;
+            } elseif ($tokens[$i]['code'] === T_CLOSE_SQUARE_BRACKET) {
+                $openBrackets--;
+            }
+
+            // Stop searching after reasonable distance
+            if ($stackPtr - $i > 200) {
+                break;
+            }
+        }
+
+        // If we have unmatched opening parens/brackets, we're in a multi-line construct
+        return $openParens > 0 || $openBrackets > 0;
+    }
+
+    /**
+     * Check if this could be in a case block by looking for case/default keywords nearby.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return bool
+     */
+    protected function couldBeInCaseBlock(File $phpcsFile, int $stackPtr, array $tokens): bool
+    {
+        // Look backward for case/default keywords (not too far)
+        for ($i = $stackPtr - 1; $i >= max(0, $stackPtr - 100); $i--) {
+            if ($tokens[$i]['code'] === T_CASE || $tokens[$i]['code'] === T_DEFAULT) {
+                // Found a case/default, likely in a case block
+                return true;
+            }
+            // If we hit another control structure, stop
+            if ($tokens[$i]['code'] === T_IF || $tokens[$i]['code'] === T_WHILE || $tokens[$i]['code'] === T_FOR) {
                 break;
             }
         }
