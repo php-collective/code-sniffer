@@ -70,13 +70,14 @@ class AttributesSniff implements Sniff
         if (isset($useStatements[$firstPart])) {
             // Found a use statement, construct the full name
             $useStatement = $useStatements[$firstPart];
+            $fullName = (string)$useStatement['fullName'];
             if (str_contains($attributeName, '\\')) {
                 // Replace first part with full name (e.g., Foo\Bar\Baz -> \Full\Namespace\Foo\Bar\Baz)
                 $parts = explode('\\', $attributeName);
                 array_shift($parts); // Remove first part
-                $fullyQualifiedName = '\\' . $useStatement['fullName'] . (count($parts) > 0 ? '\\' . implode('\\', $parts) : '');
+                $fullyQualifiedName = '\\' . $fullName . (count($parts) > 0 ? '\\' . implode('\\', $parts) : '');
             } else {
-                $fullyQualifiedName = '\\' . $useStatement['fullName'];
+                $fullyQualifiedName = '\\' . $fullName;
             }
         }
 
