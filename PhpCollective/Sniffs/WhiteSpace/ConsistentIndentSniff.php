@@ -525,7 +525,8 @@ class ConsistentIndentSniff extends AbstractSniff
     protected function couldBeInCaseBlock(File $phpcsFile, int $stackPtr, array $tokens): bool
     {
         // Look backward for case/default keywords (not too far)
-        for ($i = $stackPtr - 1; $i >= max(0, $stackPtr - 100); $i--) {
+        // Using 500 to match isInsideSwitchCase() limit, as case blocks can be large
+        for ($i = $stackPtr - 1; $i >= max(0, $stackPtr - 500); $i--) {
             if ($tokens[$i]['code'] === T_CASE || $tokens[$i]['code'] === T_DEFAULT) {
                 // Found a case/default, likely in a case block
                 return true;
