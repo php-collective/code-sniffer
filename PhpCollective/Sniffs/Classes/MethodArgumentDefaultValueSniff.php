@@ -88,12 +88,17 @@ class MethodArgumentDefaultValueSniff extends AbstractSniff
             $token = $tokens[$i];
 
             if ($this->isGivenKind(T_EQUAL, $token)) {
-                $i = $phpcsFile->findPrevious(T_VARIABLE, $i - 1) ?: null;
-                if (!$i) {
+                $result = $phpcsFile->findPrevious(T_VARIABLE, $i - 1);
+                if ($result === false) {
                     continue;
                 }
+                $i = $result;
 
-                $i = $phpcsFile->findPrevious(Tokens::$emptyTokens, $i, $startIndex - 1, true) ?: null;
+                $result = $phpcsFile->findPrevious(Tokens::$emptyTokens, $i, $startIndex - 1, true);
+                if ($result === false) {
+                    break;
+                }
+                $i = $result;
 
                 continue;
             }

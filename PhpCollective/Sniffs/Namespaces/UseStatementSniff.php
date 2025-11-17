@@ -1044,6 +1044,9 @@ class UseStatementSniff implements Sniff
             }
 
             $useStatementStartIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $index + 1, null, true);
+            if ($useStatementStartIndex === false) {
+                continue;
+            }
 
             // Ignore function () use ($foo) {}
             if ($tokens[$useStatementStartIndex]['content'] === '(') {
@@ -1052,6 +1055,9 @@ class UseStatementSniff implements Sniff
 
             $semicolonIndex = $phpcsFile->findNext(T_SEMICOLON, $useStatementStartIndex + 1);
             $useStatementEndIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $semicolonIndex - 1, null, true);
+            if ($useStatementEndIndex === false) {
+                continue;
+            }
 
             $statement = '';
             for ($i = $useStatementStartIndex; $i <= $useStatementEndIndex; $i++) {
@@ -1239,7 +1245,7 @@ class UseStatementSniff implements Sniff
         }
 
         $classIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $startIndex + 1, null, true);
-        if (empty($tokens[$classIndex])) {
+        if ($classIndex === false || empty($tokens[$classIndex])) {
             throw new RuntimeException('Should not happen');
         }
 

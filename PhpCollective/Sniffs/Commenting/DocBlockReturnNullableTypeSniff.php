@@ -235,6 +235,9 @@ class DocBlockReturnNullableTypeSniff extends AbstractSniff
 
         $docBlockStartIndex = DocCommentHelper::findDocCommentOpenPointer($phpcsFile, $stackPointer);
         $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
+        if (!$docBlockEndIndex) {
+            return [];
+        }
 
         for ($i = $docBlockEndIndex; $i >= $docBlockStartIndex; $i--) {
             if ($tokens[$i]['content'] !== '@return') {

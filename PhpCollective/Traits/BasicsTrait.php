@@ -54,6 +54,9 @@ trait BasicsTrait
         $namespace = '';
         $namespaceStartIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $namespaceIndex + 1, null, true);
         $namespaceEndIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $endIndex - 1, null, true);
+        if ($namespaceStartIndex === false || $namespaceEndIndex === false) {
+            return [];
+        }
         for ($i = $namespaceStartIndex; $i <= $namespaceEndIndex; $i++) {
             $namespace .= $tokens[$i]['content'];
         }
