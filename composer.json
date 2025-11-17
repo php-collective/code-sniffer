@@ -15,10 +15,6 @@
         {
             "name": "The PHP Collective",
             "homepage": "https://github.com/php-collective"
-        },
-        {
-            "name": "Spryker",
-            "homepage": "https://spryker.com"
         }
     ],
     "require": {
