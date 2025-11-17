@@ -54,9 +54,9 @@
             "sed -i.bak 's/<!--<severity>0<\\/severity>-->/<severity>0<\\/severity>/' PhpCollective/ruleset.xml",
             "rm -f PhpCollective/ruleset.xml.bak"
         ],
-        "cs-check": "vendor/bin/phpcs phpstan analyse",
+        "cs-check": "phpcs --colors --parallel=16",
         "cs-fix": "phpcbf --colors --parallel=16",
-        "test": "phpunit --colors --parallel=16",
+        "test": "phpunit",
         "stan": "phpstan analyze",
         "xml": "tests/xmllint.sh"
     },
