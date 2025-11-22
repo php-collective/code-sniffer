@@ -88,6 +88,27 @@ class DocBlockParamSniff extends AbstractSniff
                 continue;
             }
 
+            // Check if this might be a multi-line type (has unclosed brackets)
+            $openBrackets = substr_count($content, '<') + substr_count($content, '{') + substr_count($content, '(');
+            $closeBrackets = substr_count($content, '>') + substr_count($content, '}') + substr_count($content, ')');
+
+            if ($openBrackets > $closeBrackets) {
+                // Multi-line type annotation - collect across lines
+                $multiLineResult = $this->collectMultiLineType($phpcsFile, $i, $docBlockEndIndex);
+                if ($multiLineResult !== null) {
+                    $docBlockParams[] = [
+                        'index' => $classNameIndex,
+                        'type' => $multiLineResult['type'],
+                        'variable' => $multiLineResult['variable'],
+                        'appendix' => ' ' . $multiLineResult['variable'] . ($multiLineResult['description'] ? ' ' . $multiLineResult['description'] : ''),
+                    ];
+                    // Skip to the end of the multi-line annotation
+                    $i = $multiLineResult['endIndex'];
+
+                    continue;
+                }
+            }
+
             $appendix = '';
             $spacePos = strpos($content, ' ');
             if ($spacePos) {
