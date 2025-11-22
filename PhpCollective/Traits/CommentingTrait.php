@@ -210,6 +210,104 @@ trait CommentingTrait
     }
 
     /**
+     * Collects a potentially multi-line type annotation from a doc block.
+     *
+     * This handles complex types like:
+     * - array<string, array{msgid: string, msgid_plural: string|null}>
+     * - Multi-line array shapes with nested structures
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $tagIndex The index of the @param/@return/@var tag
+     * @param int $docBlockEndIndex The end of the doc block
+     *
+     * @return array{type: string, variable: string, description: string, endIndex: int}|null
+     */
+    protected function collectMultiLineType(File $phpcsFile, int $tagIndex, int $docBlockEndIndex): ?array
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        // Find the first content token after the tag
+        $contentIndex = $tagIndex + 2;
+        if (!isset($tokens[$contentIndex]) || $tokens[$contentIndex]['type'] !== 'T_DOC_COMMENT_STRING') {
+            return null;
+        }
+
+        $collectedContent = '';
+        $bracketDepth = 0;
+        $endIndex = $contentIndex;
+
+        // Collect content across multiple lines if brackets are open
+        for ($i = $contentIndex; $i < $docBlockEndIndex; $i++) {
+            $token = $tokens[$i];
+
+            if ($token['type'] === 'T_DOC_COMMENT_STRING') {
+                $content = $token['content'];
+                $collectedContent .= $content;
+                $endIndex = $i;
+
+                // Count bracket depth
+                $bracketDepth += substr_count($content, '<') + substr_count($content, '{') + substr_count($content, '(');
+                $bracketDepth -= substr_count($content, '>') + substr_count($content, '}') + substr_count($content, ')');
+
+                // If brackets are balanced and we have content, check if we have the full type
+                if ($bracketDepth <= 0) {
+                    break;
+                }
+            } elseif ($token['type'] === 'T_DOC_COMMENT_WHITESPACE') {
+                // Add a space for line continuations (replacing newlines and asterisks)
+                if ($bracketDepth > 0 && str_contains($token['content'], "\n")) {
+                    $collectedContent .= ' ';
+                }
+            } elseif ($token['type'] === 'T_DOC_COMMENT_STAR') {
+                // Skip the leading asterisk on continuation lines
+                continue;
+            } elseif ($token['type'] === 'T_DOC_COMMENT_TAG') {
+                // Hit another tag, stop collecting
+                break;
+            }
+        }
+
+        // Normalize whitespace (collapse multiple spaces)
+        $collectedContent = (string)preg_replace('/\s+/', ' ', trim($collectedContent));
+
+        // Parse the collected content to extract type, variable, and description
+        return $this->parseCollectedTypeContent($collectedContent, $endIndex);
+    }
+
+    /**
+     * Parse the collected content to extract type, variable name, and description.
+     *
+     * @param string $content The collected content
+     * @param int $endIndex The ending token index
+     *
+     * @return array{type: string, variable: string, description: string, endIndex: int}|null
+     */
+    protected function parseCollectedTypeContent(string $content, int $endIndex): ?array
+    {
+        // Find the variable name (starts with $)
+        if (!preg_match('/^(.+?)\s+(\$\S+)(?:\s+(.*))?$/', $content, $matches)) {
+            // Maybe just a type without variable (for @return)
+            if (preg_match('/^(\S+)(?:\s+(.*))?$/', $content, $matches)) {
+                return [
+                    'type' => $matches[1],
+                    'variable' => '',
+                    'description' => $matches[2] ?? '',
+                    'endIndex' => $endIndex,
+                ];
+            }
+
+            return null;
+        }
+
+        return [
+            'type' => trim($matches[1]),
+            'variable' => $matches[2],
+            'description' => $matches[3] ?? '',
+            'endIndex' => $endIndex,
+        ];
+    }
+
+    /**
      * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode|string> $typeNodes type nodes
      *
      * @return string

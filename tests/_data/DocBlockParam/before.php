@@ -111,4 +111,55 @@ class DocBlockParamTestClass
     {
         // Should not error due to @inheritDoc
     }
+
+    /**
+     * Multi-line array shape annotation - should be parsed correctly
+     *
+     * @param array<string, array{
+     *   msgid: string,
+     *   msgid_plural: string|null,
+     *   msgctxt: string|null,
+     *   references: array<string>,
+     *   comments: array<string>
+     * }> $strings Extracted strings
+     *
+     * @return void
+     */
+    public function multiLineArrayShape(array $strings): void
+    {
+        // Should not error - multi-line array shape is valid
+    }
+
+    /**
+     * Multi-line with multiple params - should be parsed correctly
+     *
+     * @param string $name The name
+     * @param array{
+     *   id: int,
+     *   name: string,
+     *   meta?: array<string, mixed>
+     * } $data The data object
+     * @param bool $flag Optional flag
+     *
+     * @return void
+     */
+    public function multiLineWithMultipleParams(string $name, array $data, bool $flag = false): void
+    {
+        // Should not error - multi-line array shape with other params
+    }
+
+    /**
+     * Nested multi-line generics
+     *
+     * @param array<int, array<string, array{
+     *   key: string,
+     *   value: mixed
+     * }>> $nested Deeply nested structure
+     *
+     * @return void
+     */
+    public function nestedMultiLineGenerics(array $nested): void
+    {
+        // Should not error - deeply nested multi-line type
+    }
 }
