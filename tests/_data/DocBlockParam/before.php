@@ -162,4 +162,14 @@ class DocBlockParamTestClass
     {
         // Should not error - deeply nested multi-line type
     }
+
+    /**
+     * Middle param documented - should add before and after
+     *
+     * @param array<string> $lines
+     */
+    public function middleParamDocumented(Node $parent, array $lines, int $indent): void
+    {
+        // Should error: missing @param for $parent (before) and $indent (after)
+    }
 }

@@ -269,20 +269,139 @@ class DocBlockParamSniff extends AbstractSniff
         if ($fix === true) {
             $phpcsFile->fixer->beginChangeset();
 
-            // Build list of existing param variables
-            $existingVars = [];
+            // Build map of existing param variables to their docblock info
+            $existingParamsByVar = [];
             foreach ($docBlockParams as $param) {
-                $existingVars[] = $param['variable'];
+                $existingParamsByVar[$param['variable']] = $param;
             }
 
-            // Add missing params
+            // Build ordered list of what the @param section should look like
+            $orderedParams = [];
             foreach ($methodSignature as $methodParam) {
                 $variable = $tokens[$methodParam['variableIndex']]['content'];
-                if (!in_array($variable, $existingVars, true)) {
-                    $indent = $this->getIndentForParam($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
-                    $paramLine = "\n" . $indent . '* @param ' . $methodParam['typehintFull'] . ' ' . $variable;
+                if (isset($existingParamsByVar[$variable])) {
+                    // Use existing param's type (preserve user's more specific type)
+                    $orderedParams[] = [
+                        'type' => $existingParamsByVar[$variable]['type'],
+                        'variable' => $variable,
+                        'appendix' => $existingParamsByVar[$variable]['appendix'],
+                        'existing' => true,
+                    ];
+                } else {
+                    // Add new param with method signature type
+                    $orderedParams[] = [
+                        'type' => $methodParam['typehintFull'],
+                        'variable' => $variable,
+                        'appendix' => ' ' . $variable,
+                        'existing' => false,
+                    ];
+                }
+            }
 
-                    $phpcsFile->fixer->addContentBefore($insertPosition, $paramLine);
+            // Now we need to add the missing params in the correct positions
+            // Strategy: find each existing param in the docblock and add missing ones around it
+
+            // Build a map of existing @param tag positions by variable
+            $paramTagsByVar = [];
+            for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
+                if ($tokens[$i]['type'] === 'T_DOC_COMMENT_TAG' && $tokens[$i]['content'] === '@param') {
+                    $classNameIndex = $i + 2;
+                    if (isset($tokens[$classNameIndex]) && $tokens[$classNameIndex]['type'] === 'T_DOC_COMMENT_STRING') {
+                        $content = $tokens[$classNameIndex]['content'];
+                        $spacePos = strpos($content, ' ');
+                        if ($spacePos) {
+                            $appendix = substr($content, $spacePos);
+                            preg_match('/\$[^\s]+/', $appendix, $matches);
+                            if ($matches) {
+                                $paramTagsByVar[$matches[0]] = [
+                                    'tagIndex' => $i,
+                                    'stringIndex' => $classNameIndex,
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+
+            $indent = $this->getIndentForParam($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
+
+            // Process ordered params - insert missing ones at appropriate positions
+            $pendingInserts = []; // Params to insert before the first existing one
+            $lastExistingTagIndex = null;
+
+            foreach ($orderedParams as $param) {
+                if ($param['existing']) {
+                    // This param exists - first flush any pending inserts before it
+                    if ($pendingInserts !== [] && isset($paramTagsByVar[$param['variable']])) {
+                        $tagInfo = $paramTagsByVar[$param['variable']];
+                        // Find the whitespace/newline before this tag
+                        $insertBeforeIndex = $tagInfo['tagIndex'];
+                        for ($j = $tagInfo['tagIndex'] - 1; $j > $docBlockStartIndex; $j--) {
+                            if ($tokens[$j]['type'] === 'T_DOC_COMMENT_WHITESPACE' && $tokens[$j]['content'] !== ' ') {
+                                // This is the indentation whitespace, insert before it
+                                $insertBeforeIndex = $j;
+
+                                break;
+                            }
+                        }
+
+                        foreach ($pendingInserts as $pendingParam) {
+                            $paramLine = $indent . '* @param ' . $pendingParam['type'] . ' ' . $pendingParam['variable'] . "\n";
+                            $phpcsFile->fixer->addContentBefore($insertBeforeIndex, $paramLine);
+                        }
+                        $pendingInserts = [];
+                    }
+                    $lastExistingTagIndex = $paramTagsByVar[$param['variable']]['tagIndex'] ?? null;
+                } else {
+                    // This param needs to be added
+                    if ($lastExistingTagIndex === null) {
+                        // No existing param seen yet - queue it
+                        $pendingInserts[] = $param;
+                    } else {
+                        // Insert after the last existing param's line
+                        // Find the start of the next line (the whitespace token after the newline)
+                        $insertBeforeIndex = null;
+                        $foundNewline = false;
+                        for ($j = $lastExistingTagIndex + 1; $j < $docBlockEndIndex; $j++) {
+                            if ($tokens[$j]['content'] === "\n") {
+                                $foundNewline = true;
+
+                                continue;
+                            }
+                            if ($foundNewline && $tokens[$j]['type'] === 'T_DOC_COMMENT_WHITESPACE') {
+                                $insertBeforeIndex = $j;
+
+                                break;
+                            }
+                        }
+
+                        if ($insertBeforeIndex !== null) {
+                            $paramLine = $indent . '* @param ' . $param['type'] . ' ' . $param['variable'] . "\n";
+                            $phpcsFile->fixer->addContentBefore($insertBeforeIndex, $paramLine);
+                        }
+                        // Update lastExistingTagIndex to track where we just inserted
+                        // (This is tricky - the token indices don't change, but logically we've added after)
+                    }
+                }
+            }
+
+            // If there are still pending inserts (all params come before existing ones, or no existing params)
+            if ($pendingInserts !== []) {
+                // Find the whitespace before the closing tag
+                $insertBeforeIndex = null;
+                for ($j = $docBlockEndIndex - 1; $j > $docBlockStartIndex; $j--) {
+                    if ($tokens[$j]['type'] === 'T_DOC_COMMENT_WHITESPACE' && $tokens[$j]['content'] !== "\n" && strpos($tokens[$j]['content'], "\n") === false) {
+                        $insertBeforeIndex = $j;
+
+                        break;
+                    }
+                }
+
+                if ($insertBeforeIndex !== null) {
+                    foreach ($pendingInserts as $pendingParam) {
+                        $paramLine = $indent . '* @param ' . $pendingParam['type'] . ' ' . $pendingParam['variable'] . "\n";
+                        $phpcsFile->fixer->addContentBefore($insertBeforeIndex, $paramLine);
+                    }
                 }
             }
 
