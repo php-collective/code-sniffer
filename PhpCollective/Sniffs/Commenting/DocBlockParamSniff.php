@@ -153,21 +153,29 @@ class DocBlockParamSniff extends AbstractSniff
             return;
         }
 
-        foreach ($docBlockParams as $docBlockParam) {
-            /** @var array<string, mixed> $methodParam */
-            $methodParam = array_shift($methodSignature);
-            $variableName = $tokens[$methodParam['variableIndex']]['content'];
+        // Build a map of method param variable names for lookup
+        $methodParamsByName = [];
+        foreach ($methodSignature as $methodParam) {
+            $varName = $tokens[$methodParam['variableIndex']]['content'];
+            $methodParamsByName[$varName] = $methodParam;
+        }
 
-            if ($docBlockParam['variable'] === $variableName) {
-                continue;
-            }
+        foreach ($docBlockParams as $docBlockParam) {
             // We let other sniffers take care of missing type for now
             if (str_contains($docBlockParam['type'], '$')) {
                 continue;
             }
 
-            $error = 'Doc Block param variable `' . $docBlockParam['variable'] . '` should be `' . $variableName . '`';
-            // For now just report (buggy yet)
+            $docBlockVariable = $docBlockParam['variable'];
+
+            // Check if the doc block variable exists in the method signature
+            if (isset($methodParamsByName[$docBlockVariable])) {
+                // Variable name matches a method param - this is correct
+                continue;
+            }
+
+            // Variable doesn't exist in method signature - report error
+            $error = 'Doc Block param variable `' . $docBlockVariable . '` does not exist in method signature';
             $phpcsFile->addError($error, $docBlockParam['index'], 'VariableWrong');
         }
     }
