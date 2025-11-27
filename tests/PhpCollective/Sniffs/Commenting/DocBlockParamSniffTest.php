@@ -26,7 +26,8 @@ class DocBlockParamSniffTest extends TestCase
         // Line 74: ExtraParam - no params but has @param (fixable - can remove param)
         // Line 84: MissingType - missing type in @param (not fixable - needs manual type)
         // Line 87: SignatureMismatch - params don't match after missing type (not fixable)
-        $this->assertSnifferFindsErrors(new DocBlockParamSniff(), 8);
+        // Line 169: SignatureMismatch - middle param documented, need to add before and after (fixable)
+        $this->assertSnifferFindsErrors(new DocBlockParamSniff(), 9);
     }
 
     /**
@@ -34,10 +35,11 @@ class DocBlockParamSniffTest extends TestCase
      */
     public function testDocBlockParamFixer(): void
     {
-        // 3 fixable errors:
+        // 4 fixable errors:
         // Line 37: Can add missing @param
         // Line 64: Can remove extra @param
         // Line 74: Can remove @param when no params
-        $this->assertSnifferCanFixErrors(new DocBlockParamSniff(), 3);
+        // Line 169: Can add missing @param before and after existing param (order preserved)
+        $this->assertSnifferCanFixErrors(new DocBlockParamSniff(), 4);
     }
 }
