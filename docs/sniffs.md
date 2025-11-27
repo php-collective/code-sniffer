@@ -61,7 +61,6 @@ PhpCollective (85 sniffs)
 - PhpCollective.Classes.Psr4
 - PhpCollective.Classes.ReturnTypeHint
 - PhpCollective.Classes.SelfAccessor
-- PhpCollective.Commenting.Attributes
 - PhpCollective.Commenting.DisallowArrayTypeHintSyntax
 - PhpCollective.Commenting.DisallowShorthandNullableTypeHint
 - PhpCollective.Commenting.DocBlock
@@ -73,6 +72,7 @@ PhpCollective (85 sniffs)
 - PhpCollective.Commenting.DocBlockParamAllowDefaultValue
 - PhpCollective.Commenting.DocBlockParamArray
 - PhpCollective.Commenting.DocBlockParamNotJustNull
+- PhpCollective.Commenting.DocBlockParamTypeMismatch
 - PhpCollective.Commenting.DocBlockPipeSpacing
 - PhpCollective.Commenting.DocBlockReturnNull
 - PhpCollective.Commenting.DocBlockReturnNullableType
