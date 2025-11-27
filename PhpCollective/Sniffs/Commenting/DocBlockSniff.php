@@ -201,11 +201,23 @@ class DocBlockSniff extends AbstractSniff
             }
         }
 
-        // Check for return type
-        $hasReturnType = isset($tokens[$stackPtr]['parenthesis_closer']) &&
-            isset($tokens[$stackPtr]['scope_opener']);
+        // Check for return type - need parenthesis_closer to find return type
+        if (!isset($tokens[$stackPtr]['parenthesis_closer'])) {
+            return false;
+        }
 
-        $colonPtr = $phpcsFile->findNext(T_COLON, $tokens[$stackPtr]['parenthesis_closer'], $tokens[$stackPtr]['scope_opener']);
+        // For abstract methods or interface methods, there's no scope_opener
+        // In that case, search until semicolon or end of statement
+        $searchEnd = $tokens[$stackPtr]['scope_opener'] ?? null;
+        if ($searchEnd === null) {
+            // Find the semicolon that ends the method declaration
+            $searchEnd = $phpcsFile->findNext(T_SEMICOLON, $tokens[$stackPtr]['parenthesis_closer']);
+            if ($searchEnd === false) {
+                return false;
+            }
+        }
+
+        $colonPtr = $phpcsFile->findNext(T_COLON, $tokens[$stackPtr]['parenthesis_closer'], $searchEnd);
 
         if ($colonPtr === false) {
             return false; // No return type
