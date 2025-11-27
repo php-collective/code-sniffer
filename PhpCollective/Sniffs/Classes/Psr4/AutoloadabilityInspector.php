@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace PhpCollective\Sniffs\Classes\Psr4;
 
+use const PATHINFO_DIRNAME;
+use const PATHINFO_FILENAME;
+
 class AutoloadabilityInspector
 {
     /**
@@ -110,10 +113,10 @@ class AutoloadabilityInspector
     protected function guessRelativeClassName(string $relativeFileName): string
     {
         $basename = basename($relativeFileName);
-        $filename = pathinfo($relativeFileName, \PATHINFO_FILENAME);
+        $filename = pathinfo($relativeFileName, PATHINFO_FILENAME);
         $dirname = $basename === $relativeFileName ?
             '' :
-            pathinfo($relativeFileName, \PATHINFO_DIRNAME) . '/';
+            pathinfo($relativeFileName, PATHINFO_DIRNAME) . '/';
 
         return str_replace('/', '\\', $dirname) . $filename;
     }

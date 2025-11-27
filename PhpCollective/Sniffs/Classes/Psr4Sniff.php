@@ -19,6 +19,10 @@ use PhpCollective\Sniffs\Classes\Psr4\NonAutoloadableClass;
 use RuntimeException;
 use SlevomatCodingStandard\Helpers\ClassHelper;
 use SlevomatCodingStandard\Helpers\TokenHelper;
+use const T_CLASS;
+use const T_INTERFACE;
+use const T_STRING;
+use const T_TRAIT;
 
 class Psr4Sniff implements Sniff
 {
@@ -63,7 +67,7 @@ class Psr4Sniff implements Sniff
      */
     public function register(): array
     {
-        return [\T_CLASS, \T_INTERFACE, \T_TRAIT];
+        return [T_CLASS, T_INTERFACE, T_TRAIT];
     }
 
     /**
@@ -162,6 +166,6 @@ class Psr4Sniff implements Sniff
         File $phpcsFile,
         int $typePointer,
     ): ?int {
-        return TokenHelper::findNext($phpcsFile, \T_STRING, $typePointer + 1);
+        return TokenHelper::findNext($phpcsFile, T_STRING, $typePointer + 1);
     }
 }

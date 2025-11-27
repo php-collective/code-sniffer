@@ -30,9 +30,6 @@
             <property name="allowFallbackGlobalConstants" value="true"/>
         </properties>
     </rule>
-    <rule ref="SlevomatCodingStandard.Namespaces.ReferenceUsedNamesOnly.ReferenceViaFullyQualifiedName">
-        <severity>0</severity>
-    </rule>
 
     <rule ref="SlevomatCodingStandard.Namespaces.UseFromSameNamespace"/>
     <rule ref="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash"/>
