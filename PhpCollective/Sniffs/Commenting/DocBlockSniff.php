@@ -134,6 +134,20 @@ class DocBlockSniff extends AbstractSniff
             return;
         }
 
+        // If all parameters are fully typed (including promoted properties), no docblock is needed
+        $allTyped = true;
+        foreach ($methodSignature as $param) {
+            if (empty($param['typehint'])) {
+                $allTyped = false;
+
+                break;
+            }
+        }
+
+        if ($allTyped) {
+            return;
+        }
+
         $phpcsFile->addError('Missing doc block for method', $stackPtr, 'ConstructDesctructMissingDocBlock');
     }
 
