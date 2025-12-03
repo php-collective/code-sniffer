@@ -345,7 +345,9 @@ class DocBlockParamSniff extends AbstractSniff
                             }
                         }
 
-                        foreach ($pendingInserts as $pendingParam) {
+                        // Reverse the array since addContentBefore inserts before the same position
+                        // multiple times, which would reverse the order
+                        foreach (array_reverse($pendingInserts) as $pendingParam) {
                             $paramLine = $indent . '* @param ' . $pendingParam['type'] . ' ' . $pendingParam['variable'] . "\n";
                             $phpcsFile->fixer->addContentBefore($insertBeforeIndex, $paramLine);
                         }
@@ -398,7 +400,9 @@ class DocBlockParamSniff extends AbstractSniff
                 }
 
                 if ($insertBeforeIndex !== null) {
-                    foreach ($pendingInserts as $pendingParam) {
+                    // Reverse the array since addContentBefore inserts before the same position
+                    // multiple times, which would reverse the order
+                    foreach (array_reverse($pendingInserts) as $pendingParam) {
                         $paramLine = $indent . '* @param ' . $pendingParam['type'] . ' ' . $pendingParam['variable'] . "\n";
                         $phpcsFile->fixer->addContentBefore($insertBeforeIndex, $paramLine);
                     }
