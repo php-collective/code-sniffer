@@ -183,7 +183,7 @@ trait CommentingTrait
     protected function containsTypeArray(array $docBlockTypes, string $iterableType = 'array'): bool
     {
         foreach ($docBlockTypes as $docBlockType) {
-            if (str_contains($docBlockType, '[]') || str_starts_with($docBlockType, $iterableType . '<')) {
+            if (str_contains($docBlockType, '[]') || str_starts_with($docBlockType, $iterableType . '<') || str_starts_with($docBlockType, $iterableType . '{')) {
                 return true;
             }
         }

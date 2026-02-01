@@ -77,4 +77,12 @@ class FixMe
     public function multipleUnion(int|string|null $value): void
     {
     }
+
+    /**
+     * @param array{msgid: string, msgid_plural: string|null} $array
+     * @return void
+     */
+    public function arrayShape(array $array = null): void
+    {
+    }
 }
