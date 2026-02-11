@@ -15,12 +15,14 @@ use PhpCollective\Test\TestCase;
  *
  * This sniff has been updated with the following fixes ported from PSR2R NoInlineFullyQualifiedClassName:
  * - PHP 8+ T_NAME_FULLY_QUALIFIED token support in all check methods
+ * - PHP 8+ T_NAME_QUALIFIED token support for partially qualified names (e.g., Foo\Bar::method())
  * - PHP 8+ T_NAME_FULLY_QUALIFIED token support in parse() method for extends/implements
  * - shortName fallback when alias is null (prevents undefined replacements)
  * - str_contains() instead of deprecated strpos()
  *
  * The fixes ensure the sniff works correctly on PHP 8+ where inline FQCNs like \Foo\Bar\Class
  * are tokenized as a single T_NAME_FULLY_QUALIFIED token instead of multiple T_NS_SEPARATOR + T_STRING tokens.
+ * Partially qualified names like Foo\Bar\Class are tokenized as T_NAME_QUALIFIED.
  */
 class UseStatementSniffTest extends TestCase
 {
@@ -128,6 +130,28 @@ class UseStatementSniffTest extends TestCase
     public function testStaticFixer(): void
     {
         $this->prefix = 'static-';
+        $this->assertSnifferCanFixErrors(new UseStatementSniff());
+        $this->prefix = null;
+    }
+
+    /**
+     * Tests static call with PHP 8+ T_NAME_QUALIFIED (partially qualified name).
+     *
+     * @return void
+     */
+    public function testStaticQualifiedSniffer(): void
+    {
+        $this->prefix = 'static-qualified-';
+        $this->assertSnifferFindsErrors(new UseStatementSniff(), 1);
+        $this->prefix = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testStaticQualifiedFixer(): void
+    {
+        $this->prefix = 'static-qualified-';
         $this->assertSnifferCanFixErrors(new UseStatementSniff());
         $this->prefix = null;
     }
