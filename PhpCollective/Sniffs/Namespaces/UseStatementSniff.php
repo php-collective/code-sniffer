@@ -45,7 +45,19 @@ class UseStatementSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_NEW, T_FUNCTION, T_DOUBLE_COLON, T_CLASS, T_INTERFACE, T_TRAIT, T_INSTANCEOF, T_CATCH, T_CLOSURE, T_PROTECTED, T_PUBLIC, T_PRIVATE];
+        $tokens = [T_NEW, T_FUNCTION, T_DOUBLE_COLON, T_CLASS, T_INTERFACE, T_TRAIT, T_INSTANCEOF, T_CATCH, T_CLOSURE, T_PROTECTED, T_PUBLIC, T_PRIVATE];
+
+        // PHP 8.0+ attributes
+        if (defined('T_ATTRIBUTE')) {
+            $tokens[] = T_ATTRIBUTE;
+        }
+
+        // PHP 8.1+ enums
+        if (defined('T_ENUM')) {
+            $tokens[] = T_ENUM;
+        }
+
+        return $tokens;
     }
 
     /**
@@ -64,6 +76,10 @@ class UseStatementSniff implements Sniff
 
         if ($tokens[$stackPtr]['code'] === T_CLASS || $tokens[$stackPtr]['code'] === T_INTERFACE || $tokens[$stackPtr]['code'] === T_TRAIT) {
             $this->checkUseForClass($phpcsFile, $stackPtr);
+        } elseif (defined('T_ENUM') && $tokens[$stackPtr]['code'] === T_ENUM) {
+            $this->checkUseForEnum($phpcsFile, $stackPtr);
+        } elseif (defined('T_ATTRIBUTE') && $tokens[$stackPtr]['code'] === T_ATTRIBUTE) {
+            $this->checkUseForAttribute($phpcsFile, $stackPtr);
         } elseif ($tokens[$stackPtr]['code'] === T_NEW) {
             $this->checkUseForNew($phpcsFile, $stackPtr);
         } elseif ($tokens[$stackPtr]['code'] === T_DOUBLE_COLON) {
@@ -115,6 +131,72 @@ class UseStatementSniff implements Sniff
     }
 
     /**
+     * Checks implements for PHP 8.1+ enums.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return void
+     */
+    protected function checkUseForEnum(File $phpcsFile, int $stackPtr): void
+    {
+        $this->checkImplements($phpcsFile, $stackPtr);
+    }
+
+    /**
+     * Checks PHP 8+ attributes for FQCNs.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return void
+     */
+    protected function checkUseForAttribute(File $phpcsFile, int $stackPtr): void
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        // Find the attribute name token (right after #[)
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
+        if (!$nextIndex) {
+            return;
+        }
+
+        // PHP 8+: Check if it's T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$nextIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$nextIndex])
+            )
+        ) {
+            $extractedUseStatement = ltrim($tokens[$nextIndex]['content'], '\\');
+            if (!str_contains($extractedUseStatement, '\\')) {
+                return;
+            }
+
+            $lastSeparatorPos = strrpos($extractedUseStatement, '\\');
+            $className = substr($extractedUseStatement, $lastSeparatorPos + 1);
+
+            $error = 'Use statement ' . $extractedUseStatement . ' for class ' . $className . ' should be in use block.';
+            $fix = $phpcsFile->addFixableError($error, $stackPtr, 'Attribute');
+            if (!$fix) {
+                return;
+            }
+
+            $phpcsFile->fixer->beginChangeset();
+
+            $addedUseStatement = $this->addUseStatement($phpcsFile, $className, $extractedUseStatement);
+
+            if ($addedUseStatement['alias'] !== null) {
+                $phpcsFile->fixer->replaceToken($nextIndex, $addedUseStatement['alias']);
+            } else {
+                $phpcsFile->fixer->replaceToken($nextIndex, $addedUseStatement['shortName']);
+            }
+
+            $phpcsFile->fixer->endChangeset();
+        }
+    }
+
+    /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      *
@@ -146,17 +228,10 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        $partial = !str_starts_with($statement['content'], '\\');
-
         $extractedUseStatement = ltrim($statement['content'], '\\');
         $className = substr($statement['content'], strrpos($statement['content'], '\\') + 1);
 
         $error = 'Use statement ' . $extractedUseStatement . ' for class ' . $className . ' should be in use block.';
-        if ($partial) {
-            // For now just warn about partial FQCN locally
-            //$phpcsFile->addWarning($error, $stackPtr, 'Interface');
-            return;
-        }
 
         $fix = $phpcsFile->addFixableError($error, $stackPtr, 'Statement');
         if (!$fix) {
@@ -196,8 +271,13 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-        if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$nextIndex])) {
+        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$nextIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$nextIndex])
+            )
+        ) {
             $extractedUseStatement = ltrim($tokens[$nextIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return;
@@ -309,8 +389,13 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-        if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$prevIndex])) {
+        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$prevIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$prevIndex])
+            )
+        ) {
             $extractedUseStatement = ltrim($tokens[$prevIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return;
@@ -414,8 +499,13 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-        if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$classNameIndex])) {
+        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$classNameIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$classNameIndex])
+            )
+        ) {
             $extractedUseStatement = ltrim($tokens[$classNameIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return;
@@ -523,8 +613,13 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-        if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$classNameIndex])) {
+        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$classNameIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$classNameIndex])
+            )
+        ) {
             $extractedUseStatement = ltrim($tokens[$classNameIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return;
@@ -640,8 +735,13 @@ class UseStatementSniff implements Sniff
                 $startIndex = $i;
             }
 
-            // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-            if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$i])) {
+            // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+            if (
+                defined('T_NAME_FULLY_QUALIFIED') && (
+                    $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$i]) ||
+                    $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$i])
+                )
+            ) {
                 $extractedUseStatement = ltrim($tokens[$i]['content'], '\\');
                 if (!str_contains($extractedUseStatement, '\\')) {
                     continue;
@@ -757,8 +857,13 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED token
-        if (defined('T_NAME_FULLY_QUALIFIED') && $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$startIndex])) {
+        // PHP 8+: Check if it's a single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+        if (
+            defined('T_NAME_FULLY_QUALIFIED') && (
+                $this->isGivenKind(T_NAME_FULLY_QUALIFIED, $tokens[$startIndex]) ||
+                $this->isGivenKind(T_NAME_QUALIFIED, $tokens[$startIndex])
+            )
+        ) {
             $extractedUseStatement = ltrim($tokens[$startIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return;
@@ -861,9 +966,12 @@ class UseStatementSniff implements Sniff
             return;
         }
 
-        // Handle T_NAME_FULLY_QUALIFIED token (PHP CodeSniffer v4)
+        // Handle T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token (PHP CodeSniffer v4)
         $className = '';
-        if ($tokens[$startIndex]['code'] === T_NAME_FULLY_QUALIFIED) {
+        if (
+            $tokens[$startIndex]['code'] === T_NAME_FULLY_QUALIFIED ||
+            (defined('T_NAME_QUALIFIED') && $tokens[$startIndex]['code'] === T_NAME_QUALIFIED)
+        ) {
             $extractedUseStatement = ltrim($tokens[$startIndex]['content'], '\\');
             if (!str_contains($extractedUseStatement, '\\')) {
                 return; // Not a namespaced class
@@ -923,7 +1031,7 @@ class UseStatementSniff implements Sniff
                 $phpcsFile->fixer->replaceToken($lastIndex, $addedUseStatement['alias']);
             }
         } else {
-            // PHP CodeSniffer v4: replace single T_NAME_FULLY_QUALIFIED token
+            // PHP CodeSniffer v4: replace single T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
             if ($addedUseStatement['alias'] !== null) {
                 $phpcsFile->fixer->replaceToken($startIndex, $addedUseStatement['alias']);
             } else {
@@ -1257,8 +1365,13 @@ class UseStatementSniff implements Sniff
                 break;
             }
 
-            // PHP 8+: Check for T_NAME_FULLY_QUALIFIED token
-            if (defined('T_NAME_FULLY_QUALIFIED') && $tokens[$i]['code'] === T_NAME_FULLY_QUALIFIED) {
+            // PHP 8+: Check for T_NAME_FULLY_QUALIFIED or T_NAME_QUALIFIED token
+            if (
+                defined('T_NAME_FULLY_QUALIFIED') && (
+                    $tokens[$i]['code'] === T_NAME_FULLY_QUALIFIED ||
+                    $tokens[$i]['code'] === T_NAME_QUALIFIED
+                )
+            ) {
                 $implements[] = [
                     'start' => $i,
                     'end' => $i,
