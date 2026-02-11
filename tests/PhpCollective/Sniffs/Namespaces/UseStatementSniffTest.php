@@ -243,4 +243,92 @@ class UseStatementSniffTest extends TestCase
         $this->assertSnifferCanFixErrors(new UseStatementSniff());
         $this->prefix = null;
     }
+
+    /**
+     * Tests PHP 8+ attribute with T_NAME_FULLY_QUALIFIED.
+     *
+     * @return void
+     */
+    public function testAttributeSniffer(): void
+    {
+        $this->prefix = 'attribute-';
+        $this->assertSnifferFindsErrors(new UseStatementSniff(), 1);
+        $this->prefix = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testAttributeFixer(): void
+    {
+        $this->prefix = 'attribute-';
+        $this->assertSnifferCanFixErrors(new UseStatementSniff());
+        $this->prefix = null;
+    }
+
+    /**
+     * Tests PHP 8+ attribute with T_NAME_QUALIFIED (partially qualified name).
+     *
+     * @return void
+     */
+    public function testAttributeQualifiedSniffer(): void
+    {
+        $this->prefix = 'attribute-qualified-';
+        $this->assertSnifferFindsErrors(new UseStatementSniff(), 1);
+        $this->prefix = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testAttributeQualifiedFixer(): void
+    {
+        $this->prefix = 'attribute-qualified-';
+        $this->assertSnifferCanFixErrors(new UseStatementSniff());
+        $this->prefix = null;
+    }
+
+    /**
+     * Tests PHP 8.1+ enum implements with T_NAME_FULLY_QUALIFIED.
+     *
+     * @return void
+     */
+    public function testEnumSniffer(): void
+    {
+        $this->prefix = 'enum-';
+        $this->assertSnifferFindsErrors(new UseStatementSniff(), 1);
+        $this->prefix = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testEnumFixer(): void
+    {
+        $this->prefix = 'enum-';
+        $this->assertSnifferCanFixErrors(new UseStatementSniff());
+        $this->prefix = null;
+    }
+
+    /**
+     * Tests PHP 8.1+ enum implements with T_NAME_QUALIFIED (partially qualified name).
+     *
+     * @return void
+     */
+    public function testEnumQualifiedSniffer(): void
+    {
+        $this->prefix = 'enum-qualified-';
+        $this->assertSnifferFindsErrors(new UseStatementSniff(), 1);
+        $this->prefix = null;
+    }
+
+    /**
+     * @return void
+     */
+    public function testEnumQualifiedFixer(): void
+    {
+        $this->prefix = 'enum-qualified-';
+        $this->assertSnifferCanFixErrors(new UseStatementSniff());
+        $this->prefix = null;
+    }
 }
