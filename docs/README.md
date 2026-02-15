@@ -85,6 +85,19 @@ Projects can - at their own discretion - enable strict mode for PHP files:
 ```
 Please note: This can have side effects as type casting is now not happening anymore in some cases.
 
+## Disallow void return type on magic methods
+Magic methods like `__construct`, `__destruct`, and `__clone` cannot return values by definition.
+Adding `: void` return type hints can cause inheritance issues across class hierarchies.
+
+To enable checking for (and auto-fixing) invalid `: void` return types on these methods:
+```xml
+    <rule ref="PhpCollective.Commenting.DocBlockReturnVoid">
+        <properties>
+            <property name="checkReturnTypeHint" value="true"/>
+        </properties>
+    </rule>
+```
+
 ## Excluding test related comparison files
 If you want to exclude certain generated (e.g. PHP) files, make sure those are in a `test_files` subfolder to be auto-skipped.
 You can otherwise always create a custom and rather unique folder name and manually exclude it in your PHPCS settings.
