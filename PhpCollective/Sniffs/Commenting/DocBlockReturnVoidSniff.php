@@ -23,11 +23,17 @@ class DocBlockReturnVoidSniff extends AbstractSniff
     public bool $strict = false;
 
     /**
+     * Also check for invalid `: void` return type hints on magic methods.
+     */
+    public bool $checkReturnTypeHint = false;
+
+    /**
      * @var array<string>
      */
     protected array $ignored = [
         '__construct',
         '__destruct',
+        '__clone',
     ];
 
     /**
@@ -121,12 +127,16 @@ class DocBlockReturnVoidSniff extends AbstractSniff
      */
     protected function checkConstructorAndDestructor(File $phpcsFile, int $index): void
     {
+        $tokens = $phpcsFile->getTokens();
+
+        if ($this->checkReturnTypeHint) {
+            $this->checkInvalidReturnTypeHint($phpcsFile, $index);
+        }
+
         $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $index);
         if (!$docBlockEndIndex) {
             return;
         }
-
-        $tokens = $phpcsFile->getTokens();
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
@@ -144,6 +154,61 @@ class DocBlockReturnVoidSniff extends AbstractSniff
                 $phpcsFile->fixer->replaceToken($docBlockReturnIndex + 1, '');
                 $phpcsFile->fixer->replaceToken($docBlockReturnIndex + 2, '');
             }
+        }
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $index
+     *
+     * @return void
+     */
+    protected function checkInvalidReturnTypeHint(File $phpcsFile, int $index): void
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        // Find the function token (we're at the method name)
+        $functionIndex = $phpcsFile->findPrevious(T_FUNCTION, $index - 1);
+        if ($functionIndex === false) {
+            return;
+        }
+
+        $parenthesisOpener = $phpcsFile->findNext(T_OPEN_PARENTHESIS, $functionIndex + 1);
+        if ($parenthesisOpener === false || empty($tokens[$parenthesisOpener]['parenthesis_closer'])) {
+            return;
+        }
+
+        $parenthesisCloser = $tokens[$parenthesisOpener]['parenthesis_closer'];
+        $scopeOpener = $phpcsFile->findNext(T_OPEN_CURLY_BRACKET, $parenthesisCloser + 1);
+        if ($scopeOpener === false) {
+            return;
+        }
+
+        $colonIndex = $phpcsFile->findNext(T_COLON, $parenthesisCloser + 1, $scopeOpener);
+        if ($colonIndex === false) {
+            return;
+        }
+
+        $returnTypeIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $colonIndex + 1, $scopeOpener, true);
+        if ($returnTypeIndex === false) {
+            return;
+        }
+
+        if (strtolower($tokens[$returnTypeIndex]['content']) !== 'void') {
+            return;
+        }
+
+        $fix = $phpcsFile->addFixableError(
+            $tokens[$index]['content'] . ' cannot have a return type hint.',
+            $returnTypeIndex,
+            'ReturnTypeHintInvalid',
+        );
+        if ($fix) {
+            $phpcsFile->fixer->beginChangeset();
+            for ($i = $colonIndex; $i <= $returnTypeIndex; $i++) {
+                $phpcsFile->fixer->replaceToken($i, '');
+            }
+            $phpcsFile->fixer->endChangeset();
         }
     }
 
