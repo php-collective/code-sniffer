@@ -100,11 +100,11 @@ class NoIsNullSniff extends AbstractSniff
             }
 
             if ($trailingComparison) {
-                $possibleEndIndex = $this->findUnnecessaryLeadingComparisonStart($phpcsFile, $endIndex);
-                if ($possibleEndIndex !== null) {
-                    $endIndex = $possibleEndIndex;
+                $trailingResult = $this->findUnnecessaryTrailingComparisonEnd($phpcsFile, $endIndex);
+                if ($trailingResult !== null) {
+                    $endIndex = $trailingResult['index'];
                     $trailingComparison = false;
-                    if ($tokens[$endIndex]['code'] === T_FALSE) {
+                    if ($trailingResult['negated']) {
                         $negated = !$negated;
                     }
                 }
@@ -189,13 +189,13 @@ class NoIsNullSniff extends AbstractSniff
     {
         $tokens = $phpcsFile->getTokens();
 
-        $previous = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($index - 1), null, true);
-        if (!$previous || !in_array($tokens[$previous]['code'], [T_IS_IDENTICAL, T_IS_NOT_IDENTICAL])) {
+        $previous = $phpcsFile->findPrevious(T_WHITESPACE, $index - 1, null, true);
+        if ($previous === false || !in_array($tokens[$previous]['code'], [T_IS_IDENTICAL, T_IS_NOT_IDENTICAL], true)) {
             return null;
         }
 
-        $previous = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($previous - 1), null, true);
-        if (!$previous || !in_array($tokens[$previous]['code'], [T_TRUE, T_FALSE])) {
+        $previous = $phpcsFile->findPrevious(T_WHITESPACE, $previous - 1, null, true);
+        if ($previous === false || !in_array($tokens[$previous]['code'], [T_TRUE, T_FALSE], true)) {
             return null;
         }
 
@@ -206,23 +206,34 @@ class NoIsNullSniff extends AbstractSniff
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $index
      *
-     * @return int|null
+     * @return array{index: int, negated: bool}|null
      */
-    protected function findUnnecessaryTrailingComparisonEnd(File $phpcsFile, int $index): ?int
+    protected function findUnnecessaryTrailingComparisonEnd(File $phpcsFile, int $index): ?array
     {
         $tokens = $phpcsFile->getTokens();
 
-        $next = (int)$phpcsFile->findNext(T_WHITESPACE, ($index + 1), null, true);
-        if (!$next || !in_array($tokens[$next]['code'], [T_IS_IDENTICAL, T_IS_NOT_IDENTICAL])) {
+        $operatorIndex = $phpcsFile->findNext(T_WHITESPACE, $index + 1, null, true);
+        if ($operatorIndex === false || !in_array($tokens[$operatorIndex]['code'], [T_IS_IDENTICAL, T_IS_NOT_IDENTICAL], true)) {
             return null;
         }
 
-        $next = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($next - 1), null, true);
-        if (!$next || !in_array($tokens[$next]['code'], [T_TRUE, T_FALSE])) {
+        $isNotIdentical = $tokens[$operatorIndex]['code'] === T_IS_NOT_IDENTICAL;
+
+        $valueIndex = $phpcsFile->findNext(T_WHITESPACE, $operatorIndex + 1, null, true);
+        if ($valueIndex === false || !in_array($tokens[$valueIndex]['code'], [T_TRUE, T_FALSE], true)) {
             return null;
         }
 
-        return $next;
+        $isFalse = $tokens[$valueIndex]['code'] === T_FALSE;
+
+        // Determine if negation is needed:
+        // === true -> no negation
+        // === false -> negate
+        // !== true -> negate
+        // !== false -> no negation (double negation)
+        $negated = $isNotIdentical !== $isFalse;
+
+        return ['index' => $valueIndex, 'negated' => $negated];
     }
 
     /**

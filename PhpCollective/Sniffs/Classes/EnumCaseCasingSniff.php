@@ -55,7 +55,7 @@ class EnumCaseCasingSniff extends AbstractSniff
         }
 
         $result = mb_strtolower($content);
-        $result = ucfirst($result);
+        $result = mb_strtoupper(mb_substr($result, 0, 1)) . mb_substr($result, 1);
 
         if ($result === $content) {
             return;

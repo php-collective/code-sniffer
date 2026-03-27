@@ -48,13 +48,13 @@ class PreferCastOverFunctionSniff extends AbstractSniff
             return;
         }
 
-        $previous = (int)$phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
-        if (!$previous || in_array($tokens[$previous]['code'], $wrongTokens)) {
+        $previous = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
+        if ($previous === false || in_array($tokens[$previous]['code'], $wrongTokens, true)) {
             return;
         }
 
-        $openingBraceIndex = (int)$phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), null, true);
-        if (!$openingBraceIndex || $tokens[$openingBraceIndex]['type'] !== 'T_OPEN_PARENTHESIS') {
+        $openingBraceIndex = $phpcsFile->findNext(T_WHITESPACE, $stackPtr + 1, null, true);
+        if ($openingBraceIndex === false || $tokens[$openingBraceIndex]['type'] !== 'T_OPEN_PARENTHESIS') {
             return;
         }
 
