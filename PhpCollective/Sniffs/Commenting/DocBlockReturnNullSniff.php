@@ -193,10 +193,13 @@ class DocBlockReturnNullSniff implements Sniff
             }
 
             $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $i + 1, null, true);
-            if (!$nextIndex) {
+            if ($nextIndex === false) {
                 continue;
             }
             $lastIndex = $phpcsFile->findNext(T_SEMICOLON, $nextIndex);
+            if ($lastIndex === false) {
+                continue;
+            }
 
             $type = '';
             for ($j = $nextIndex; $j < $lastIndex; $j++) {
