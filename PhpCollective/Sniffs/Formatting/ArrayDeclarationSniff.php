@@ -153,6 +153,7 @@ class ArrayDeclarationSniff implements Sniff
         $tokens = $phpcsFile->getTokens();
 
         $keyUsed = false;
+        /** @var array<array{value: int, index?: int, index_content?: string, arrow?: int}> $indices */
         $indices = [];
         $maxLength = 0;
 
