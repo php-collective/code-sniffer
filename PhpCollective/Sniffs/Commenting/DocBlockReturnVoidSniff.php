@@ -456,19 +456,30 @@ class DocBlockReturnVoidSniff extends AbstractSniff
     protected function hasReturnType(File $phpcsFile, int $stackPtr): bool
     {
         $tokens = $phpcsFile->getTokens();
-        if (empty($tokens[$stackPtr]['parenthesis_closer']) || empty($tokens[$stackPtr]['scope_opener'])) {
+        if (empty($tokens[$stackPtr]['parenthesis_closer'])) {
             return false;
         }
 
         $parenthesisCloserIndex = $tokens[$stackPtr]['parenthesis_closer'];
-        $scopeOpenerIndex = $tokens[$stackPtr]['scope_opener'];
-        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $parenthesisCloserIndex + 1, $scopeOpenerIndex, true);
 
-        if ($tokens[$nextIndex]['code'] !== T_COLON) {
+        // For interface/abstract methods, there's no scope_opener - look for semicolon instead
+        if (empty($tokens[$stackPtr]['scope_opener'])) {
+            $endIndex = $phpcsFile->findNext(T_SEMICOLON, $parenthesisCloserIndex + 1);
+        } else {
+            $endIndex = $tokens[$stackPtr]['scope_opener'];
+        }
+
+        if (!$endIndex) {
             return false;
         }
 
-        $typeHintIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $nextIndex + 1, $scopeOpenerIndex, true);
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $parenthesisCloserIndex + 1, $endIndex, true);
+
+        if ($nextIndex === false || $tokens[$nextIndex]['code'] !== T_COLON) {
+            return false;
+        }
+
+        $typeHintIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $nextIndex + 1, $endIndex, true);
         if (!$typeHintIndex) {
             return false;
         }
