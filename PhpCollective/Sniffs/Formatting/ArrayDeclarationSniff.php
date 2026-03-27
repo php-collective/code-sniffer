@@ -184,8 +184,8 @@ class ArrayDeclarationSniff implements Sniff
                 }
 
                 $parenthesisCloseIndex = $tokens[$tokens[$nextToken]['parenthesis_opener']]['parenthesis_closer'];
-                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, ($parenthesisCloseIndex + 1), null, true);
-                if (!$nextTokenIndex) {
+                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, $parenthesisCloseIndex + 1, null, true);
+                if ($nextTokenIndex === false) {
                     break;
                 }
 
@@ -206,8 +206,8 @@ class ArrayDeclarationSniff implements Sniff
                 }
 
                 $bracketCloseIndex = $tokens[$nextToken]['bracket_closer'];
-                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, ($bracketCloseIndex + 1), null, true);
-                if (!$nextTokenIndex) {
+                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, $bracketCloseIndex + 1, null, true);
+                if ($nextTokenIndex === false) {
                     break;
                 }
 
@@ -227,8 +227,8 @@ class ArrayDeclarationSniff implements Sniff
                 }
 
                 $nextToken = $tokens[$nextToken]['scope_closer'];
-                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, ($nextToken + 1), null, true);
-                if (!$nextTokenIndex) {
+                $nextTokenIndex = $phpcsFile->findNext(T_WHITESPACE, $nextToken + 1, null, true);
+                if ($nextTokenIndex === false) {
                     break;
                 }
 

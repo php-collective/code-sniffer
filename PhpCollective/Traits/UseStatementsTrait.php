@@ -38,6 +38,9 @@ trait UseStatementsTrait
             }
 
             $semicolonIndex = $phpcsFile->findNext(T_SEMICOLON, $useStatementStartIndex + 1);
+            if ($semicolonIndex === false) {
+                continue;
+            }
             $useStatementEndIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $semicolonIndex - 1, null, true);
             if ($useStatementEndIndex === false) {
                 continue;

@@ -469,7 +469,7 @@ class DocBlockReturnVoidSniff extends AbstractSniff
             $endIndex = $tokens[$stackPtr]['scope_opener'];
         }
 
-        if (!$endIndex) {
+        if ($endIndex === false) {
             return false;
         }
 
