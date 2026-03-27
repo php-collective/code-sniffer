@@ -135,8 +135,9 @@ abstract class AbstractSniff implements Sniff
         $fileName = $phpcsFile->getFilename();
         $fileNameParts = explode(DIRECTORY_SEPARATOR, $fileName);
         $directoryPosition = array_search('src', $fileNameParts, true);
-        if (!$directoryPosition) {
-            $directoryPosition = array_search('tests', $fileNameParts, true) + 1;
+        if ($directoryPosition === false) {
+            $testsPosition = array_search('tests', $fileNameParts, true);
+            $directoryPosition = $testsPosition === false ? 0 : $testsPosition + 1;
         }
         $classNameParts = array_slice($fileNameParts, $directoryPosition + 1);
         $className = implode('\\', $classNameParts);
