@@ -32,8 +32,14 @@ class InlineDocBlockSniff extends AbstractSniff
     public function process(File $phpcsFile, $stackPointer): void
     {
         $tokens = $phpcsFile->getTokens();
-        $startIndex = $phpcsFile->findNext(T_OPEN_CURLY_BRACKET, $stackPointer + 1);
-        if (!$startIndex || empty($tokens[$startIndex]['bracket_closer'])) {
+
+        // Skip abstract methods and interface methods (no body)
+        if (empty($tokens[$stackPointer]['scope_opener'])) {
+            return;
+        }
+
+        $startIndex = $tokens[$stackPointer]['scope_opener'];
+        if (empty($tokens[$startIndex]['bracket_closer'])) {
             return;
         }
 
@@ -231,7 +237,7 @@ class InlineDocBlockSniff extends AbstractSniff
     protected function hasReturnAsFollowingToken(File $phpcsFile, int $contentIndex): bool
     {
         $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $contentIndex + 1, null, true);
-        if (!$nextIndex) {
+        if ($nextIndex === false) {
             return false;
         }
 
