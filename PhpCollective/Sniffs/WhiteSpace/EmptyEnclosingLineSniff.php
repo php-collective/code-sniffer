@@ -91,7 +91,9 @@ class EmptyEnclosingLineSniff extends AbstractSniff
                 if ($contentLine < $braceLine + 1) {
                     $phpcsFile->fixer->addNewline($curlyBraceStartIndex);
                 } else {
-                    for ($i = $curlyBraceStartIndex + 1; $i < $beginningOfLine - 1; $i++) {
+                    // Replace first token with newline, remove the rest
+                    $phpcsFile->fixer->replaceToken($curlyBraceStartIndex + 1, $phpcsFile->eolChar);
+                    for ($i = $curlyBraceStartIndex + 2; $i < $beginningOfLine; $i++) {
                         $phpcsFile->fixer->replaceToken($i, '');
                     }
                 }
