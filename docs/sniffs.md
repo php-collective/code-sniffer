@@ -48,7 +48,7 @@ PEAR (4 sniffs)
 - PEAR.Functions.ValidDefaultValue
 - PEAR.NamingConventions.ValidClassName
 
-PhpCollective (87 sniffs)
+PhpCollective (85 sniffs)
 -------------------------
 - PhpCollective.Arrays.ArrayBracketSpacing
 - PhpCollective.Arrays.DisallowImplicitArrayCreation
@@ -97,7 +97,6 @@ PhpCollective (87 sniffs)
 - PhpCollective.ControlStructures.ControlSignature
 - PhpCollective.ControlStructures.ControlStructureEmptyStatement
 - PhpCollective.ControlStructures.ControlStructureSpacing
-- PhpCollective.ControlStructures.DisallowAlternativeControlStructures
 - PhpCollective.ControlStructures.DisallowCloakingCheck
 - PhpCollective.ControlStructures.ElseIfDeclaration
 - PhpCollective.ControlStructures.NoInlineAssignment
@@ -123,7 +122,6 @@ PhpCollective (87 sniffs)
 - PhpCollective.Testing.AssertPrimitives
 - PhpCollective.Testing.ExpectException
 - PhpCollective.Testing.Mock
-- PhpCollective.WhiteSpace.CommaSpacing
 - PhpCollective.WhiteSpace.ConcatenationSpacing
 - PhpCollective.WhiteSpace.ConsistentIndent
 - PhpCollective.WhiteSpace.DocBlockSpacing
@@ -270,7 +268,7 @@ Squiz (27 sniffs)
 - Squiz.WhiteSpace.SemicolonSpacing
 - Squiz.WhiteSpace.SuperfluousWhitespace
 
-Universal (10 sniffs)
+Universal (12 sniffs)
 ---------------------
 - Universal.CodeAnalysis.ConstructorDestructorReturn
 - Universal.CodeAnalysis.ForeachUniqueAssignment
@@ -278,9 +276,11 @@ Universal (10 sniffs)
 - Universal.CodeAnalysis.StaticInFinalClass
 - Universal.Constants.LowercaseClassResolutionKeyword
 - Universal.Constants.UppercaseMagicConstants
+- Universal.ControlStructures.DisallowAlternativeSyntax
 - Universal.Operators.ConcatPosition
 - Universal.Operators.TypeSeparatorSpacing
 - Universal.UseStatements.NoUselessAliases
+- Universal.WhiteSpace.CommaSpacing
 - Universal.WhiteSpace.PrecisionAlignment
 
 Zend (1 sniff)
