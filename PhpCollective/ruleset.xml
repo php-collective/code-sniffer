@@ -252,7 +252,12 @@
     <rule ref="Universal.Constants.UppercaseMagicConstants"/>
     <rule ref="Universal.WhiteSpace.PrecisionAlignment"/>
     <rule ref="Universal.Operators.ConcatPosition"/>
+    <rule ref="Universal.Operators.TypeSeparatorSpacing"/>
     <rule ref="Universal.UseStatements.NoUselessAliases"/>
+    <rule ref="Universal.CodeAnalysis.NoEchoSprintf"/>
+    <rule ref="Universal.CodeAnalysis.ConstructorDestructorReturn"/>
+    <rule ref="Universal.CodeAnalysis.ForeachUniqueAssignment"/>
+    <rule ref="Universal.CodeAnalysis.StaticInFinalClass"/>
     <rule ref="Modernize.FunctionCalls.Dirname"/>
     <rule ref="NormalizedArrays.Arrays.ArrayBraceSpacing"/>
 
