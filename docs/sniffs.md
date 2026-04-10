@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 240 sniffs
+The PhpCollectiveStrict standard contains 245 sniffs
 
 Generic (27 sniffs)
 -------------------
@@ -270,11 +270,16 @@ Squiz (27 sniffs)
 - Squiz.WhiteSpace.SemicolonSpacing
 - Squiz.WhiteSpace.SuperfluousWhitespace
 
-Universal (5 sniffs)
---------------------
+Universal (10 sniffs)
+---------------------
+- Universal.CodeAnalysis.ConstructorDestructorReturn
+- Universal.CodeAnalysis.ForeachUniqueAssignment
+- Universal.CodeAnalysis.NoEchoSprintf
+- Universal.CodeAnalysis.StaticInFinalClass
 - Universal.Constants.LowercaseClassResolutionKeyword
 - Universal.Constants.UppercaseMagicConstants
 - Universal.Operators.ConcatPosition
+- Universal.Operators.TypeSeparatorSpacing
 - Universal.UseStatements.NoUselessAliases
 - Universal.WhiteSpace.PrecisionAlignment
 
