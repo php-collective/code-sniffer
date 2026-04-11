@@ -28,6 +28,7 @@
         <properties>
             <property name="allowFallbackGlobalFunctions" value="true"/>
             <property name="allowFallbackGlobalConstants" value="true"/>
+            <property name="allowPartialUses" value="false"/>
         </properties>
     </rule>
 
