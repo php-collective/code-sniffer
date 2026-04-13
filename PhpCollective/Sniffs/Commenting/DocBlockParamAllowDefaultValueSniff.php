@@ -56,7 +56,15 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        $paramCount = 0;
+        // Index signature entries by parameter name so partial or out-of-order
+        // @param lists don't cause positional mismatches, which previously
+        // produced false-positive "missing type" fixes that fought
+        // DocBlockParamTypeMismatchSniff in an infinite fixer loop.
+        $signatureByName = [];
+        foreach ($methodSignature as $sigEntry) {
+            $signatureByName[$sigEntry['variable']] = $sigEntry;
+        }
+
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
             if ($tokens[$i]['type'] !== 'T_DOC_COMMENT_TAG') {
                 continue;
@@ -64,12 +72,6 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
             if ($tokens[$i]['content'] !== '@param') {
                 continue;
             }
-
-            if (empty($methodSignature[$paramCount])) {
-                continue;
-            }
-            $methodSignatureValue = $methodSignature[$paramCount];
-            $paramCount++;
 
             $classNameIndex = $i + 2;
 
@@ -83,15 +85,21 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
                 continue;
             }
 
-            if (empty($methodSignatureValue['typehint']) && empty($methodSignatureValue['default'])) {
-                continue;
-            }
-
             /** @var \PHPStan\PhpDocParser\Ast\PhpDoc\InvalidTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\TypelessParamTagValueNode|\PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode $valueNode */
             $valueNode = static::getValueNode($tokens[$i]['content'], $content);
             if ($valueNode instanceof InvalidTagValueNode || $valueNode instanceof TypelessParamTagValueNode) {
                 return;
             }
+
+            if (!isset($signatureByName[$valueNode->parameterName])) {
+                continue;
+            }
+            $methodSignatureValue = $signatureByName[$valueNode->parameterName];
+
+            if (empty($methodSignatureValue['typehint']) && empty($methodSignatureValue['default'])) {
+                continue;
+            }
+
             $parts = $this->valueNodeParts($valueNode);
 
             // We skip for mixed
