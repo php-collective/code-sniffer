@@ -85,4 +85,18 @@ class FixMe
     public function arrayShape(array $array = null): void
     {
     }
+
+    /**
+     * Partial doc block - only $row and $errors are documented, skipping intermediate
+     * parameters. Positional matching would wrongly map docblock's $errors to the $accountId
+     * signature slot and try to add `int` to the list<string> type, fighting
+     * DocBlockParamTypeMismatchSniff in an infinite fixer loop. Must be matched by name.
+     *
+     * @param array<string, string> $row
+     * @param list<string> $errors
+     * @return void
+     */
+    public function partialDocBlock(array $row, int $accountId, array &$errors): void
+    {
+    }
 }
