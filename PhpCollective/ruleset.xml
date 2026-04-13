@@ -223,11 +223,6 @@
         <exclude name="PSR12.Files.FileHeader"/>
         <exclude name="PSR12.Files.DeclareStatement"/>
         <exclude name="PSR12.Files.OpenTag"/>
-        <!-- Conflicts with Universal.WhiteSpace.AnonClassKeywordSpacing (no space). PSR-12 spec does not
-             actually require a space between `class` and `(` in anonymous classes; the message is an
-             unintended side effect of PSR2\ClassDeclarationSniff being inherited. See
-             https://github.com/PHPCSStandards/PHP_CodeSniffer/issues/1413 -->
-        <exclude name="PSR12.Classes.AnonClassDeclaration.SpaceAfterKeyword"/>
     </rule>
 
     <!-- Disabled - these are contradictory to PSR12 (and PSR12 overrules PSR2) -->
@@ -258,7 +253,12 @@
     <rule ref="Universal.Constants.UppercaseMagicConstants"/>
     <rule ref="Universal.WhiteSpace.PrecisionAlignment"/>
     <rule ref="Universal.WhiteSpace.CommaSpacing"/>
-    <rule ref="Universal.WhiteSpace.AnonClassKeywordSpacing"/>
+    <rule ref="Universal.WhiteSpace.AnonClassKeywordSpacing">
+        <properties>
+            <!-- PSR-12 requires a space after `class` in anonymous classes (§8 defers to §7 closures). -->
+            <property name="spacing" value="1"/>
+        </properties>
+    </rule>
     <rule ref="Universal.WhiteSpace.FirstClassCallableSpacing"/>
     <rule ref="Universal.WhiteSpace.DisallowInlineTabs"/>
     <rule ref="Universal.Attributes.BracketSpacing"/>
