@@ -92,9 +92,9 @@
     <rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition"/>
 
     <rule ref="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable"/>
-    <!-- skip for now, not autofixable
-    <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/>
-    -->
+    <!-- Intentionally disabled: reports require manual review (removing a variable
+         can drop a side-effecting call), so it's not a good fit for autofix-based flows. -->
+    <!-- <rule ref="SlevomatCodingStandard.Variables.UnusedVariable"/> -->
 
     <rule ref="SlevomatCodingStandard.PHP.UselessSemicolon"/>
     <rule ref="SlevomatCodingStandard.PHP.ShortList"/>
@@ -151,16 +151,19 @@
     <rule ref="Squiz.ControlStructures.ForEachLoopDeclaration"/>
     <rule ref="Squiz.ControlStructures.LowercaseDeclaration"/>
 
-    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
-        <severity>0</severity>
-    </rule>
-
-    <rule ref="PSR2"/>
-    <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
-        <severity>0</severity>
-    </rule>
-    <rule ref="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed">
-        <severity>0</severity>
+    <rule ref="PSR2">
+        <!-- Inherited via PSR-2. Long-standing exclusion; mixing declarations and side effects is tolerated. -->
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+        <!-- We allow the `_privateMethod` convention. -->
+        <exclude name="PSR2.Methods.MethodDeclaration.Underscore"/>
+        <!-- Duplicate of PhpCollective.ControlStructures.ElseIfDeclaration.NotAllowed (our own sniff handles it). -->
+        <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed"/>
+        <!-- LineLength soft-limit warning is enough; no hard error. -->
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+        <!-- Contradictory to PSR-12 (PSR-12 overrules PSR-2) -->
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace"/>
+        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterFirst"/>
+        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterSecond"/>
     </rule>
 
     <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace">
@@ -172,9 +175,6 @@
 
     <rule ref="Zend.Files.ClosingTag"/>
     <rule ref="Generic.Files.LineEndings"/>
-    <rule ref="Generic.Files.LineLength.TooLong">
-        <severity>0</severity>
-    </rule>
 
     <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
     <rule ref="Squiz.Functions.MultiLineFunctionDeclaration"/>
@@ -187,8 +187,6 @@
             <property name="equalsSpacing" value="1"/>
         </properties>
     </rule>
-
-    <rule ref="PEAR.Functions.ValidDefaultValue"/>
 
     <rule ref="PEAR.NamingConventions.ValidClassName"/>
 
@@ -223,17 +221,6 @@
         <exclude name="PSR12.Files.FileHeader"/>
         <exclude name="PSR12.Files.DeclareStatement"/>
         <exclude name="PSR12.Files.OpenTag"/>
-    </rule>
-
-    <!-- Disabled - these are contradictory to PSR12 (and PSR12 overrules PSR2) -->
-    <rule ref="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterSecond">
-        <severity>0</severity>
-    </rule>
-    <rule ref="Squiz.ControlStructures.ForLoopDeclaration.SpacingAfterFirst">
-        <severity>0</severity>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Operators.SpreadOperatorSpacing"/>
