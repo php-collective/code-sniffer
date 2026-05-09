@@ -13,7 +13,7 @@ use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 use PhpCollective\Traits\CommentingTrait;
 
 /**
- * Method doc blocks should have a consistent order of tag types.
+ * Function/method and class/interface/trait doc blocks should have a consistent order of tag types.
  *
  * @author Mark Scherer
  * @license MIT
@@ -23,11 +23,23 @@ class DocBlockTagOrderSniff extends AbstractSniff
     use CommentingTrait;
 
     /**
-     * All other tags will go above those
+     * Tag order for function/method docblocks. All other tags will go above those.
+     *
+     * Configurable via XML:
+     *
+     * ``` xml
+     * <rule ref="PhpCollective.Commenting.DocBlockTagOrder">
+     *     <properties>
+     *         <property name="order" type="array" value="deprecated,see,param,throws,return"/>
+     *     </properties>
+     * </rule>
+     * ```
+     *
+     * Note: leading "at" sign on tag names is optional; it will be normalized.
      *
      * @var array<int, string>
      */
-    protected array $order = [
+    public array $order = [
         '@deprecated',
         '@see',
         '@param',
@@ -36,11 +48,29 @@ class DocBlockTagOrderSniff extends AbstractSniff
     ];
 
     /**
+     * Tag order for class/interface/trait docblocks. All other tags will go above those.
+     *
+     * Configurable via XML the same way as `$order`.
+     *
+     * @var array<int, string>
+     */
+    public array $classOrder = [
+        '@template',
+        '@extends',
+        '@implements',
+        '@property',
+        '@property-read',
+        '@property-write',
+        '@method',
+        '@mixin',
+    ];
+
+    /**
      * @inheritDoc
      */
     public function register(): array
     {
-        return [T_FUNCTION];
+        return [T_FUNCTION, T_CLASS, T_INTERFACE, T_TRAIT];
     }
 
     /**
@@ -49,11 +79,14 @@ class DocBlockTagOrderSniff extends AbstractSniff
     public function process(File $phpcsFile, $stackPtr): void
     {
         $tokens = $phpcsFile->getTokens();
+        $isFunction = $tokens[$stackPtr]['code'] === T_FUNCTION;
 
-        // Don't mess with closures
-        $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
-        if (!$this->isGivenKind(Tokens::$methodPrefixes, $tokens[$prevIndex])) {
-            return;
+        if ($isFunction) {
+            // Don't mess with closures
+            $prevIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+            if (!$this->isGivenKind(Tokens::$methodPrefixes, $tokens[$prevIndex])) {
+                return;
+            }
         }
 
         $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPtr);
@@ -63,20 +96,23 @@ class DocBlockTagOrderSniff extends AbstractSniff
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
-        $tags = $this->readTags($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
-        $tags = $this->checkAnnotationTagOrder($tags);
+        $order = $isFunction ? $this->order : $this->classOrder;
 
-        $this->fixOrder($phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $tags);
+        $tags = $this->readTags($phpcsFile, $docBlockStartIndex, $docBlockEndIndex);
+        $tags = $this->checkAnnotationTagOrder($tags, $order);
+
+        $this->fixOrder($phpcsFile, $docBlockStartIndex, $docBlockEndIndex, $tags, $order);
     }
 
     /**
      * @param array<int, array<string, mixed>> $tags
+     * @param array<int, string> $orderList
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function checkAnnotationTagOrder(array $tags): array
+    protected function checkAnnotationTagOrder(array $tags, array $orderList): array
     {
-        $order = $this->getTagOrderMap();
+        $order = $this->getTagOrderMap($orderList);
 
         $currentOrder = null;
         foreach ($tags as $i => $tag) {
@@ -153,13 +189,12 @@ class DocBlockTagOrderSniff extends AbstractSniff
             $index++;
         }
 
-        // Jump to the previous line
-        $currentLine = $tokens[$index]['line'];
-        while ($tokens[$index]['line'] === $currentLine) {
+        // Walk back to the line that actually contains this tag's content,
+        // skipping over any blank " * " separator lines so they are not folded
+        // into this tag's range and re-emitted in the rebuilt docblock.
+        while ($index > $startIndex && $tokens[$index]['code'] !== T_DOC_COMMENT_STRING && $tokens[$index]['code'] !== T_DOC_COMMENT_TAG) {
             $index--;
         }
-        // Fix for single line doc blocks
-        $index = max($index, $startIndex);
 
         return $this->getLastTokenOfLine($tokens, $index);
     }
@@ -206,10 +241,11 @@ class DocBlockTagOrderSniff extends AbstractSniff
      * @param int $docBlockStartIndex
      * @param int $docBlockEndIndex
      * @param array<int, array<string, mixed>> $tags
+     * @param array<int, string> $orderList
      *
      * @return void
      */
-    protected function fixOrder(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $tags): void
+    protected function fixOrder(File $phpcsFile, int $docBlockStartIndex, int $docBlockEndIndex, array $tags, array $orderList): void
     {
         $errors = [];
         foreach ($tags as $i => $tag) {
@@ -231,7 +267,7 @@ class DocBlockTagOrderSniff extends AbstractSniff
 
         $phpcsFile->fixer->beginChangeset();
 
-        $order = $this->getTagOrderMap();
+        $order = $this->getTagOrderMap($orderList);
 
         $newOrder = [];
         foreach ($tags as $tag) {
@@ -262,10 +298,17 @@ class DocBlockTagOrderSniff extends AbstractSniff
     }
 
     /**
+     * @param array<int, string> $orderList
+     *
      * @return array<string, int>
      */
-    protected function getTagOrderMap(): array
+    protected function getTagOrderMap(array $orderList): array
     {
-        return array_flip($this->order);
+        $normalized = [];
+        foreach ($orderList as $tag) {
+            $normalized[] = str_starts_with($tag, '@') ? $tag : '@' . $tag;
+        }
+
+        return array_flip($normalized);
     }
 }
