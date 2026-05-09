@@ -81,4 +81,83 @@ class DocBlockTagOrderSniffTest extends TestCase
 
         $this->prefix = null;
     }
+
+    /**
+     * Empty pattern list for a tag means "alphabetize everything in this bucket."
+     * Typical recipe for @property association lists.
+     *
+     * @return void
+     */
+    public function testDocBlockTagOrderInnerOrderProperty(): void
+    {
+        $this->prefix = 'inner-property.';
+
+        $sniff = new DocBlockTagOrderSniff();
+        $sniff->innerOrder = ['@property' => ''];
+
+        $this->assertSnifferCanFixErrors($sniff, 1);
+
+        $this->prefix = null;
+    }
+
+    /**
+     * @method CRUD recipe: prefix-priority with alphabetical tiebreak,
+     * unmatched custom methods float to the bottom alphabetically.
+     *
+     * @return void
+     */
+    public function testDocBlockTagOrderInnerOrderMethodCrud(): void
+    {
+        $this->prefix = 'inner-method.';
+
+        $sniff = new DocBlockTagOrderSniff();
+        $sniff->innerOrder = [
+            '@method' => 'newEmptyEntity,newEntity,newEntities,get,findOrCreate,find*,patchEntity,patchEntities,save,saveOrFail,saveMany*,delete,deleteOrFail,deleteMany*',
+        ];
+
+        $this->assertSnifferCanFixErrors($sniff, 1);
+
+        $this->prefix = null;
+    }
+
+    /**
+     * Edge-case shapes for @method: generic / union return types, `static` modifier,
+     * missing return type, trailing-bareword malformed line.
+     *
+     * @return void
+     */
+    public function testDocBlockTagOrderInnerOrderMethodEdges(): void
+    {
+        $this->prefix = 'inner-method-edges.';
+
+        $sniff = new DocBlockTagOrderSniff();
+        $sniff->innerOrder = [
+            '@method' => 'newEmptyEntity,newEntity,newEntities,get,findOrCreate,find*,patchEntity,patchEntities,save,saveOrFail,saveMany*,delete,deleteOrFail,deleteMany*',
+        ];
+
+        $this->assertSnifferCanFixErrors($sniff, 1);
+
+        $this->prefix = null;
+    }
+
+    /**
+     * Combined: bucket reordering + inner ordering for both @method and @property
+     * applied in one fixer pass.
+     *
+     * @return void
+     */
+    public function testDocBlockTagOrderInnerOrderCombined(): void
+    {
+        $this->prefix = 'inner-combined.';
+
+        $sniff = new DocBlockTagOrderSniff();
+        $sniff->innerOrder = [
+            '@method' => 'newEmptyEntity,newEntity,newEntities,get,findOrCreate,find*,patchEntity,patchEntities,save,saveOrFail,saveMany*,delete,deleteOrFail,deleteMany*',
+            '@property' => '',
+        ];
+
+        $this->assertSnifferCanFixErrors($sniff, 2);
+
+        $this->prefix = null;
+    }
 }
