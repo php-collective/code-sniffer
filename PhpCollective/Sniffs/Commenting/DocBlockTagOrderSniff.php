@@ -189,13 +189,12 @@ class DocBlockTagOrderSniff extends AbstractSniff
             $index++;
         }
 
-        // Jump to the previous line
-        $currentLine = $tokens[$index]['line'];
-        while ($tokens[$index]['line'] === $currentLine) {
+        // Walk back to the line that actually contains this tag's content,
+        // skipping over any blank " * " separator lines so they are not folded
+        // into this tag's range and re-emitted in the rebuilt docblock.
+        while ($index > $startIndex && $tokens[$index]['code'] !== T_DOC_COMMENT_STRING && $tokens[$index]['code'] !== T_DOC_COMMENT_TAG) {
             $index--;
         }
-        // Fix for single line doc blocks
-        $index = max($index, $startIndex);
 
         return $this->getLastTokenOfLine($tokens, $index);
     }

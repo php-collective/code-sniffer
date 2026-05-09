@@ -64,4 +64,21 @@ class DocBlockTagOrderSniffTest extends TestCase
 
         $this->prefix = null;
     }
+
+    /**
+     * Blank-line separators between tag groups should be normalized away when tags are reordered,
+     * otherwise an orphan blank line may end up splitting a now-coherent same-kind tag group.
+     *
+     * @return void
+     */
+    public function testDocBlockTagOrderNormalizesBlankLineSeparators(): void
+    {
+        $this->prefix = 'blank-lines.';
+
+        $sniff = new DocBlockTagOrderSniff();
+
+        $this->assertSnifferCanFixErrors($sniff, 1);
+
+        $this->prefix = null;
+    }
 }
