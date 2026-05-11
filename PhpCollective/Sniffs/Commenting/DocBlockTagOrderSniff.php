@@ -94,6 +94,10 @@ class DocBlockTagOrderSniff extends AbstractSniff
      * An empty value means "no prefix priority - alphabetize everything in this bucket,"
      * which is the typical recipe for `@property` association lists.
      *
+     * Only applied on class/interface/trait docblocks, not on function/method
+     * docblocks - per-method tags like `@param`/`@return` are positional and have
+     * no meaningful within-bucket subject.
+     *
      * Subject extraction per tag:
      *  - `@method` -> method name (after optional `static` + return type)
      *  - `@property[-read|-write]` -> variable name minus leading `$`
@@ -182,7 +186,10 @@ class DocBlockTagOrderSniff extends AbstractSniff
                 $value = ltrim(substr((string)$tags[$idx]['content'], strlen($tagName)));
                 $subject = $this->extractSubject($tagName, $value);
                 $score = $subject === null ? PHP_INT_MAX : $this->scoreSubject($subject, $prefixes);
-                $key = [$score, (string)$subject];
+                // Tuple second slot pushes null-subject (malformed/unparseable)
+                // entries to the bottom of their score class; without it they'd
+                // sort before real subjects because (string)null === ''.
+                $key = [$score, $subject === null ? 1 : 0, (string)$subject];
                 if ($previousKey !== null && $key < $previousKey) {
                     $tags[$idx]['innerError'] = sprintf(
                         'Inner order of %s tag wrong (subject "%s").',
@@ -402,6 +409,14 @@ class DocBlockTagOrderSniff extends AbstractSniff
 
         if ($fixInner) {
             foreach ($newOrder as $tagOrder => $entries) {
+                // The -1 bucket holds tags not present in the outer order list,
+                // so its entries can be a mix of tag types. Applying a single
+                // tag's inner-order sort across that mix would extract subjects
+                // with the wrong tag name and reorder unrelated tags. The
+                // alphabetical-by-content sort applied above already covers it.
+                if ($tagOrder === -1) {
+                    continue;
+                }
                 $tagName = $entries[0]['tag'];
                 if (!array_key_exists($tagName, $this->innerOrder)) {
                     continue;
@@ -416,8 +431,21 @@ class DocBlockTagOrderSniff extends AbstractSniff
                     if ($scoreA !== $scoreB) {
                         return $scoreA <=> $scoreB;
                     }
+                    // Push null subjects (malformed/unparseable) to the bottom
+                    // of the score class instead of letting (string)null === ''
+                    // pull them above real subjects. Fall back to original line
+                    // content when both are null so the order remains stable.
+                    if ($sa === null && $sb === null) {
+                        return strcmp($a['content'], $b['content']);
+                    }
+                    if ($sa === null) {
+                        return 1;
+                    }
+                    if ($sb === null) {
+                        return -1;
+                    }
 
-                    return strcmp((string)$sa, (string)$sb);
+                    return strcmp($sa, $sb);
                 });
 
                 $newOrder[$tagOrder] = $entries;
