@@ -134,7 +134,7 @@ Example covering both recipes (CRUD method order plus alphabetized property list
         <properties>
             <property name="innerOrder" type="array">
                 <element key="@method"
-                         value="newEmptyEntity,newEntity,newEntities,get,findOrCreate,find*,patchEntity,patchEntities,save,saveOrFail,saveMany*,delete,deleteOrFail,deleteMany*"/>
+                         value="newEmptyEntity,newEntity,newEntities,get,find*,findOrCreate,patchEntity,patchEntities,save,saveOrFail,saveMany*,delete,deleteOrFail,deleteMany*"/>
                 <element key="@property" value=""/>
                 <element key="@property-read" value=""/>
                 <element key="@property-write" value=""/>
