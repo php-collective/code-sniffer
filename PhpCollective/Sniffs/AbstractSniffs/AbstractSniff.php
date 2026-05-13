@@ -29,6 +29,27 @@ abstract class AbstractSniff implements Sniff
     ];
 
     /**
+     * Per-file cache for class-name-with-namespace resolution.
+     *
+     * `getClassNameWithNamespace()` walks the token stream backwards from
+     * the end of the file to find the class/trait/interface/enum keyword.
+     * The result is stable for the lifetime of a phpcs run on a given file,
+     * but the original implementation re-computed it on every sniff call.
+     * Caching by filename turns dozens-to-hundreds of full-file walks per
+     * large file into a single walk.
+     *
+     * @var array<string, string|null>
+     */
+    private static array $classNameWithNamespaceCache = [];
+
+    /**
+     * Per-file cache for class name resolution (with filename fallback).
+     *
+     * @var array<string, string>
+     */
+    private static array $classNameCache = [];
+
+    /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      *
@@ -98,22 +119,27 @@ abstract class AbstractSniff implements Sniff
      */
     protected function getClassNameWithNamespace(File $phpcsFile): ?string
     {
+        $cacheKey = $phpcsFile->getFilename();
+        if (array_key_exists($cacheKey, self::$classNameWithNamespaceCache)) {
+            return self::$classNameWithNamespaceCache[$cacheKey];
+        }
+
         try {
             $lastToken = TokenHelper::getLastTokenPointer($phpcsFile);
         } catch (EmptyFileException $e) {
-            return null;
+            return self::$classNameWithNamespaceCache[$cacheKey] = null;
         }
 
         if (!NamespaceHelper::findCurrentNamespaceName($phpcsFile, $lastToken)) {
-            return null;
+            return self::$classNameWithNamespaceCache[$cacheKey] = null;
         }
 
         $prevIndex = $phpcsFile->findPrevious([T_CLASS, T_TRAIT, T_INTERFACE, T_ENUM], $lastToken);
         if (!$prevIndex) {
-            return null;
+            return self::$classNameWithNamespaceCache[$cacheKey] = null;
         }
 
-        return ClassHelper::getFullyQualifiedName(
+        return self::$classNameWithNamespaceCache[$cacheKey] = ClassHelper::getFullyQualifiedName(
             $phpcsFile,
             $prevIndex,
         );
@@ -126,10 +152,15 @@ abstract class AbstractSniff implements Sniff
      */
     protected function getClassName(File $phpcsFile): string
     {
+        $cacheKey = $phpcsFile->getFilename();
+        if (isset(self::$classNameCache[$cacheKey])) {
+            return self::$classNameCache[$cacheKey];
+        }
+
         $namespace = $this->getClassNameWithNamespace($phpcsFile);
 
         if ($namespace) {
-            return trim($namespace, '\\');
+            return self::$classNameCache[$cacheKey] = trim($namespace, '\\');
         }
 
         $fileName = $phpcsFile->getFilename();
@@ -143,7 +174,7 @@ abstract class AbstractSniff implements Sniff
         $className = implode('\\', $classNameParts);
         $className = str_replace('.php', '', $className);
 
-        return $className;
+        return self::$classNameCache[$cacheKey] = $className;
     }
 
     /**
