@@ -306,16 +306,32 @@ class ConsistentIndentSniff extends AbstractSniff
     }
 
     /**
+     * Per-file cache of arrow function (T_FN) scope ranges.
+     *
+     * T_FN, unlike T_CLOSURE, isn't propagated into inner tokens' `conditions`
+     * map by phpcs, so we can't use the O(depth) conditions check for arrow
+     * functions. Instead we collect every arrow function's [scope_opener,
+     * scope_closer] range once per file and check each line against this list.
+     * Arrow function scopes can legitimately be long (think a multi-line
+     * `match` expression or a deeply nested array literal as the body), so a
+     * scan window would be incorrect; the cached-ranges approach is both
+     * unbounded and faster.
+     *
+     * The cache stores the token count alongside the scopes so it self-
+     * invalidates if the file is re-tokenized during a phpcbf fix loop.
+     *
+     * @var array<string, array{count: int, scopes: array<int, array{0: int, 1: int}>}>
+     */
+    private static array $arrowFunctionScopesCache = [];
+
+    /**
      * Check if the current position is inside a closure or arrow function.
      *
      * Fast path: phpcs's PHP tokenizer rewrites the `conditions` map of every
      * token inside an anonymous function so it contains `T_CLOSURE` rather
      * than `T_FUNCTION` (see `PHP::processAdditional()`), so the common case
      * resolves with an O(depth) walk of the (typically <10-entry) conditions
-     * array. T_FN (arrow functions) is not added to `conditions`, so we still
-     * scan backwards for it — but arrow function expressions are short by
-     * language construction (a single expression), so a tight scan window
-     * suffices.
+     * array. T_FN is handled via a per-file scope cache built on first use.
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
@@ -333,22 +349,55 @@ class ConsistentIndentSniff extends AbstractSniff
             }
         }
 
-        // Fallback for T_FN: bounded scan, since arrow function expressions
-        // can't realistically span more than a few hundred tokens.
-        $limit = max(0, $stackPtr - 500);
-        for ($i = $stackPtr - 1; $i >= $limit; $i--) {
-            if ($tokens[$i]['code'] !== T_FN) {
-                continue;
-            }
-            if (!isset($tokens[$i]['scope_opener'], $tokens[$i]['scope_closer'])) {
-                continue;
-            }
-            if ($stackPtr > $tokens[$i]['scope_opener'] && $stackPtr < $tokens[$i]['scope_closer']) {
+        foreach ($this->getArrowFunctionScopes($phpcsFile, $tokens) as $range) {
+            if ($stackPtr > $range[0] && $stackPtr < $range[1]) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Build (and cache per file) the list of arrow function scope ranges.
+     *
+     * Single O(file) walk on first invocation per file, then O(arrows) per
+     * lookup. Arrow function counts are typically a handful per file, so the
+     * per-lookup cost stays small.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return array<int, array{0: int, 1: int}>
+     */
+    protected function getArrowFunctionScopes(File $phpcsFile, array $tokens): array
+    {
+        $cacheKey = $phpcsFile->getFilename();
+        $tokenCount = count($tokens);
+        if (
+            isset(self::$arrowFunctionScopesCache[$cacheKey])
+            && self::$arrowFunctionScopesCache[$cacheKey]['count'] === $tokenCount
+        ) {
+            return self::$arrowFunctionScopesCache[$cacheKey]['scopes'];
+        }
+
+        $scopes = [];
+        foreach ($tokens as $token) {
+            if ($token['code'] !== T_FN) {
+                continue;
+            }
+            if (!isset($token['scope_opener'], $token['scope_closer'])) {
+                continue;
+            }
+            $scopes[] = [$token['scope_opener'], $token['scope_closer']];
+        }
+
+        self::$arrowFunctionScopesCache[$cacheKey] = [
+            'count' => $tokenCount,
+            'scopes' => $scopes,
+        ];
+
+        return $scopes;
     }
 
     /**
