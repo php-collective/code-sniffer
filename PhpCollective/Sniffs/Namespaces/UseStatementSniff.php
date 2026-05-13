@@ -41,6 +41,22 @@ class UseStatementSniff implements Sniff
     protected ?string $className = null;
 
     /**
+     * Per-file cache of `getUseStatements()` output.
+     *
+     * The sniff's existing instance-level cache (`$this->existingStatements`)
+     * already covers repeated calls within a single phpcs pass. The
+     * static cache adds protection across phpcbf fix iterations, where
+     * `populateTokenListeners()` instantiates a fresh sniff object per
+     * pass and resets the instance cache. Token count alone is not a
+     * strong enough invalidation key (an alias rename can keep it
+     * constant), so cached entries also store a content fingerprint of
+     * each use statement range and re-verify it before being trusted.
+     *
+     * @var array<string, array{count: int, statements: array<string, array<string, mixed>>, fingerprints: array<int, array{start: int, end: int, fingerprint: string}>}>
+     */
+    private static array $useStatementsFileCache = [];
+
+    /**
      * @inheritDoc
      */
     public function register(): array
@@ -1120,8 +1136,19 @@ class UseStatementSniff implements Sniff
     protected function getUseStatements(File $phpcsFile): array
     {
         $tokens = $phpcsFile->getTokens();
+        $cacheKey = $phpcsFile->getFilename();
+        $tokenCount = count($tokens);
+        if (
+            isset(self::$useStatementsFileCache[$cacheKey])
+            && self::$useStatementsFileCache[$cacheKey]['count'] === $tokenCount
+            && self::$useStatementsFileCache[$cacheKey]['fingerprints'] !== []
+            && $this->useStatementsCacheStillValid(self::$useStatementsFileCache[$cacheKey]['fingerprints'], $tokens)
+        ) {
+            return self::$useStatementsFileCache[$cacheKey]['statements'];
+        }
 
         $statements = [];
+        $fingerprints = [];
         foreach ($tokens as $index => $token) {
             if ($token['code'] !== T_USE || $token['level'] > 0) {
                 continue;
@@ -1138,6 +1165,9 @@ class UseStatementSniff implements Sniff
             }
 
             $semicolonIndex = $phpcsFile->findNext(T_SEMICOLON, $useStatementStartIndex + 1);
+            if ($semicolonIndex === false) {
+                continue;
+            }
             $useStatementEndIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $semicolonIndex - 1, null, true);
             if ($useStatementEndIndex === false) {
                 continue;
@@ -1177,9 +1207,74 @@ class UseStatementSniff implements Sniff
                 'shortName' => $shortName,
                 'start' => $index,
             ];
+            $fingerprints[] = [
+                'start' => (int)$index,
+                'end' => $semicolonIndex,
+                'fingerprint' => $this->buildUseStatementFingerprint($tokens, (int)$index, $semicolonIndex),
+            ];
         }
 
+        self::$useStatementsFileCache[$cacheKey] = [
+            'count' => $tokenCount,
+            'statements' => $statements,
+            'fingerprints' => $fingerprints,
+        ];
+
         return $statements;
+    }
+
+    /**
+     * Verify a cached `getUseStatements()` entry against the live tokens.
+     *
+     * Matches the invalidation strategy used by `UseStatementsTrait` and
+     * `FullyQualifiedClassNameInDocBlockSniff`: re-fingerprint each
+     * recorded use statement range and bail if anything differs. Catches
+     * in-place edits that preserve token count (e.g. alias rename).
+     *
+     * Cost: O(num_uses * avg_use_length) - a handful of token reads.
+     *
+     * @param array<int, array{start: int, end: int, fingerprint: string}> $fingerprints
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return bool
+     */
+    private function useStatementsCacheStillValid(array $fingerprints, array $tokens): bool
+    {
+        foreach ($fingerprints as $entry) {
+            $start = $entry['start'];
+            if (!isset($tokens[$start]) || $tokens[$start]['code'] !== T_USE) {
+                return false;
+            }
+
+            $live = $this->buildUseStatementFingerprint($tokens, $start, $entry['end']);
+            if ($live !== $entry['fingerprint']) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Concatenate the content of every token in [$start, $end] inclusive.
+     *
+     * @param array<int, array<string, mixed>> $tokens
+     * @param int $start
+     * @param int $end
+     *
+     * @return string
+     */
+    private function buildUseStatementFingerprint(array $tokens, int $start, int $end): string
+    {
+        $fingerprint = '';
+        for ($i = $start; $i <= $end; $i++) {
+            if (!isset($tokens[$i])) {
+                break;
+            }
+            $fingerprint .= $tokens[$i]['content'];
+        }
+
+        return $fingerprint;
     }
 
     /**
