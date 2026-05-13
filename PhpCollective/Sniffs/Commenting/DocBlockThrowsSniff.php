@@ -132,7 +132,14 @@ class DocBlockThrowsSniff extends AbstractSniff
                 $classIndex = $nextIndex;
             }
 
-            $doubleColonIndex = $phpcsFile->findNext(T_DOUBLE_COLON, $i + 1, $scopeCloser);
+            // Constrain the `::` lookup to the current statement.
+            // The original code searched up to $scopeCloser, which on long
+            // method bodies could pick up an unrelated `::` operator from
+            // a later statement (and silently used it to gate exception
+            // collection for *this* throw). Bound by the next `;`.
+            $statementEnd = $phpcsFile->findNext(T_SEMICOLON, $i + 1, $scopeCloser);
+            $doubleColonSearchEnd = $statementEnd !== false ? $statementEnd : $scopeCloser;
+            $doubleColonIndex = $phpcsFile->findNext(T_DOUBLE_COLON, $i + 1, $doubleColonSearchEnd);
 
             if (!$newIndex && !$classIndex && !$doubleColonIndex) {
                 continue;
