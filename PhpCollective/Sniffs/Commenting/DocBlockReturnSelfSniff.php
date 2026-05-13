@@ -43,6 +43,8 @@ class DocBlockReturnSelfSniff extends AbstractSniff
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
+        $ownClassName = null;
+
         for ($i = $docBlockStartIndex + 1; $i < $docBlockEndIndex; $i++) {
             if ($tokens[$i]['type'] !== 'T_DOC_COMMENT_TAG') {
                 continue;
@@ -75,6 +77,28 @@ class DocBlockReturnSelfSniff extends AbstractSniff
             }
 
             $parts = explode('|', $content);
+
+            // The three assertions below all act only when `parts` contains
+            // `self`, `$this`, or the own (fully qualified) class name.
+            // Skipping the expensive return-type body scan when none of these
+            // are present turns this sniff from O(methods * body_size) into
+            // ~O(methods) for files where most @return tags are plain types
+            // like `void`, `int`, `array<...>`, etc.
+            if ($ownClassName === null) {
+                $ownClassName = '\\' . $this->getClassName($phpcsFile);
+            }
+            $needsReturnTypeCheck = false;
+            foreach ($parts as $part) {
+                if ($part === 'self' || $part === '$this' || $part === $ownClassName) {
+                    $needsReturnTypeCheck = true;
+
+                    break;
+                }
+            }
+            if (!$needsReturnTypeCheck) {
+                continue;
+            }
+
             $returnTypes = $this->getReturnTypes($phpcsFile, $stackPointer);
 
             $this->assertCorrectDocBlockParts($phpcsFile, $classNameIndex, $parts, $returnTypes, $appendix);
