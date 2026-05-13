@@ -24,6 +24,23 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
     use CommentingTrait;
 
     /**
+     * Per-file runtime cache for the current phpcs pass.
+     *
+     * The sniff registers on several token types that can all point at the
+     * same doc block, so without deduplication the same comment can be parsed
+     * multiple times in one pass. The file-level namespace and use statements
+     * are also stable within one pass and should only be built once.
+     *
+     * phpcbf may re-tokenize the same File object for a new pass while keeping
+     * the token count unchanged. We detect that by the stack pointer order:
+     * token processing is monotonic within a pass, so a non-increasing pointer
+     * means a fresh pass and the cache is reset.
+     *
+     * @var array<string, array{count: int, lastStackPointer: int, namespace: string|null, processedDocBlocks: array<int, true>, useStatements: array<string, string>|null}>
+     */
+    private static array $runtimeCache = [];
+
+    /**
      * @var array<string>
      */
     public static array $whitelistedTypes = [
@@ -73,13 +90,18 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
      */
     public function process(File $phpcsFile, $stackPointer): void
     {
-        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, $stackPointer);
+        $tokens = $phpcsFile->getTokens();
+        $this->initializeRuntimeCache($phpcsFile, (int)$stackPointer, $tokens);
+
+        $docBlockEndIndex = $this->findRelatedDocBlock($phpcsFile, (int)$stackPointer);
 
         if (!$docBlockEndIndex) {
             return;
         }
-
-        $tokens = $phpcsFile->getTokens();
+        if ($this->hasProcessedDocBlock($phpcsFile, $docBlockEndIndex)) {
+            return;
+        }
+        $this->markDocBlockProcessed($phpcsFile, $docBlockEndIndex);
 
         $docBlockStartIndex = $tokens[$docBlockEndIndex]['comment_opener'];
 
@@ -241,6 +263,11 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
      */
     protected function getNamespace(File $phpcsFile): string
     {
+        $cacheKey = $phpcsFile->getFilename();
+        if (self::$runtimeCache[$cacheKey]['namespace'] !== null) {
+            return self::$runtimeCache[$cacheKey]['namespace'];
+        }
+
         $tokens = $phpcsFile->getTokens();
 
         $namespaceStart = null;
@@ -254,6 +281,8 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
             break;
         }
         if (!$namespaceStart) {
+            self::$runtimeCache[$cacheKey]['namespace'] = '';
+
             return '';
         }
 
@@ -269,6 +298,7 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
         );
 
         $namespace = trim($phpcsFile->getTokensAsString(($namespaceStart), ($namespaceEnd - $namespaceStart)));
+        self::$runtimeCache[$cacheKey]['namespace'] = $namespace;
 
         return $namespace;
     }
@@ -303,6 +333,11 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
      */
     protected function parseUseStatements(File $phpcsFile): array
     {
+        $cacheKey = $phpcsFile->getFilename();
+        if (self::$runtimeCache[$cacheKey]['useStatements'] !== null) {
+            return self::$runtimeCache[$cacheKey]['useStatements'];
+        }
+
         $useStatements = [];
         $tokens = $phpcsFile->getTokens();
 
@@ -334,6 +369,63 @@ class FullyQualifiedClassNameInDocBlockSniff implements Sniff
             $useStatements[$className] = $useStatement;
         }
 
+        self::$runtimeCache[$cacheKey]['useStatements'] = $useStatements;
+
         return $useStatements;
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPointer
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return void
+     */
+    protected function initializeRuntimeCache(File $phpcsFile, int $stackPointer, array $tokens): void
+    {
+        $cacheKey = $phpcsFile->getFilename();
+        $tokenCount = count($tokens);
+        if (
+            !isset(self::$runtimeCache[$cacheKey])
+            || self::$runtimeCache[$cacheKey]['count'] !== $tokenCount
+            || $stackPointer <= self::$runtimeCache[$cacheKey]['lastStackPointer']
+        ) {
+            self::$runtimeCache[$cacheKey] = [
+                'count' => $tokenCount,
+                'lastStackPointer' => $stackPointer,
+                'namespace' => null,
+                'processedDocBlocks' => [],
+                'useStatements' => null,
+            ];
+
+            return;
+        }
+
+        self::$runtimeCache[$cacheKey]['lastStackPointer'] = $stackPointer;
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $docBlockEndIndex
+     *
+     * @return bool
+     */
+    protected function hasProcessedDocBlock(File $phpcsFile, int $docBlockEndIndex): bool
+    {
+        $cacheKey = $phpcsFile->getFilename();
+
+        return isset(self::$runtimeCache[$cacheKey]['processedDocBlocks'][$docBlockEndIndex]);
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $docBlockEndIndex
+     *
+     * @return void
+     */
+    protected function markDocBlockProcessed(File $phpcsFile, int $docBlockEndIndex): void
+    {
+        $cacheKey = $phpcsFile->getFilename();
+        self::$runtimeCache[$cacheKey]['processedDocBlocks'][$docBlockEndIndex] = true;
     }
 }
