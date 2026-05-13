@@ -107,8 +107,7 @@ class ConsistentIndentSniff extends AbstractSniff
             return;
         }
 
-        // Additional safety: if this looks like it could be in a case block, skip it
-        // Case blocks don't show up in conditions, so expected might be wrong
+        // Additional safety: if this looks like it could be in a case block, skip it.
         if ($this->couldBeInCaseBlock($phpcsFile, $stackPtr, $tokens)) {
             return;
         }
@@ -307,8 +306,16 @@ class ConsistentIndentSniff extends AbstractSniff
     }
 
     /**
-     * Check if the current position is inside a closure/anonymous function.
-     * PHPCS doesn't properly track closures in the conditions array, so we need to detect them manually.
+     * Check if the current position is inside a closure or arrow function.
+     *
+     * Fast path: phpcs's PHP tokenizer rewrites the `conditions` map of every
+     * token inside an anonymous function so it contains `T_CLOSURE` rather
+     * than `T_FUNCTION` (see `PHP::processAdditional()`), so the common case
+     * resolves with an O(depth) walk of the (typically <10-entry) conditions
+     * array. T_FN (arrow functions) is not added to `conditions`, so we still
+     * scan backwards for it — but arrow function expressions are short by
+     * language construction (a single expression), so a tight scan window
+     * suffices.
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
@@ -318,41 +325,26 @@ class ConsistentIndentSniff extends AbstractSniff
      */
     protected function isInsideClosure(File $phpcsFile, int $stackPtr, array $tokens): bool
     {
-        // Look backward for a closure token (T_CLOSURE, T_FN, or T_FUNCTION for anonymous functions)
-        $closureTypes = [T_CLOSURE, T_FN];
-
-        // Search backward for a closure opening
-        for ($i = $stackPtr - 1; $i >= 0; $i--) {
-            // Check for T_FUNCTION (could be a named method or anonymous function)
-            if ($tokens[$i]['code'] === T_FUNCTION) {
-                // Check if this is a named function (not a closure)
-                $nextNonWhitespace = $phpcsFile->findNext(T_WHITESPACE, $i + 1, null, true);
-                if ($nextNonWhitespace !== false && $tokens[$nextNonWhitespace]['code'] === T_STRING) {
-                    // Named function/method - stop searching, we're not in a closure
-                    return false;
-                }
-
-                // It's an anonymous function (closure) - check if we're inside it
-                if (isset($tokens[$i]['scope_opener']) && isset($tokens[$i]['scope_closer'])) {
-                    if ($stackPtr > $tokens[$i]['scope_opener'] && $stackPtr < $tokens[$i]['scope_closer']) {
-                        return true;
-                    }
+        if (!empty($tokens[$stackPtr]['conditions'])) {
+            foreach ($tokens[$stackPtr]['conditions'] as $code) {
+                if ($code === T_CLOSURE) {
+                    return true;
                 }
             }
+        }
 
-            if (in_array($tokens[$i]['code'], $closureTypes, true)) {
-                // Found a closure, check if our position is within its scope
-                if (isset($tokens[$i]['scope_opener']) && isset($tokens[$i]['scope_closer'])) {
-                    if ($stackPtr > $tokens[$i]['scope_opener'] && $stackPtr < $tokens[$i]['scope_closer']) {
-                        return true;
-                    }
-                }
+        // Fallback for T_FN: bounded scan, since arrow function expressions
+        // can't realistically span more than a few hundred tokens.
+        $limit = max(0, $stackPtr - 500);
+        for ($i = $stackPtr - 1; $i >= $limit; $i--) {
+            if ($tokens[$i]['code'] !== T_FN) {
+                continue;
             }
-
-            // Stop searching if we've gone too far (more than 2000 tokens back)
-            // Large closures with validation logic can easily exceed 500 tokens
-            if ($stackPtr - $i > 2000) {
-                break;
+            if (!isset($tokens[$i]['scope_opener'], $tokens[$i]['scope_closer'])) {
+                continue;
+            }
+            if ($stackPtr > $tokens[$i]['scope_opener'] && $stackPtr < $tokens[$i]['scope_closer']) {
+                return true;
             }
         }
 
@@ -416,6 +408,10 @@ class ConsistentIndentSniff extends AbstractSniff
      * Check if the current position is inside a switch/case block.
      * Case blocks have special indentation rules per PER Coding Style.
      *
+     * Uses the pre-computed `conditions` map: T_SWITCH is a scope opener
+     * in phpcs's PHP tokenizer, so every token inside a switch's scope
+     * already carries T_SWITCH in its conditions array — no scan needed.
+     *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      * @param array<int, array<string, mixed>> $tokens
@@ -424,20 +420,13 @@ class ConsistentIndentSniff extends AbstractSniff
      */
     protected function isInsideSwitchCase(File $phpcsFile, int $stackPtr, array $tokens): bool
     {
-        // Look backward for a switch statement
-        for ($i = $stackPtr - 1; $i >= 0; $i--) {
-            if ($tokens[$i]['code'] === T_SWITCH) {
-                // Found a switch, check if we're within its scope
-                if (isset($tokens[$i]['scope_opener']) && isset($tokens[$i]['scope_closer'])) {
-                    if ($stackPtr > $tokens[$i]['scope_opener'] && $stackPtr < $tokens[$i]['scope_closer']) {
-                        return true;
-                    }
-                }
-            }
+        if (empty($tokens[$stackPtr]['conditions'])) {
+            return false;
+        }
 
-            // Stop if we've gone too far back
-            if ($stackPtr - $i > 500) {
-                break;
+        foreach ($tokens[$stackPtr]['conditions'] as $code) {
+            if ($code === T_SWITCH) {
+                return true;
             }
         }
 
@@ -514,7 +503,11 @@ class ConsistentIndentSniff extends AbstractSniff
     }
 
     /**
-     * Check if this could be in a case block by looking for case/default keywords nearby.
+     * Check if this could be in a case block.
+     *
+     * Uses the pre-computed `conditions` map: T_CASE and T_DEFAULT are scope
+     * openers in phpcs's PHP tokenizer, so a token lexically inside a case
+     * arm already carries T_CASE / T_DEFAULT in its conditions array.
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
@@ -524,16 +517,13 @@ class ConsistentIndentSniff extends AbstractSniff
      */
     protected function couldBeInCaseBlock(File $phpcsFile, int $stackPtr, array $tokens): bool
     {
-        // Look backward for case/default keywords (not too far)
-        // Using 500 to match isInsideSwitchCase() limit, as case blocks can be large
-        for ($i = $stackPtr - 1; $i >= max(0, $stackPtr - 500); $i--) {
-            if ($tokens[$i]['code'] === T_CASE || $tokens[$i]['code'] === T_DEFAULT) {
-                // Found a case/default, likely in a case block
+        if (empty($tokens[$stackPtr]['conditions'])) {
+            return false;
+        }
+
+        foreach ($tokens[$stackPtr]['conditions'] as $code) {
+            if ($code === T_CASE || $code === T_DEFAULT) {
                 return true;
-            }
-            // If we hit another control structure, stop
-            if ($tokens[$i]['code'] === T_IF || $tokens[$i]['code'] === T_WHILE || $tokens[$i]['code'] === T_FOR) {
-                break;
             }
         }
 
