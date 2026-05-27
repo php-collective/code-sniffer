@@ -664,7 +664,7 @@ class DocBlockTagOrderSniff extends AbstractSniff
      *
      * @return array<int, string>
      */
-    protected function normalizeInnerPrefixes(string|array|null $value): array
+    protected function normalizeInnerPrefixes(array|string|null $value): array
     {
         if ($value === null || $value === '') {
             return [];
