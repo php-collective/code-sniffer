@@ -32,6 +32,8 @@ use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use const T_FUNCTION;
+use const T_TYPE_UNION;
 
 /**
  * Verifies order of types in type hints. Also removes duplicates.
@@ -91,7 +93,10 @@ class TypeHintSniff extends AbstractSniff
      */
     public function register(): array
     {
-        return [T_DOC_COMMENT_OPEN_TAG];
+        return [
+            T_DOC_COMMENT_OPEN_TAG,
+            T_FUNCTION,
+        ];
     }
 
     /**
@@ -101,6 +106,12 @@ class TypeHintSniff extends AbstractSniff
      */
     public function process(File $phpcsFile, $stackPtr): void
     {
+        if ($phpcsFile->getTokens()[$stackPtr]['code'] === T_FUNCTION) {
+            $this->processNativeTypeHints($phpcsFile, $stackPtr);
+
+            return;
+        }
+
         $tokens = $phpcsFile->getTokens();
 
         if (!isset($tokens[$stackPtr]['comment_closer'])) {
@@ -245,6 +256,81 @@ class TypeHintSniff extends AbstractSniff
     }
 
     /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return void
+     */
+    protected function processNativeTypeHints(File $phpcsFile, int $stackPtr): void
+    {
+        foreach ($phpcsFile->getMethodParameters($stackPtr) as $param) {
+            if ($param['type_hint'] === '' || $param['type_hint_token'] === false || $param['type_hint_end_token'] === false) {
+                continue;
+            }
+
+            $this->processNativeTypeHint(
+                $phpcsFile,
+                $param['type_hint_token'],
+                $param['type_hint_end_token'],
+                $param['type_hint'],
+            );
+        }
+
+        $methodProperties = $phpcsFile->getMethodProperties($stackPtr);
+        if (
+            $methodProperties['return_type'] === '' ||
+            $methodProperties['return_type_token'] === false ||
+            $methodProperties['return_type_end_token'] === false
+        ) {
+            return;
+        }
+
+        $this->processNativeTypeHint(
+            $phpcsFile,
+            $methodProperties['return_type_token'],
+            $methodProperties['return_type_end_token'],
+            $methodProperties['return_type'],
+        );
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $typeHintToken
+     * @param int $typeHintEndToken
+     * @param string $typeHint
+     *
+     * @return void
+     */
+    protected function processNativeTypeHint(File $phpcsFile, int $typeHintToken, int $typeHintEndToken, string $typeHint): void
+    {
+        if (!str_contains($typeHint, '|') || !$this->contains($phpcsFile, T_TYPE_UNION, $typeHintToken, $typeHintEndToken, false)) {
+            return;
+        }
+
+        $sortedTypeHint = $this->getSortedNativeTypeHint(explode('|', $typeHint));
+        if ($sortedTypeHint === $typeHint) {
+            return;
+        }
+
+        $fix = $phpcsFile->addFixableError(
+            'Native type hint is not formatted properly, expected "%s"',
+            $typeHintToken,
+            'IncorrectNativeFormat',
+            [$sortedTypeHint],
+        );
+        if (!$fix) {
+            return;
+        }
+
+        $phpcsFile->fixer->beginChangeset();
+        $phpcsFile->fixer->replaceToken($typeHintToken, $sortedTypeHint);
+        for ($i = $typeHintToken + 1; $i <= $typeHintEndToken; $i++) {
+            $phpcsFile->fixer->replaceToken($i, '');
+        }
+        $phpcsFile->fixer->endChangeset();
+    }
+
+    /**
      * @param array<\PHPStan\PhpDocParser\Ast\Type\TypeNode> $types node types
      *
      * @return string
@@ -299,6 +385,35 @@ class TypeHintSniff extends AbstractSniff
         $types = $this->makeUnique($types);
 
         return $this->renderUnionTypes($types);
+    }
+
+    /**
+     * @param array<string> $types
+     *
+     * @return string
+     */
+    protected function getSortedNativeTypeHint(array $types): string
+    {
+        $sortable = array_fill_keys(static::$sortMap, []);
+        $unsortable = [];
+        foreach ($types as $type) {
+            $sortName = strtolower(ltrim($type, '\\'));
+            if (in_array($sortName, static::$sortMap, true)) {
+                $sortable[$sortName][] = $type;
+            } else {
+                $unsortable[] = $type;
+            }
+        }
+
+        $sorted = [];
+        array_walk($sortable, function ($types) use (&$sorted): void {
+            $sorted = array_merge($sorted, $types);
+        });
+
+        $types = array_merge($unsortable, $sorted);
+        $types = $this->makeUnique($types);
+
+        return implode('|', $types);
     }
 
     /**

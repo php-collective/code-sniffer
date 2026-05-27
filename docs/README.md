@@ -98,6 +98,10 @@ To enable checking for (and auto-fixing) invalid `: void` return types on these 
     </rule>
 ```
 
+## Union type order
+`PhpCollective.Commenting.TypeHint` sorts docblock union types by the standard type order.
+Native function parameter and return union types are sorted with the same order, keeping signatures such as `string|int $modelId` aligned with `@param string|int $modelId`.
+
 ## Customize DocBlock tag ordering
 `PhpCollective.Commenting.DocBlockTagOrder` enforces a consistent tag order in docblocks for functions, methods, classes, interfaces, and traits. Three properties can be overridden via XML.
 

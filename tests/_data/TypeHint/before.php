@@ -34,6 +34,18 @@ class FixMe
     }
 
     /**
+     * @param string|int $modelId
+     */
+    public function nativeUnionOrder(int|string $modelId): void
+    {
+    }
+
+    public function nativeUnionReturn(): int|string
+    {
+        return 1;
+    }
+
+    /**
      * @param \ArrayObject|int[] $array
      *
      * @return \ArrayAccess|array<int> $array
