@@ -77,6 +77,9 @@ class ConsistentIndentSniff extends AbstractSniff
         if ($this->isInsideSwitchCase($phpcsFile, $nextToken, $tokens)) {
             return;
         }
+        if ($this->isInsideAnonClass($tokens, $nextToken)) {
+            return;
+        }
         if ($tokens[$nextToken]['code'] === T_COMMENT || $tokens[$nextToken]['code'] === T_DOC_COMMENT_OPEN_TAG) {
             return;
         }
@@ -475,6 +478,38 @@ class ConsistentIndentSniff extends AbstractSniff
 
         foreach ($tokens[$stackPtr]['conditions'] as $code) {
             if ($code === T_SWITCH) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the current position is inside an anonymous class body.
+     *
+     * Anonymous classes are frequently passed as arguments to a multi-line
+     * function call (e.g. `new Service(new class () extends Base { ... })`).
+     * In that case the class scope is opened inside an unclosed parenthesis,
+     * so the body carries one continuation indent level that `getExpectedIndent()`
+     * (which only counts scope conditions) cannot see. `Generic.WhiteSpace.ScopeIndent`
+     * does account for it, so flagging here produces a fixer conflict where the two
+     * sniffs dedent/indent the same lines forever ("FAILED TO FIX"). Defer to
+     * ScopeIndent for anonymous class bodies, the same way closures are skipped.
+     *
+     * @param array<int, array<string, mixed>> $tokens
+     * @param int $stackPtr
+     *
+     * @return bool
+     */
+    protected function isInsideAnonClass(array $tokens, int $stackPtr): bool
+    {
+        if (empty($tokens[$stackPtr]['conditions'])) {
+            return false;
+        }
+
+        foreach ($tokens[$stackPtr]['conditions'] as $code) {
+            if ($code === T_ANON_CLASS) {
                 return true;
             }
         }

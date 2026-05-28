@@ -108,4 +108,21 @@ class FixMe
             ?? $params['home_id']
             ?? null;
     }
+
+    public function anonClassAsArgumentShouldNotBeFlagged(array $payload): object
+    {
+        return new Service(
+            new class ($payload) extends Base {
+                public function __construct(private array $payload)
+                {
+                    parent::__construct();
+                }
+
+                public function defaultProvider(): string
+                {
+                    return 'codex';
+                }
+            },
+        );
+    }
 }
