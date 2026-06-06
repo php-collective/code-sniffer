@@ -283,7 +283,11 @@ class DocBlockVarSniff extends AbstractSniff
         }
 
         $content = $tokens[$classNameIndex]['content'];
-        if (str_contains($content, '{') || str_contains($content, '<')) {
+        // Skip types whose syntax contains internal spaces/structure that the
+        // simple first-space split below cannot handle: generics/array-shapes
+        // (`{`, `<`) and callable/Closure signatures (`(int): string`). Without
+        // this the fixer would split mid-type and corrupt the annotation.
+        if (str_contains($content, '{') || str_contains($content, '<') || str_contains($content, '(')) {
             return;
         }
 
