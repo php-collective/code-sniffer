@@ -283,19 +283,22 @@ class DocBlockVarSniff extends AbstractSniff
         }
 
         $content = $tokens[$classNameIndex]['content'];
-        // Skip types whose syntax contains internal spaces/structure that the
-        // simple first-space split below cannot handle: generics/array-shapes
-        // (`{`, `<`) and callable/Closure signatures (`(int): string`). Without
-        // this the fixer would split mid-type and corrupt the annotation.
-        if (str_contains($content, '{') || str_contains($content, '<') || str_contains($content, '(')) {
-            return;
-        }
 
         $appendix = '';
         $spaceIndex = strpos($content, ' ');
-        if ($spaceIndex) {
+        if ($spaceIndex !== false) {
             $appendix = substr($content, $spaceIndex);
             $content = substr($content, 0, $spaceIndex);
+        }
+
+        // Skip types whose syntax contains internal structure that the simple
+        // first-space split above cannot handle: generics/array-shapes (`{`,
+        // `<`) and callable/Closure signatures (`(int): string`). Their opening
+        // token sits before the first space, so checking the split-off type
+        // catches them while leaving a trailing description like `Foo (note)`
+        // alone. Without this the fixer would split mid-type and corrupt it.
+        if (str_contains($content, '{') || str_contains($content, '<') || str_contains($content, '(')) {
+            return;
         }
 
         if (!$content) {

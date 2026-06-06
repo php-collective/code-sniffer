@@ -75,4 +75,9 @@ class FixMe
      * @var \Closure(string): string
      */
     protected ?Closure $transformer = null;
+
+    /**
+     * @var string|null (deprecated)
+     */
+    protected ?string $note;
 }
