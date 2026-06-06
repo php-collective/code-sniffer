@@ -70,4 +70,14 @@ class FixMe
      * @var MyClass[]
      */
     protected array $objects;
+
+    /**
+     * @var \Closure(string): string
+     */
+    protected ?Closure $transformer = null;
+
+    /**
+     * @var string (deprecated)
+     */
+    protected ?string $note;
 }

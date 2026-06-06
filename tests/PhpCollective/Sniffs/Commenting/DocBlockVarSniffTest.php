@@ -17,7 +17,7 @@ class DocBlockVarSniffTest extends TestCase
      */
     public function testDocBlockConstSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new DocBlockVarSniff(), 1);
+        $this->assertSnifferFindsErrors(new DocBlockVarSniff(), 2);
     }
 
     /**
