@@ -25,6 +25,7 @@ class RemoveFunctionAliasSniff implements Sniff
         'is_long' => 'is_int',
         'is_real' => 'is_float',
         'is_double' => 'is_float',
+        'doubleval' => 'floatval',
         'is_writeable' => 'is_writable',
         'join' => 'implode',
         'key_exists' => 'array_key_exists', // Deprecated function
@@ -32,9 +33,10 @@ class RemoveFunctionAliasSniff implements Sniff
         'strchr' => 'strstr',
         'ini_alter' => 'ini_set',
         'fputs' => 'fwrite',
-        'die' => 'exit',
         'chop' => 'rtrim',
-        'print' => 'echo',
+        'pos' => 'current',
+        'show_source' => 'highlight_file',
+        'user_error' => 'trigger_error',
     ];
 
     /**
