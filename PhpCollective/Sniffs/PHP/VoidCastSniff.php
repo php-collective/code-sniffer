@@ -227,9 +227,9 @@ class VoidCastSniff implements Sniff
                 'MissingSpaceAfter',
             );
             if ($fix) {
-                // Grow the following token rather than the cast itself: on PHP 8.5 the whole
-                // cast is one token, so the inner-spacing fix would target the same index and
-                // one of the two changes would be dropped.
+                // Grow a neighboring token rather than the cast itself. Both spacing fixes
+                // deliberately avoid the cast token because on PHP 8.5 the whole cast is a single
+                // token, and two mutations of one index in one fixer pass would collide.
                 $phpcsFile->fixer->addContentBefore($nextToken, ' ');
             }
         } else {

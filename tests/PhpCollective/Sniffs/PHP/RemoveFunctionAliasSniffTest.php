@@ -17,7 +17,7 @@ class RemoveFunctionAliasSniffTest extends TestCase
      */
     public function testRemoveFunctionAliasSniffer(): void
     {
-        $this->assertSnifferFindsFixableErrors(new RemoveFunctionAliasSniff(), 16, 16);
+        $this->assertSnifferFindsFixableErrors(new RemoveFunctionAliasSniff(), 18, 18);
     }
 
     /**
@@ -25,6 +25,6 @@ class RemoveFunctionAliasSniffTest extends TestCase
      */
     public function testRemoveFunctionAliasFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new RemoveFunctionAliasSniff(), 16);
+        $this->assertSnifferCanFixErrors(new RemoveFunctionAliasSniff(), 18);
     }
 }

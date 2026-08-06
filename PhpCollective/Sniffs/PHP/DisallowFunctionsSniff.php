@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Sniffs\Sniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Do not use functions that are problematic or not safe for upgrading.
  */
-class DisallowFunctionsSniff implements Sniff
+class DisallowFunctionsSniff extends AbstractSniff
 {
     /**
      * @var array<string>
@@ -30,7 +30,7 @@ class DisallowFunctionsSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_STRING];
+        return $this->getGlobalFunctionNameTokenCodes();
     }
 
     /**
@@ -52,12 +52,12 @@ class DisallowFunctionsSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        $key = strtolower($tokenContent);
-        if (!isset(static::$disallowed[$key])) {
+        $key = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
+        if ($key === null || !isset(static::$disallowed[$key])) {
             return;
         }
 
+        $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
         if (!$previous || in_array($tokens[$previous]['code'], static::$wrongTokens)) {
             return;
@@ -82,8 +82,7 @@ class DisallowFunctionsSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        $key = strtolower($tokenContent);
+        $key = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
         if ($key !== 'implode') {
             return;
         }

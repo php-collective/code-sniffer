@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Sniffs\Sniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Do not use aliases or long forms of functions.
  */
-class RemoveFunctionAliasSniff implements Sniff
+class RemoveFunctionAliasSniff extends AbstractSniff
 {
     /**
      * @see http://php.net/manual/en/aliases.php
@@ -44,7 +44,7 @@ class RemoveFunctionAliasSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_STRING];
+        return $this->getGlobalFunctionNameTokenCodes();
     }
 
     /**
@@ -67,12 +67,12 @@ class RemoveFunctionAliasSniff implements Sniff
 
         $tokens = $phpcsFile->getTokens();
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        $key = strtolower($tokenContent);
-        if (!isset(static::$matching[$key])) {
+        $key = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
+        if ($key === null || !isset(static::$matching[$key])) {
             return;
         }
 
+        $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
         if (!$previous || in_array($tokens[$previous]['code'], $wrongTokens)) {
             return;
@@ -83,10 +83,16 @@ class RemoveFunctionAliasSniff implements Sniff
             return;
         }
 
-        $error = 'Function name ' . $tokenContent . '() found, should be ' . static::$matching[$key] . '().';
+        // A fully qualified call keeps its leading backslash, in the message as well as in the fix.
+        $replacement = static::$matching[$key];
+        if ($tokens[$stackPtr]['code'] === T_NAME_FULLY_QUALIFIED) {
+            $replacement = '\\' . $replacement;
+        }
+
+        $error = 'Function name ' . $tokenContent . '() found, should be ' . $replacement . '().';
         $fix = $phpcsFile->addFixableError($error, $stackPtr, 'LongInvalid');
         if ($fix) {
-            $phpcsFile->fixer->replaceToken($stackPtr, static::$matching[$key]);
+            $phpcsFile->fixer->replaceToken($stackPtr, $replacement);
         }
     }
 }

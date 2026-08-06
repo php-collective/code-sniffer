@@ -36,6 +36,19 @@ class FixMe
     }
 
     /**
+     * Only plain and fully-qualified global calls should be touched.
+     */
+    public function namespacedFunctionForms(array $list): array
+    {
+        $plain = pos($list);
+        $fullyQualified = \pos($list);
+        $qualified = Foo\pos($list);
+        $relative = namespace\pos($list);
+
+        return [$plain, $fullyQualified, $qualified, $relative];
+    }
+
+    /**
      * Resource and runtime aliases.
      */
     public function runtime($handle, string $file): void

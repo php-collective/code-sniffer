@@ -8,12 +8,12 @@
 namespace PhpCollective\Sniffs\PHP;
 
 use PHP_CodeSniffer\Files\File;
-use PHP_CodeSniffer\Sniffs\Sniff;
+use PhpCollective\Sniffs\AbstractSniffs\AbstractSniff;
 
 /**
  * Always use PHP_SAPI constant instead of php_sapi_name() function.
  */
-class PhpSapiConstantSniff implements Sniff
+class PhpSapiConstantSniff extends AbstractSniff
 {
     /**
      * @var string
@@ -25,7 +25,7 @@ class PhpSapiConstantSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_STRING];
+        return $this->getGlobalFunctionNameTokenCodes();
     }
 
     /**
@@ -37,11 +37,12 @@ class PhpSapiConstantSniff implements Sniff
 
         $wrongTokens = [T_FUNCTION, T_OBJECT_OPERATOR, T_NEW, T_DOUBLE_COLON];
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        if (strtolower($tokenContent) !== 'php_sapi_name') {
+        $functionName = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
+        if ($functionName !== 'php_sapi_name') {
             return;
         }
 
+        $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
         if ($previous === false || in_array($tokens[$previous]['code'], $wrongTokens, true)) {
             return;

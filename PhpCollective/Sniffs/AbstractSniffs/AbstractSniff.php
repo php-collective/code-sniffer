@@ -50,6 +50,40 @@ abstract class AbstractSniff implements Sniff
     private static array $classNameCache = [];
 
     /**
+     * @return array<int>
+     */
+    protected function getGlobalFunctionNameTokenCodes(): array
+    {
+        return [T_STRING, T_NAME_FULLY_QUALIFIED];
+    }
+
+    /**
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return string|null
+     */
+    protected function getGlobalFunctionName(File $phpcsFile, int $stackPtr): ?string
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        if ($tokens[$stackPtr]['code'] === T_STRING) {
+            return strtolower($tokens[$stackPtr]['content']);
+        }
+
+        if ($tokens[$stackPtr]['code'] !== T_NAME_FULLY_QUALIFIED) {
+            return null;
+        }
+
+        $functionName = substr($tokens[$stackPtr]['content'], 1);
+        if (str_contains($functionName, '\\')) {
+            return null;
+        }
+
+        return strtolower($functionName);
+    }
+
+    /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
      * @param int $stackPtr
      *
