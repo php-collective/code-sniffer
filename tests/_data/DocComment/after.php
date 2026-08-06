@@ -8,7 +8,7 @@ class DocCommentExample
 {
     /**
      * Close tag shares a line. 
-				 */
+     */
     public function closeTagSharesLine(): void
     {
     }
@@ -29,7 +29,7 @@ class DocCommentExample
 
     /**
      * Tags are too close.
-				 *
+     *
      * @return void
      */
     public function tagsNeedSpacing(): void
