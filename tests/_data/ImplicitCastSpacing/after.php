@@ -59,4 +59,14 @@ class ImplicitCastSpacingExample
     {
         $args[] = 1;
     }
+
+    /**
+     * @return array<int>
+     */
+    protected function &byRefReturn(): array
+    {
+        static $items = [];
+
+        return $items;
+    }
 }
