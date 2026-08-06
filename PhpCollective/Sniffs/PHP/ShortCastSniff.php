@@ -40,7 +40,7 @@ class ShortCastSniff implements Sniff
 
         if ($tokens[$stackPtr]['content'] === '!') {
             $prevIndex = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
-            if (!$prevIndex || $tokens[$prevIndex]['content'] !== '!') {
+            if ($prevIndex === false || $tokens[$prevIndex]['content'] !== '!') {
                 return;
             }
 

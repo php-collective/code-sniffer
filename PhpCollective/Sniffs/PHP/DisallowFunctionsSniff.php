@@ -59,7 +59,7 @@ class DisallowFunctionsSniff extends AbstractSniff
 
         $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
-        if (!$previous || in_array($tokens[$previous]['code'], static::$wrongTokens)) {
+        if ($previous === false || in_array($tokens[$previous]['code'], static::$wrongTokens)) {
             return;
         }
 
@@ -88,7 +88,7 @@ class DisallowFunctionsSniff extends AbstractSniff
         }
 
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
-        if (!$previous || in_array($tokens[$previous]['code'], static::$wrongTokens)) {
+        if ($previous === false || in_array($tokens[$previous]['code'], static::$wrongTokens)) {
             return;
         }
 
