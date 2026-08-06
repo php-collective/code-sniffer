@@ -88,35 +88,39 @@ class ImplicitCastSpacingSniff implements Sniff
             return true;
         }
 
-        $unaryPrefixes = Tokens::$operators
-            + Tokens::$assignmentTokens
-            + Tokens::$comparisonTokens
-            + Tokens::$booleanOperators
-            + Tokens::$castTokens
-            + [
-                T_OPEN_PARENTHESIS => T_OPEN_PARENTHESIS,
-                T_OPEN_SQUARE_BRACKET => T_OPEN_SQUARE_BRACKET,
-                T_OPEN_SHORT_ARRAY => T_OPEN_SHORT_ARRAY,
-                T_OPEN_CURLY_BRACKET => T_OPEN_CURLY_BRACKET,
-                T_COMMA => T_COMMA,
-                T_SEMICOLON => T_SEMICOLON,
-                T_COLON => T_COLON,
-                T_DOUBLE_ARROW => T_DOUBLE_ARROW,
-                T_INLINE_THEN => T_INLINE_THEN,
-                T_INLINE_ELSE => T_INLINE_ELSE,
-                T_RETURN => T_RETURN,
-                T_ECHO => T_ECHO,
-                T_PRINT => T_PRINT,
-                T_CASE => T_CASE,
-                T_BOOLEAN_NOT => T_BOOLEAN_NOT,
-                T_YIELD => T_YIELD,
-                T_YIELD_FROM => T_YIELD_FROM,
-                T_THROW => T_THROW,
-                T_FN_ARROW => T_FN_ARROW,
-                T_MATCH_ARROW => T_MATCH_ARROW,
-                T_OPEN_TAG => T_OPEN_TAG,
-                T_OPEN_TAG_WITH_ECHO => T_OPEN_TAG_WITH_ECHO,
-            ];
+        static $unaryPrefixes = null;
+
+        if ($unaryPrefixes === null) {
+            $unaryPrefixes = Tokens::$operators
+                + Tokens::$assignmentTokens
+                + Tokens::$comparisonTokens
+                + Tokens::$booleanOperators
+                + Tokens::$castTokens
+                + [
+                    T_OPEN_PARENTHESIS => T_OPEN_PARENTHESIS,
+                    T_OPEN_SQUARE_BRACKET => T_OPEN_SQUARE_BRACKET,
+                    T_OPEN_SHORT_ARRAY => T_OPEN_SHORT_ARRAY,
+                    T_OPEN_CURLY_BRACKET => T_OPEN_CURLY_BRACKET,
+                    T_COMMA => T_COMMA,
+                    T_SEMICOLON => T_SEMICOLON,
+                    T_COLON => T_COLON,
+                    T_DOUBLE_ARROW => T_DOUBLE_ARROW,
+                    T_INLINE_THEN => T_INLINE_THEN,
+                    T_INLINE_ELSE => T_INLINE_ELSE,
+                    T_RETURN => T_RETURN,
+                    T_ECHO => T_ECHO,
+                    T_PRINT => T_PRINT,
+                    T_CASE => T_CASE,
+                    T_BOOLEAN_NOT => T_BOOLEAN_NOT,
+                    T_YIELD => T_YIELD,
+                    T_YIELD_FROM => T_YIELD_FROM,
+                    T_THROW => T_THROW,
+                    T_FN_ARROW => T_FN_ARROW,
+                    T_MATCH_ARROW => T_MATCH_ARROW,
+                    T_OPEN_TAG => T_OPEN_TAG,
+                    T_OPEN_TAG_WITH_ECHO => T_OPEN_TAG_WITH_ECHO,
+                ];
+        }
 
         return isset($unaryPrefixes[$tokens[$previousIndex]['code']]);
     }
