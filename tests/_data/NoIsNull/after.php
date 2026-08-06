@@ -67,4 +67,17 @@ class FixMe
     {
         return $x === null;
     }
+
+    /**
+     * Only plain and fully-qualified global calls should be touched.
+     */
+    public function namespacedFunctionForms($x): array
+    {
+        $plain = $x === null;
+        $fullyQualified = $x === null;
+        $qualified = Foo\is_null($x);
+        $relative = namespace\is_null($x);
+
+        return [$plain, $fullyQualified, $qualified, $relative];
+    }
 }

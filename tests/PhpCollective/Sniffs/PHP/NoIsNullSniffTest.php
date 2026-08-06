@@ -17,7 +17,7 @@ class NoIsNullSniffTest extends TestCase
      */
     public function testNoIsNullSniffer(): void
     {
-        $this->assertSnifferFindsFixableErrors(new NoIsNullSniff(), 8, 8);
+        $this->assertSnifferFindsFixableErrors(new NoIsNullSniff(), 10, 10);
     }
 
     /**
@@ -25,6 +25,6 @@ class NoIsNullSniffTest extends TestCase
      */
     public function testNoIsNullFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new NoIsNullSniff(), 8);
+        $this->assertSnifferCanFixErrors(new NoIsNullSniff(), 10);
     }
 }

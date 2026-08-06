@@ -21,7 +21,7 @@ class NoIsNullSniff extends AbstractSniff
      */
     public function register(): array
     {
-        return [T_STRING];
+        return $this->getGlobalFunctionNameTokenCodes();
     }
 
     /**
@@ -33,11 +33,12 @@ class NoIsNullSniff extends AbstractSniff
 
         $tokens = $phpcsFile->getTokens();
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        if (strtolower($tokenContent) !== 'is_null') {
+        $functionName = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
+        if ($functionName !== 'is_null') {
             return;
         }
 
+        $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
         if (!$previous || in_array($tokens[$previous]['code'], $wrongTokens)) {
             return;

@@ -107,9 +107,9 @@ class PipeOperatorSpacingSniff implements Sniff
             $message = 'Expected at least 1 space before "|"; 0 found';
             $fix = $phpcsFile->addFixableError($message, $stackPtr, 'MissingBefore');
             if ($fix) {
-                // Grow the preceding token rather than the operator itself: on PHP 8.5 the
-                // whole `|>` is one token, so the "after" fix would target the same index and
-                // one of the two changes would be dropped.
+                // Grow a neighboring token rather than the operator itself. Both spacing fixes
+                // deliberately avoid the `|>` token because on PHP 8.5 the whole operator is a
+                // single token, and two mutations of one index in one fixer pass would collide.
                 $phpcsFile->fixer->addContent($stackPtr - 1, ' ');
             }
         } else {

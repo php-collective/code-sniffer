@@ -30,7 +30,7 @@ class PreferCastOverFunctionSniff extends AbstractSniff
      */
     public function register(): array
     {
-        return [T_STRING];
+        return $this->getGlobalFunctionNameTokenCodes();
     }
 
     /**
@@ -42,12 +42,12 @@ class PreferCastOverFunctionSniff extends AbstractSniff
 
         $tokens = $phpcsFile->getTokens();
 
-        $tokenContent = $tokens[$stackPtr]['content'];
-        $key = strtolower($tokenContent);
-        if (!isset(static::$matching[$key])) {
+        $key = $this->getGlobalFunctionName($phpcsFile, $stackPtr);
+        if ($key === null || !isset(static::$matching[$key])) {
             return;
         }
 
+        $tokenContent = $tokens[$stackPtr]['content'];
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, $stackPtr - 1, null, true);
         if ($previous === false || in_array($tokens[$previous]['code'], $wrongTokens, true)) {
             return;
