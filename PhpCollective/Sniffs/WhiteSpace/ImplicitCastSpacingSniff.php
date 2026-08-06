@@ -89,6 +89,12 @@ class ImplicitCastSpacingSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
 
+        // Return by reference: `function & name()`. The name is not a variable, so this comes first.
+        $previousIndex = $phpcsFile->findPrevious(Tokens::$emptyTokens, $stackPtr - 1, null, true);
+        if ($previousIndex !== false && in_array($tokens[$previousIndex]['code'], [T_FUNCTION, T_CLOSURE, T_FN], true)) {
+            return true;
+        }
+
         $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
         if ($nextIndex === false || !in_array($tokens[$nextIndex]['code'], [T_VARIABLE, T_ELLIPSIS], true)) {
             return false;
