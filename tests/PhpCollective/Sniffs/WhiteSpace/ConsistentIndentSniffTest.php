@@ -17,7 +17,7 @@ class ConsistentIndentSniffTest extends TestCase
      */
     public function testConsistentIndentSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new ConsistentIndentSniff(), 2);
+        $this->assertSnifferFindsErrors(new ConsistentIndentSniff(), 3);
     }
 
     /**
