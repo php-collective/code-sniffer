@@ -19,11 +19,23 @@ use PHP_CodeSniffer\Util\Tokens;
 class VoidCastSniff implements Sniff
 {
     /**
+     * PHP 8.5 tokenizes the whole cast, inner whitespace included, as a single T_VOID_CAST
+     * token. Older versions have no such cast and produce `(`, `void`, `)` instead, so both
+     * forms have to be registered.
+     *
      * @inheritDoc
      */
     public function register(): array
     {
-        return [T_OPEN_PARENTHESIS];
+        $tokens = [T_OPEN_PARENTHESIS];
+
+        if (defined('T_VOID_CAST')) {
+            /** @var int $voidCast */
+            $voidCast = constant('T_VOID_CAST');
+            $tokens[] = $voidCast;
+        }
+
+        return $tokens;
     }
 
     /**
@@ -32,6 +44,15 @@ class VoidCastSniff implements Sniff
     public function process(File $phpcsFile, $stackPtr): void
     {
         $tokens = $phpcsFile->getTokens();
+
+        // PHP 8.5+: single token carrying the whole cast.
+        if ($tokens[$stackPtr]['type'] === 'T_VOID_CAST') {
+            $this->checkSpacingBeforeCast($phpcsFile, $stackPtr);
+            $this->checkSingleTokenCastContent($phpcsFile, $stackPtr);
+            $this->checkSpacingAfterCast($phpcsFile, $stackPtr);
+
+            return;
+        }
 
         // Check if this is a (void) cast pattern
         $nextNonWhitespace = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
@@ -137,6 +158,52 @@ class VoidCastSniff implements Sniff
     }
 
     /**
+     * Check that there's no space within the cast (void) not ( void ).
+     *
+     * On PHP 8.5+ the inner whitespace is part of the T_VOID_CAST token itself, so it has to
+     * be read off the token content rather than from surrounding tokens.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return void
+     */
+    protected function checkSingleTokenCastContent(File $phpcsFile, int $stackPtr): void
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        if (!preg_match('/^\((\s*)(\w+)(\s*)\)$/', $tokens[$stackPtr]['content'], $matches)) {
+            return;
+        }
+
+        $replacement = '(' . $matches[2] . ')';
+
+        if ($matches[1] !== '') {
+            $fix = $phpcsFile->addFixableError(
+                'No space expected after opening parenthesis in void cast',
+                $stackPtr,
+                'SpaceAfterOpenParen',
+            );
+            if ($fix) {
+                $phpcsFile->fixer->replaceToken($stackPtr, $replacement);
+            }
+        }
+
+        if ($matches[3] === '') {
+            return;
+        }
+
+        $fix = $phpcsFile->addFixableError(
+            'No space expected before closing parenthesis in void cast',
+            $stackPtr,
+            'SpaceBeforeCloseParen',
+        );
+        if ($fix) {
+            $phpcsFile->fixer->replaceToken($stackPtr, $replacement);
+        }
+    }
+
+    /**
      * Check that there's exactly one space after the cast
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
@@ -160,7 +227,10 @@ class VoidCastSniff implements Sniff
                 'MissingSpaceAfter',
             );
             if ($fix) {
-                $phpcsFile->fixer->addContent($closeParen, ' ');
+                // Grow the following token rather than the cast itself: on PHP 8.5 the whole
+                // cast is one token, so the inner-spacing fix would target the same index and
+                // one of the two changes would be dropped.
+                $phpcsFile->fixer->addContentBefore($nextToken, ' ');
             }
         } else {
             $nextNonWhitespace = $phpcsFile->findNext(Tokens::$emptyTokens, $nextToken, null, true);

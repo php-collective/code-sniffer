@@ -27,6 +27,9 @@ class PipeOperatorExample
         // Combination of issues
         $bad4 = $input|>trim(...)  |>  strtolower(...);
 
+        // Space between | and >
+        $bad5 = $input | > trim(...);
+
         return $output;
     }
 }

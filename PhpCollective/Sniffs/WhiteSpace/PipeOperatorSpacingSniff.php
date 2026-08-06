@@ -20,11 +20,23 @@ use PHP_CodeSniffer\Util\Tokens;
 class PipeOperatorSpacingSniff implements Sniff
 {
     /**
+     * PHP 8.5 tokenizes `|>` as a single T_PIPE token. On older versions, and on PHP 8.5
+     * whenever the two characters are separated, it comes through as T_BITWISE_OR followed
+     * by T_GREATER_THAN. Both forms have to be registered.
+     *
      * @inheritDoc
      */
     public function register(): array
     {
-        return [T_BITWISE_OR];
+        $tokens = [T_BITWISE_OR];
+
+        if (defined('T_PIPE')) {
+            /** @var int $pipe */
+            $pipe = constant('T_PIPE');
+            $tokens[] = $pipe;
+        }
+
+        return $tokens;
     }
 
     /**
@@ -33,6 +45,14 @@ class PipeOperatorSpacingSniff implements Sniff
     public function process(File $phpcsFile, $stackPtr): void
     {
         $tokens = $phpcsFile->getTokens();
+
+        // PHP 8.5+: the whole operator is a single token, so there is nothing in between.
+        if ($tokens[$stackPtr]['type'] === 'T_PIPE') {
+            $this->checkSpacingBefore($phpcsFile, $stackPtr);
+            $this->checkSpacingAfter($phpcsFile, $stackPtr);
+
+            return;
+        }
 
         // Check if this is part of a pipe operator (|>)
         $nextNonWhitespace = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
@@ -87,7 +107,10 @@ class PipeOperatorSpacingSniff implements Sniff
             $message = 'Expected at least 1 space before "|"; 0 found';
             $fix = $phpcsFile->addFixableError($message, $stackPtr, 'MissingBefore');
             if ($fix) {
-                $phpcsFile->fixer->addContentBefore($stackPtr, ' ');
+                // Grow the preceding token rather than the operator itself: on PHP 8.5 the
+                // whole `|>` is one token, so the "after" fix would target the same index and
+                // one of the two changes would be dropped.
+                $phpcsFile->fixer->addContent($stackPtr - 1, ' ');
             }
         } else {
             $content = $tokens[$stackPtr - 1]['content'];
@@ -106,38 +129,39 @@ class PipeOperatorSpacingSniff implements Sniff
      * Check that there's exactly one space after the pipe operator
      *
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
-     * @param int $greaterThanPtr Pointer to the > token
+     * @param int $pipeEnd Pointer to the last token of the operator: the `>` on the two-token
+     *   form, or the whole `|>` token on PHP 8.5+.
      *
      * @return void
      */
-    protected function checkSpacingAfter(File $phpcsFile, int $greaterThanPtr): void
+    protected function checkSpacingAfter(File $phpcsFile, int $pipeEnd): void
     {
         $tokens = $phpcsFile->getTokens();
 
-        $nextIndex = $phpcsFile->findNext(T_WHITESPACE, $greaterThanPtr + 1, null, true);
+        $nextIndex = $phpcsFile->findNext(T_WHITESPACE, $pipeEnd + 1, null, true);
         if (!$nextIndex) {
             return;
         }
 
         // Check if next token is on a different line
-        if ($tokens[$nextIndex]['line'] !== $tokens[$greaterThanPtr]['line']) {
+        if ($tokens[$nextIndex]['line'] !== $tokens[$pipeEnd]['line']) {
             return;
         }
 
-        if ($tokens[$greaterThanPtr + 1]['code'] !== T_WHITESPACE) {
+        if ($tokens[$pipeEnd + 1]['code'] !== T_WHITESPACE) {
             $message = 'Expected at least 1 space after ">"; 0 found';
-            $fix = $phpcsFile->addFixableError($message, $greaterThanPtr, 'MissingAfter');
+            $fix = $phpcsFile->addFixableError($message, $pipeEnd, 'MissingAfter');
             if ($fix) {
-                $phpcsFile->fixer->addContent($greaterThanPtr, ' ');
+                $phpcsFile->fixer->addContentBefore($pipeEnd + 1, ' ');
             }
         } else {
-            $content = $tokens[$greaterThanPtr + 1]['content'];
-            if ($content !== ' ' && $tokens[$nextIndex]['line'] === $tokens[$greaterThanPtr]['line']) {
+            $content = $tokens[$pipeEnd + 1]['content'];
+            if ($content !== ' ' && $tokens[$nextIndex]['line'] === $tokens[$pipeEnd]['line']) {
                 $message = 'Expected 1 space after ">", but %d found';
                 $data = [strlen($content)];
-                $fix = $phpcsFile->addFixableError($message, $greaterThanPtr, 'TooManyAfter', $data);
+                $fix = $phpcsFile->addFixableError($message, $pipeEnd, 'TooManyAfter', $data);
                 if ($fix) {
-                    $phpcsFile->fixer->replaceToken($greaterThanPtr + 1, ' ');
+                    $phpcsFile->fixer->replaceToken($pipeEnd + 1, ' ');
                 }
             }
         }

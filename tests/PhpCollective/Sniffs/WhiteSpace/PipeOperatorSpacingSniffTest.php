@@ -17,7 +17,7 @@ class PipeOperatorSpacingSniffTest extends TestCase
      */
     public function testPipeOperatorSpacingSniffer(): void
     {
-        $this->assertSnifferFindsFixableErrors(new PipeOperatorSpacingSniff(), 10, 10);
+        $this->assertSnifferFindsFixableErrors(new PipeOperatorSpacingSniff(), 11, 11);
     }
 
     /**
@@ -25,6 +25,6 @@ class PipeOperatorSpacingSniffTest extends TestCase
      */
     public function testPipeOperatorSpacingFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new PipeOperatorSpacingSniff(), 10);
+        $this->assertSnifferCanFixErrors(new PipeOperatorSpacingSniff(), 11);
     }
 }

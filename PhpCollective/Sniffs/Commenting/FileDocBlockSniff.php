@@ -233,11 +233,11 @@ class FileDocBlockSniff extends AbstractSniff
 
     /**
      * @param \PHP_CodeSniffer\Files\File $phpcsFile
-     * @param int|null $fileDocBlockStartPosition
+     * @param int $fileDocBlockStartPosition
      *
      * @return array<string>
      */
-    protected function getFileDocBlockLines(File $phpcsFile, ?int $fileDocBlockStartPosition): array
+    protected function getFileDocBlockLines(File $phpcsFile, int $fileDocBlockStartPosition): array
     {
         $tokens = $phpcsFile->getTokens();
         $fileDocBlockEndPosition = $tokens[$fileDocBlockStartPosition]['comment_closer'];
