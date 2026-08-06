@@ -7,7 +7,6 @@ namespace PhpCollective;
 class DocBlockTagGroupingExample
 {
     /**
-     *
      * @var string
      */
     public const TAGS_START_TOO_LATE = 'start';
