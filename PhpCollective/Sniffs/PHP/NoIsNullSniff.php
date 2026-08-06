@@ -55,7 +55,7 @@ class NoIsNullSniff extends AbstractSniff
 
         $possibleCastIndex = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
 
-        if (!$possibleCastIndex) {
+        if ($possibleCastIndex === false) {
             return;
         }
 
@@ -156,7 +156,7 @@ class NoIsNullSniff extends AbstractSniff
         $tokens = $phpcsFile->getTokens();
 
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($index - 1), null, true);
-        if (!$previous) {
+        if ($previous === false) {
             return false;
         }
 
@@ -247,7 +247,7 @@ class NoIsNullSniff extends AbstractSniff
     {
         $previous = $phpcsFile->findPrevious(T_WHITESPACE, ($stackPtr - 1), null, true);
 
-        if (!$previous) {
+        if ($previous === false) {
             return false;
         }
 
