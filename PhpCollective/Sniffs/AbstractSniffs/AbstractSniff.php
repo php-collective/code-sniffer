@@ -67,6 +67,13 @@ abstract class AbstractSniff implements Sniff
     {
         $tokens = $phpcsFile->getTokens();
 
+        // An attribute name sits in front of a parenthesis just like a call does, but it names a
+        // class. Every token between `#[` and its closer carries the opener, including grouped
+        // attributes after a comma.
+        if (isset($tokens[$stackPtr]['attribute_opener'])) {
+            return null;
+        }
+
         if ($tokens[$stackPtr]['code'] === T_STRING) {
             return strtolower($tokens[$stackPtr]['content']);
         }

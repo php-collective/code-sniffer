@@ -4,6 +4,13 @@ namespace PhpCollective;
 
 class FixMe
 {
+
+    /**
+     * Attribute names sit in front of a parenthesis but name a class, not a function.
+     */
+    #[Pos(1), Chop(2)]
+    #[\Join(3)]
+    public int $attributed = 1;
     /**
      * Type check aliases.
      */
