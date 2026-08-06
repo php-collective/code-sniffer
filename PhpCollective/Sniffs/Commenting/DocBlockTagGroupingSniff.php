@@ -175,7 +175,7 @@ class DocBlockTagGroupingSniff extends AbstractSniff
         }
 
         $fix = $phpcsFile->addFixableError('Expected no extra blank line before tags, got ' . ($diff - 1), $nextIndex, 'NoExtraNewlineBeforeTags');
-        if ($fix) {
+        if (!$fix) {
             return;
         }
 
