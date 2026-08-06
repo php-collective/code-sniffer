@@ -4,6 +4,22 @@ namespace PhpCollective;
 
 class FixMe
 {
+    public string $label = 'x' {
+        get {
+            return $this->label;
+        }
+        set {
+            $this->label = $value;
+        }
+    }
+
+    public string $misindentedLabel = 'x' {
+        set {
+            $this->misindentedLabel = $value;
+            $this->misindentedLabel = trim($this->misindentedLabel);
+        }
+    }
+
     public function orphanedIndentExample($params): array
     {
         if (!isset($params['url']['unresolved'])) {

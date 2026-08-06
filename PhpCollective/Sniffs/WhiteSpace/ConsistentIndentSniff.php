@@ -65,7 +65,7 @@ class ConsistentIndentSniff extends AbstractSniff
         }
 
         // Get the expected indentation based on scope
-        $expectedIndent = $this->getExpectedIndent($tokens[$nextToken]);
+        $expectedIndent = $this->getExpectedIndent($phpcsFile, $nextToken, $tokens);
 
         // Skip anything that could be intentional (most things)
         if ($this->isInsideClosure($phpcsFile, $nextToken, $tokens)) {
@@ -180,15 +180,18 @@ class ConsistentIndentSniff extends AbstractSniff
     /**
      * Get the expected indentation level based on scope.
      *
-     * @param array<string, mixed> $token
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     * @param array<int, array<string, mixed>> $tokens
      *
      * @return int
      */
-    protected function getExpectedIndent(array $token): int
+    protected function getExpectedIndent(File $phpcsFile, int $stackPtr, array $tokens): int
     {
+        $token = $tokens[$stackPtr];
         $conditions = $token['conditions'];
 
-        return count($conditions);
+        return count($conditions) + $this->getUnscopedBraceIndent($phpcsFile, $stackPtr, $tokens);
     }
 
     /**
@@ -328,6 +331,17 @@ class ConsistentIndentSniff extends AbstractSniff
     private static array $arrowFunctionScopesCache = [];
 
     /**
+     * Per-file cache of paired curly-brace ranges that phpcs did not model as scopes.
+     *
+     * PHP 8.4 property hooks are one example: their braces have bracket
+     * opener/closer metadata, but they are not propagated through the
+     * `conditions` map. These ranges still affect block indentation.
+     *
+     * @var array<string, array{count: int, scopes: array<int, array{0: int, 1: int}>}>
+     */
+    private static array $unscopedBraceScopesCache = [];
+
+    /**
      * Check if the current position is inside a closure or arrow function.
      *
      * Fast path: phpcs's PHP tokenizer rewrites the `conditions` map of every
@@ -396,6 +410,73 @@ class ConsistentIndentSniff extends AbstractSniff
         }
 
         self::$arrowFunctionScopesCache[$cacheKey] = [
+            'count' => $tokenCount,
+            'scopes' => $scopes,
+        ];
+
+        return $scopes;
+    }
+
+    /**
+     * Count unscoped brace ranges enclosing the current token.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return int
+     */
+    protected function getUnscopedBraceIndent(File $phpcsFile, int $stackPtr, array $tokens): int
+    {
+        $indent = 0;
+        foreach ($this->getUnscopedBraceScopes($phpcsFile, $tokens) as $range) {
+            if ($stackPtr > $range[0] && $stackPtr < $range[1]) {
+                $indent++;
+            }
+        }
+
+        return $indent;
+    }
+
+    /**
+     * Build (and cache per file) unscoped paired curly-brace ranges.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param array<int, array<string, mixed>> $tokens
+     *
+     * @return array<int, array{0: int, 1: int}>
+     */
+    protected function getUnscopedBraceScopes(File $phpcsFile, array $tokens): array
+    {
+        $cacheKey = $phpcsFile->getFilename();
+        $tokenCount = count($tokens);
+        if (
+            isset(self::$unscopedBraceScopesCache[$cacheKey])
+            && self::$unscopedBraceScopesCache[$cacheKey]['count'] === $tokenCount
+        ) {
+            return self::$unscopedBraceScopesCache[$cacheKey]['scopes'];
+        }
+
+        $scopeOpeners = [];
+        foreach ($tokens as $token) {
+            if (isset($token['scope_opener'])) {
+                $scopeOpeners[$token['scope_opener']] = true;
+            }
+        }
+
+        $scopes = [];
+        foreach ($tokens as $stackPtr => $token) {
+            if ($token['code'] !== T_OPEN_CURLY_BRACKET) {
+                continue;
+            }
+            if (!isset($token['bracket_closer']) || isset($scopeOpeners[$stackPtr])) {
+                continue;
+            }
+
+            $scopes[] = [$stackPtr, $token['bracket_closer']];
+        }
+
+        self::$unscopedBraceScopesCache[$cacheKey] = [
             'count' => $tokenCount,
             'scopes' => $scopes,
         ];
