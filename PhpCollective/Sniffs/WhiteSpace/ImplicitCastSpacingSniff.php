@@ -22,7 +22,7 @@ class ImplicitCastSpacingSniff implements Sniff
      */
     public function register(): array
     {
-        return [T_BOOLEAN_NOT, T_NONE, T_ASPERAND, T_INC, T_DEC, T_MINUS];
+        return [T_BOOLEAN_NOT, T_NONE, T_ASPERAND, T_INC, T_DEC, T_MINUS, T_BITWISE_AND];
     }
 
     /**
@@ -35,6 +35,11 @@ class ImplicitCastSpacingSniff implements Sniff
         if ($tokens[$stackPtr]['code'] === T_INC || $tokens[$stackPtr]['code'] === T_DEC) {
             $this->processIncDec($phpcsFile, $stackPtr);
 
+            return;
+        }
+
+        // `&` marks a reference here; as bitwise and it wants its spaces.
+        if ($tokens[$stackPtr]['code'] === T_BITWISE_AND && !$this->isReferenceOperator($phpcsFile, $stackPtr)) {
             return;
         }
 
@@ -63,6 +68,48 @@ class ImplicitCastSpacingSniff implements Sniff
             $phpcsFile->fixer->replaceToken($stackPtr + 1, '');
             $phpcsFile->fixer->endChangeset();
         }
+    }
+
+    /**
+     * `&` binds a reference rather than a bitwise and when it sits in front of a variable - or the
+     * ellipsis of a by-reference variadic - and
+     * either follows something that cannot end a value, or stands in a parameter list.
+     *
+     * The parameter list case needs its own test because a type hint precedes the marker in
+     * `function f(array & $items)`, and a type hint reads exactly like the left operand of a
+     * bitwise and. Requiring a variable on the right keeps a default such as
+     * `function f(int $x = A & B)` out of it.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $stackPtr
+     *
+     * @return bool
+     */
+    protected function isReferenceOperator(File $phpcsFile, int $stackPtr): bool
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $stackPtr + 1, null, true);
+        if ($nextIndex === false || !in_array($tokens[$nextIndex]['code'], [T_VARIABLE, T_ELLIPSIS], true)) {
+            return false;
+        }
+
+        if ($this->isUnaryOperator($phpcsFile, $stackPtr)) {
+            return true;
+        }
+
+        foreach ($tokens[$stackPtr]['nested_parenthesis'] ?? [] as $opener => $closer) {
+            if (!isset($tokens[$opener]['parenthesis_owner'])) {
+                continue;
+            }
+
+            $owner = $tokens[$opener]['parenthesis_owner'];
+            if (in_array($tokens[$owner]['code'], [T_FUNCTION, T_CLOSURE, T_FN], true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -111,6 +158,7 @@ class ImplicitCastSpacingSniff implements Sniff
                     T_ECHO => T_ECHO,
                     T_PRINT => T_PRINT,
                     T_CASE => T_CASE,
+                    T_AS => T_AS,
                     T_BOOLEAN_NOT => T_BOOLEAN_NOT,
                     T_YIELD => T_YIELD,
                     T_YIELD_FROM => T_YIELD_FROM,

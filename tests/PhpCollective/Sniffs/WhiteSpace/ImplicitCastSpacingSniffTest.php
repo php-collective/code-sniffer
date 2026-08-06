@@ -17,7 +17,7 @@ class ImplicitCastSpacingSniffTest extends TestCase
      */
     public function testImplicitCastSpacingSniffer(): void
     {
-        $this->assertSnifferFindsFixableErrors(new ImplicitCastSpacingSniff(), 4, 4);
+        $this->assertSnifferFindsFixableErrors(new ImplicitCastSpacingSniff(), 8, 8);
     }
 
     /**
@@ -25,6 +25,6 @@ class ImplicitCastSpacingSniffTest extends TestCase
      */
     public function testImplicitCastSpacingFixer(): void
     {
-        $this->assertSnifferCanFixErrors(new ImplicitCastSpacingSniff(), 4);
+        $this->assertSnifferCanFixErrors(new ImplicitCastSpacingSniff(), 8);
     }
 }
