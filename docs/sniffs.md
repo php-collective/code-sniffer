@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 251 sniffs
+The PhpCollectiveStrict standard contains 250 sniffs
 
 Generic (27 sniffs)
 -------------------
@@ -163,7 +163,7 @@ PSR2 (12 sniffs)
 - PSR2.Namespaces.NamespaceDeclaration
 - PSR2.Namespaces.UseDeclaration
 
-PSR12 (14 sniffs)
+PSR12 (13 sniffs)
 -----------------
 - PSR12.Classes.AnonClassDeclaration
 - PSR12.Classes.ClassInstantiation
@@ -174,7 +174,6 @@ PSR12 (14 sniffs)
 - PSR12.Files.ImportStatement
 - PSR12.Functions.NullableTypeDeclaration
 - PSR12.Functions.ReturnTypeDeclaration
-- PSR12.Keywords.ShortFormTypeKeywords
 - PSR12.Namespaces.CompoundNamespaceDepth
 - PSR12.Operators.OperatorSpacing
 - PSR12.Properties.ConstantVisibility

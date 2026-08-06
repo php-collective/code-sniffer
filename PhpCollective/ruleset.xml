@@ -207,15 +207,16 @@
 
     <rule ref="Squiz.PHP.Eval"/>
     <!--
-        Setting the property replaces the sniff's defaults, so `sizeof` and `delete` have to be
-        repeated here. `create_function` and `each` live here rather than on
+        Setting the property replaces the sniff's defaults, so `delete` has to be repeated
+        here. `create_function` and `each` live here rather than on
         Generic.PHP.DeprecatedFunctions because that sniff builds its list from the running
-        PHP version, where both are long gone.
+        PHP version, where both are long gone. `sizeof` is deliberately NOT listed: it is
+        already reported by PhpCollective.PHP.RemoveFunctionAlias, which unlike this sniff
+        can fix it.
     -->
     <rule ref="Generic.PHP.ForbiddenFunctions">
         <properties>
             <property name="forbiddenFunctions" type="array">
-                <element key="sizeof" value="count"/>
                 <element key="delete" value="unset"/>
                 <element key="create_function" value="null"/>
                 <element key="each" value="null"/>
@@ -234,6 +235,30 @@
         <exclude name="PSR12.Files.FileHeader"/>
         <exclude name="PSR12.Files.DeclareStatement"/>
         <exclude name="PSR12.Files.OpenTag"/>
+        <!-- Long casts are covered by SlevomatCodingStandard.PHP.TypeCast, which catches more. -->
+        <exclude name="PSR12.Keywords.ShortFormTypeKeywords"/>
+    </rule>
+
+    <!--
+        Three rules used to report every long cast. SlevomatCodingStandard.PHP.TypeCast above is
+        the only one that covers all of them - it also rewrites `(double)` to `(float)` and copes
+        with inner spaces like `( boolean )` - so the two narrower ones are silenced here.
+
+        ShortCast matches token content literally and only knows `(boolean)` and `(integer)`; its
+        DoubleNotInvalid check stays on, since nothing else flags `!!`.
+    -->
+    <rule ref="PhpCollective.PHP.ShortCast">
+        <exclude name="PhpCollective.PHP.ShortCast.LongInvalid"/>
+    </rule>
+
+    <!--
+        The incrementer half duplicates Generic.WhiteSpace.IncrementDecrementSpacing, which also
+        handles targets like `$b[0] ++`. The remaining check, spacing after `!`, `@` and friends,
+        has no equivalent and stays on.
+    -->
+    <rule ref="PhpCollective.WhiteSpace.ImplicitCastSpacing">
+        <exclude name="PhpCollective.WhiteSpace.ImplicitCastSpacing.WhitespaceBeforeVariable"/>
+        <exclude name="PhpCollective.WhiteSpace.ImplicitCastSpacing.WhitespaceAfterVariable"/>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Operators.SpreadOperatorSpacing"/>
