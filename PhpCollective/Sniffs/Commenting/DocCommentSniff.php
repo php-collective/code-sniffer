@@ -75,8 +75,7 @@ class DocCommentSniff extends AbstractSniff
             $error = 'The close comment tag must be the only content on the line';
             $fix = $phpcsFile->addFixableError($error, $commentEnd, 'ContentBeforeClose');
             if ($fix === true) {
-                $indentation = $tokens[$commentStart]['column'] - 1;
-                $indentation = str_repeat("\t", $indentation);
+                $indentation = $this->getIndentationWhitespace($phpcsFile, $commentStart);
 
                 $phpcsFile->fixer->beginChangeset();
 
@@ -167,7 +166,7 @@ class DocCommentSniff extends AbstractSniff
                     $phpcsFile->fixer->replaceToken($i, '');
                 }
 
-                $indent = str_repeat("\t", $tokens[$stackPtr]['column'] - 1) . ' ';
+                $indent = $this->getIndentationWhitespace($phpcsFile, $stackPtr) . ' ';
                 $phpcsFile->fixer->addContent($prev, $phpcsFile->eolChar . $indent . '*' . $phpcsFile->eolChar);
                 $phpcsFile->fixer->endChangeset();
             }
