@@ -16,4 +16,15 @@ class FixMe
 
         return [$plain, $fullyQualified, $qualified, $relative];
     }
+
+    /**
+     * First-class callable syntax must stay as is.
+     */
+    public function firstClassCallable(array $values): array
+    {
+        $strings = array_map(strval(...), $values);
+        $ints = array_map(\intval( ... ), $values);
+
+        return [$strings, $ints];
+    }
 }

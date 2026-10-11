@@ -65,4 +65,24 @@ class FixMe
 
         new Parser();
     }
+
+    /**
+     * @return void
+     */
+    public function sameNamespace(): void
+    {
+        throw new LocalException();
+    }
+
+    /**
+     * @return void
+     */
+    public function relativeNames(): void
+    {
+        if ($this->something()) {
+            throw new Sub\NestedException();
+        }
+
+        throw new SomeAliasedException\DeeperException();
+    }
 }

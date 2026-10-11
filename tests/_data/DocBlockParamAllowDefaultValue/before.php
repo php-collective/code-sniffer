@@ -99,4 +99,17 @@ class FixMe
     public function partialDocBlock(array $row, int $accountId, array &$errors): void
     {
     }
+
+    /**
+     * Narrowed array types already cover the `array` typehint.
+     *
+     * @param non-empty-array<array{int, string}> $block
+     * @param non-empty-list<string> $names
+     * @param non-empty-array $rows
+     * @param list $items
+     * @return void
+     */
+    public function narrowedArrays(array $block, array $names, array $rows, array $items): void
+    {
+    }
 }
