@@ -153,7 +153,7 @@ class DocBlockThrowsSniff extends AbstractSniff
 
                 // Handle the case where there's no namespace separator, string token, or fully qualified name token
                 // (e.g., for parenthesis after 'new')
-                if (!$this->isGivenKind([T_NS_SEPARATOR, T_STRING, T_NAME_FULLY_QUALIFIED], $tokens[$contentIndex])) {
+                if (!$this->isGivenKind([T_NS_SEPARATOR, T_STRING, T_NAME_FULLY_QUALIFIED, T_NAME_QUALIFIED], $tokens[$contentIndex])) {
                     continue;
                 }
 
@@ -248,12 +248,13 @@ class DocBlockThrowsSniff extends AbstractSniff
             $fullClass = $tokens[$position]['content'];
             ++$position;
         } else {
-            while ($this->isGivenKind([T_NS_SEPARATOR, T_STRING], $tokens[$position])) {
+            while ($this->isGivenKind([T_NS_SEPARATOR, T_STRING, T_NAME_QUALIFIED], $tokens[$position])) {
                 $fullClass .= $tokens[$position]['content'];
                 ++$position;
             }
         }
 
+        $fullyQualified = str_starts_with($fullClass, '\\');
         $class = $fullClass = ltrim($fullClass, '\\');
         $lastSeparator = strrpos($class, '\\');
         if ($lastSeparator !== false) {
@@ -265,6 +266,7 @@ class DocBlockThrowsSniff extends AbstractSniff
             'end' => $position - 1,
             'fullClass' => $fullClass,
             'class' => $class,
+            'fullyQualified' => $fullyQualified,
         ];
     }
 
@@ -283,6 +285,7 @@ class DocBlockThrowsSniff extends AbstractSniff
         int $docBlockEndIndex,
     ): void {
         $useStatements = $this->getUseStatements($phpcsFile);
+        $namespace = $this->getNamespaceAt($phpcsFile, $docBlockEndIndex);
 
         foreach ($annotations as $annotation) {
             if ($this->isInCode($annotation, $exceptions, $useStatements)) {
@@ -307,7 +310,7 @@ class DocBlockThrowsSniff extends AbstractSniff
 
         $exceptionsToAdd = [];
         foreach ($exceptions as $exception) {
-            $exception = $this->normalizeClassName($exception, $useStatements);
+            $exception = $this->normalizeClassName($exception, $useStatements, $namespace);
             if (empty($exception['fullClass'])) {
                 // We skip for complex scenarios
                 $phpcsFile->addError('Doc Block @throw annotation missing', $docBlockEndIndex, 'ThrowMissingManual');
@@ -334,18 +337,78 @@ class DocBlockThrowsSniff extends AbstractSniff
     }
 
     /**
+     * Namespace the given position is declared in; a file can hold several namespace blocks.
+     *
+     * @param \PHP_CodeSniffer\Files\File $phpcsFile
+     * @param int $index
+     *
+     * @return string
+     */
+    protected function getNamespaceAt(File $phpcsFile, int $index): string
+    {
+        $tokens = $phpcsFile->getTokens();
+
+        $namespaceIndex = $index;
+        do {
+            $namespaceIndex = $phpcsFile->findPrevious(T_NAMESPACE, $namespaceIndex - 1);
+            if ($namespaceIndex === false) {
+                return '';
+            }
+            $nextIndex = $phpcsFile->findNext(Tokens::$emptyTokens, $namespaceIndex + 1, null, true);
+            // `namespace\Foo` is the relative-name operator, not a declaration
+        } while ($nextIndex !== false && $tokens[$nextIndex]['code'] === T_NS_SEPARATOR);
+
+        if (isset($tokens[$namespaceIndex]['scope_closer']) && $tokens[$namespaceIndex]['scope_closer'] < $index) {
+            return '';
+        }
+
+        $endIndex = $phpcsFile->findNext([T_SEMICOLON, T_OPEN_CURLY_BRACKET], $namespaceIndex + 1);
+        if ($endIndex === false) {
+            return '';
+        }
+
+        $namespace = '';
+        for ($i = $namespaceIndex + 1; $i < $endIndex; $i++) {
+            if (!in_array($tokens[$i]['code'], Tokens::$emptyTokens, true)) {
+                $namespace .= $tokens[$i]['content'];
+            }
+        }
+
+        return $namespace;
+    }
+
+    /**
      * @param array<string, mixed> $exception
      * @param array<string, array<string, mixed>> $useStatements
+     * @param string $namespace Namespace of the file, to resolve names that are not imported.
      *
      * @return array<string, mixed> Exception
      */
-    protected function normalizeClassName(array $exception, array $useStatements): array
+    protected function normalizeClassName(array $exception, array $useStatements, string $namespace = ''): array
     {
+        if (!empty($exception['fullyQualified']) || empty($exception['fullClass'])) {
+            return $exception;
+        }
+
+        /** @var string $fullClass */
+        $fullClass = $exception['fullClass'];
+        $segments = explode('\\', $fullClass);
+        $first = array_shift($segments);
+
         foreach ($useStatements as $useStatement) {
-            if ($useStatement['alias'] === $exception['class'] || $useStatement['shortName'] === $exception['class']) {
-                $exception['class'] = $useStatement['shortName'];
-                $exception['fullClass'] = $useStatement['fullName'];
+            if ($useStatement['alias'] !== $first && $useStatement['shortName'] !== $first) {
+                continue;
             }
+            if (!$segments) {
+                $exception['class'] = $useStatement['shortName'];
+            }
+            $exception['fullClass'] = implode('\\', [$useStatement['fullName'], ...$segments]);
+
+            return $exception;
+        }
+
+        if ($namespace !== '') {
+            $exception['fullClass'] = $namespace . '\\' . $fullClass;
         }
 
         return $exception;

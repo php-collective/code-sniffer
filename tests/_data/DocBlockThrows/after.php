@@ -71,4 +71,27 @@ class FixMe
 
         new Parser();
     }
+
+    /**
+     * @throws \PhpCollective\LocalException
+     * @return void
+     */
+    public function sameNamespace(): void
+    {
+        throw new LocalException();
+    }
+
+    /**
+     * @throws \Foo\Baz\Exception\DeeperException
+     * @throws \PhpCollective\Sub\NestedException
+     * @return void
+     */
+    public function relativeNames(): void
+    {
+        if ($this->something()) {
+            throw new Sub\NestedException();
+        }
+
+        throw new SomeAliasedException\DeeperException();
+    }
 }

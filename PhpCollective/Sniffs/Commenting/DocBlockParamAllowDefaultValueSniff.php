@@ -237,7 +237,12 @@ class DocBlockParamAllowDefaultValueSniff extends AbstractSniff
             return false;
         }
 
-        foreach ($iterableTypes as $iterableType) {
+        $docBlockIterableTypes = [...$iterableTypes, 'non-empty-array', 'non-empty-list'];
+        if (array_intersect($docBlockIterableTypes, $parts)) {
+            return true;
+        }
+
+        foreach ($docBlockIterableTypes as $iterableType) {
             if ($this->containsTypeArray($parts, $iterableType)) {
                 return true;
             }

@@ -60,6 +60,15 @@ class PreferCastOverFunctionSniff extends AbstractSniff
 
         $closingBraceIndex = $tokens[$openingBraceIndex]['parenthesis_closer'];
 
+        // First-class callable syntax `strval(...)` is not a call and has no cast equivalent
+        $firstArgumentIndex = $phpcsFile->findNext(T_WHITESPACE, $openingBraceIndex + 1, $closingBraceIndex, true);
+        if ($firstArgumentIndex !== false && $tokens[$firstArgumentIndex]['code'] === T_ELLIPSIS) {
+            $afterEllipsisIndex = $phpcsFile->findNext(T_WHITESPACE, $firstArgumentIndex + 1, $closingBraceIndex, true);
+            if ($afterEllipsisIndex === false) {
+                return;
+            }
+        }
+
         // We must ignore when commas are encountered
         if ($this->contains($phpcsFile, 'T_COMMA', $openingBraceIndex + 1, $closingBraceIndex - 1)) {
             return;
