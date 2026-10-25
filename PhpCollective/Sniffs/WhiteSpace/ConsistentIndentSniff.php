@@ -634,6 +634,11 @@ class ConsistentIndentSniff extends AbstractSniff
      */
     protected function isInMultiLineConstruct(File $phpcsFile, int $stackPtr, array $tokens): bool
     {
+        // The backward scan below stops at `;`, which would miss the parts of a `for (...)` header
+        if (!empty($tokens[$stackPtr]['nested_parenthesis'])) {
+            return true;
+        }
+
         // Check if we have unmatched parentheses on previous lines
         $currentLine = $tokens[$stackPtr]['line'];
         $openParens = 0;

@@ -70,7 +70,11 @@
     <rule ref="SlevomatCodingStandard.TypeHints.NullableTypeForNullDefaultValue"/>
     <rule ref="SlevomatCodingStandard.TypeHints.LongTypeHints"/>
 
-    <rule ref="SlevomatCodingStandard.Attributes.AttributeAndTargetSpacing"/>
+    <rule ref="SlevomatCodingStandard.Attributes.AttributeAndTargetSpacing">
+        <properties>
+            <property name="allowOnSameLine" value="true"/>
+        </properties>
+    </rule>
     <rule ref="SlevomatCodingStandard.Attributes.RequireAttributeAfterDocComment"/>
 
     <rule ref="SlevomatCodingStandard.Classes.BackedEnumTypeSpacing"/>

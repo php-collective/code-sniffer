@@ -141,4 +141,15 @@ class FixMe
             },
         );
     }
+
+    public function forHeader(array $list, int $lastIndex): void
+    {
+        for (
+            $changeIndex = $lastIndex;
+            $list[$changeIndex] === 0 && $changeIndex > 0;
+            $changeIndex--
+        ) {
+            $list[$changeIndex] = 1;
+        }
+    }
 }

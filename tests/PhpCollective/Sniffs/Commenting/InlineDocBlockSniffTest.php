@@ -17,7 +17,7 @@ class InlineDocBlockSniffTest extends TestCase
      */
     public function testDocBlockConstSniffer(): void
     {
-        $this->assertSnifferFindsErrors(new InlineDocBlockSniff(), 1);
+        $this->assertSnifferFindsErrors(new InlineDocBlockSniff(), 2);
     }
 
     /**

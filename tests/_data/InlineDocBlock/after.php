@@ -32,5 +32,14 @@ class FixMe
         /** @var object{user_id: int, home_id: int} $row */
         $row = new \stdClass();
         $user_id = $row->user_id;
+
+        /** @var bool $deprecation Expand type for psalm */
+        $deprecation = false;
+
+        /** @var string $dotted Ends with a dot. */
+        $dotted = '';
+
+        /** @var string $reversed Some description */
+        $reversed = '';
     }
 }

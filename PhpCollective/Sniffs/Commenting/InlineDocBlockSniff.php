@@ -139,12 +139,13 @@ class InlineDocBlockSniff extends AbstractSniff
 
             $comment = $tokens[$contentTag]['content'];
 
-            if (isset($errors['space-before-end']) || isset($errors['end'])) {
-                $comment .= ' ';
+            if (isset($errors['space-before-end'])) {
+                $comment = rtrim($comment) . ' ';
             }
 
             if (isset($errors['order'])) {
-                $comment = preg_replace('|^(.+?)\s+(.+?)\s*$|', '\2 \1 ', $comment);
+                // Swap only `$var Type`, a trailing description stays where it is
+                $comment = (string)preg_replace('|^(\S+)(\s+)(\S+)|', '\3\2\1', $comment, 1);
             }
 
             $phpcsFile->fixer->replaceToken($contentTag, $comment);
@@ -217,15 +218,34 @@ class InlineDocBlockSniff extends AbstractSniff
 
         $errors = [];
 
-        if ($isSingleLine && !preg_match('|([a-z0-9]) $|i', $comment)) {
+        if ($isSingleLine && !preg_match('|\S $|', $comment)) {
             $errors['space-before-end'] = 'Expected single space before ´*/´';
         }
 
-        if (!preg_match('|^\$[a-z0-9_]+$|i', $contentMatches[3])) {
-            $errors['order'] = 'Expected `{Type} ${var}`, got `' . $contentMatches[1] . $contentMatches[2] . $contentMatches[3] . '`';
+        [$first, $second] = preg_split('|\s+|', trim($comment), 3) ?: ['', ''];
+        if ($this->isVariable($second)) {
+            return $errors;
         }
 
+        if ($this->isVariable($first)) {
+            $errors['order'] = 'Expected `{Type} ${var}`, got `' . $first . ' ' . $second . '`';
+
+            return $errors;
+        }
+
+        $phpcsFile->addError('Invalid Inline Doc Block content, expected `{Type} ${var}` style', $contentIndex, 'ContentInvalid');
+
         return $errors;
+    }
+
+    /**
+     * @param string $word
+     *
+     * @return bool
+     */
+    protected function isVariable(string $word): bool
+    {
+        return (bool)preg_match('|^\$[a-z0-9_]+$|i', $word);
     }
 
     /**
