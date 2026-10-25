@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace PhpCollective\Sniffs\Classes;
 
+use InvalidArgumentException;
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
@@ -100,11 +101,16 @@ class Psr4Sniff implements Sniff
     {
         if ($this->initialization === static::UNINITIALIZED) {
             $this->initialization = static::INITIALIZATION_FAILURE;
-            $this->autoloadabilityInspectors =
-                AutoloadabilityInspectorsFactory::create(
-                    $config->getSettings()['basepath'] ?: getcwd(),
-                    $this->composerJsonPath,
-                );
+            try {
+                $this->autoloadabilityInspectors =
+                    AutoloadabilityInspectorsFactory::create(
+                        $config->getSettings()['basepath'] ?: getcwd(),
+                        $this->composerJsonPath,
+                    );
+            } catch (InvalidArgumentException) {
+                // Missing or unreadable composer.json: nothing to check against. Invalid JSON still throws.
+                return;
+            }
             $this->initialization = static::INITIALIZED;
         }
     }
