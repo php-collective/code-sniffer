@@ -639,8 +639,8 @@ class ArrayDeclarationSniff implements Sniff
                     // Look for the first properly indented item in this array to match its indentation
                     for ($searchIdx = $arrayStart + 1; $searchIdx < $arrayEnd; $searchIdx++) {
                         if (
-                            $tokens[$searchIdx]['line'] > $tokens[$arrayStart]['line'] &&
-                            !in_array($tokens[$searchIdx]['code'], Tokens::$emptyTokens, true)
+                            $tokens[$searchIdx]['line'] > $tokens[$arrayStart]['line']
+                            && !in_array($tokens[$searchIdx]['code'], Tokens::$emptyTokens, true)
                         ) {
                             // Extract actual indentation from the line (only leading whitespace)
                             $lineStart = $phpcsFile->findFirstOnLine([], $searchIdx);
@@ -670,8 +670,8 @@ class ArrayDeclarationSniff implements Sniff
                         $count = count($tokens);
                         for ($detectIdx = 0; $detectIdx < $count; $detectIdx++) {
                             if (
-                                $tokens[$detectIdx]['code'] === T_WHITESPACE &&
-                                $tokens[$detectIdx]['line'] !== $tokens[$detectIdx - 1]['line']
+                                $tokens[$detectIdx]['code'] === T_WHITESPACE
+                                && $tokens[$detectIdx]['line'] !== $tokens[$detectIdx - 1]['line']
                             ) {
                                 $whitespace = $tokens[$detectIdx]['content'];
                                 if (str_contains($whitespace, "\t")) {
@@ -707,10 +707,10 @@ class ArrayDeclarationSniff implements Sniff
                     // Determine if we should use chunking for this line
                     $useChunking = false;
                     if (
-                        $this->nonAssocExceedAction === 'chunk' &&
-                        $this->maxNonAssocItemsPerLine > 0 &&
-                        $nonAssocCount > $this->maxNonAssocItemsPerLine &&
-                        !$hasAssociative
+                        $this->nonAssocExceedAction === 'chunk'
+                        && $this->maxNonAssocItemsPerLine > 0
+                        && $nonAssocCount > $this->maxNonAssocItemsPerLine
+                        && !$hasAssociative
                     ) {
                         // Use chunking only for pure non-associative arrays
                         $useChunking = true;

@@ -42,9 +42,9 @@ class AutoloadabilityInspector
     public function inspect(
         ClassFileUnderInspection $classFile,
     ): InspectionResult {
-        return $this->classFileIsUnderBaseDirectory($classFile) ?
-            $this->inspectAutoloadability($classFile) :
-            new PSR4UnrelatedClass();
+        return $this->classFileIsUnderBaseDirectory($classFile)
+            ? $this->inspectAutoloadability($classFile)
+            : new PSR4UnrelatedClass();
     }
 
     /**
@@ -69,9 +69,9 @@ class AutoloadabilityInspector
         $expectedClassName = $this->guessExpectedClassName($classFile);
         $actualClassName = $classFile->getClassName();
 
-        return $expectedClassName === $actualClassName ?
-            new AutoloadableClass() :
-            new NonAutoloadableClass($expectedClassName, $actualClassName);
+        return $expectedClassName === $actualClassName
+            ? new AutoloadableClass()
+            : new NonAutoloadableClass($expectedClassName, $actualClassName);
     }
 
     /**
@@ -114,9 +114,9 @@ class AutoloadabilityInspector
     {
         $basename = basename($relativeFileName);
         $filename = pathinfo($relativeFileName, PATHINFO_FILENAME);
-        $dirname = $basename === $relativeFileName ?
-            '' :
-            pathinfo($relativeFileName, PATHINFO_DIRNAME) . '/';
+        $dirname = $basename === $relativeFileName
+            ? ''
+            : pathinfo($relativeFileName, PATHINFO_DIRNAME) . '/';
 
         return str_replace('/', '\\', $dirname) . $filename;
     }
