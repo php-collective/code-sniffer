@@ -237,7 +237,12 @@
         <exclude name="PSR12.Files.OpenTag"/>
         <!-- Long casts are covered by SlevomatCodingStandard.PHP.TypeCast, which catches more. -->
         <exclude name="PSR12.Keywords.ShortFormTypeKeywords"/>
+        <!-- Replaced by PhpCollective.Operators.OperatorSpacing, which additionally treats the
+             `|` in a catch type list as a type separator (no space) instead of a bitwise operator. -->
+        <exclude name="PSR12.Operators.OperatorSpacing"/>
     </rule>
+
+    <rule ref="PhpCollective.Operators.OperatorSpacing"/>
 
     <!--
         Three rules used to report every long cast. SlevomatCodingStandard.PHP.TypeCast above is
