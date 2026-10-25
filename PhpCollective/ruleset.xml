@@ -237,6 +237,7 @@
         <exclude name="PSR12.Files.OpenTag"/>
         <!-- Long casts are covered by SlevomatCodingStandard.PHP.TypeCast, which catches more. -->
         <exclude name="PSR12.Keywords.ShortFormTypeKeywords"/>
+        <exclude name="PSR12.Operators.OperatorSpacing"/>
     </rule>
 
     <!--

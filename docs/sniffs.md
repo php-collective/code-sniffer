@@ -1,7 +1,7 @@
 # PhpCollective Code Sniffer
 
 
-The PhpCollectiveStrict standard contains 250 sniffs
+The PhpCollectiveStrict standard contains 251 sniffs
 
 Generic (27 sniffs)
 -------------------
@@ -48,7 +48,7 @@ PEAR (4 sniffs)
 - PEAR.Functions.ValidDefaultValue
 - PEAR.NamingConventions.ValidClassName
 
-PhpCollective (85 sniffs)
+PhpCollective (87 sniffs)
 -------------------------
 - PhpCollective.Arrays.ArrayBracketSpacing
 - PhpCollective.Arrays.DisallowImplicitArrayCreation
@@ -107,6 +107,7 @@ PhpCollective (85 sniffs)
 - PhpCollective.Namespaces.FunctionNamespace
 - PhpCollective.Namespaces.UseStatement
 - PhpCollective.Namespaces.UseWithAliasing
+- PhpCollective.Operators.OperatorSpacing
 - PhpCollective.PHP.DeclareStrictTypes
 - PhpCollective.PHP.DisallowFunctions
 - PhpCollective.PHP.DisallowTrailingCommaInSingleLine
@@ -122,6 +123,7 @@ PhpCollective (85 sniffs)
 - PhpCollective.Testing.AssertPrimitives
 - PhpCollective.Testing.ExpectException
 - PhpCollective.Testing.Mock
+- PhpCollective.WhiteSpace.CatchTypeSeparatorSpacing
 - PhpCollective.WhiteSpace.ConcatenationSpacing
 - PhpCollective.WhiteSpace.ConsistentIndent
 - PhpCollective.WhiteSpace.DocBlockSpacing
@@ -163,7 +165,7 @@ PSR2 (12 sniffs)
 - PSR2.Namespaces.NamespaceDeclaration
 - PSR2.Namespaces.UseDeclaration
 
-PSR12 (13 sniffs)
+PSR12 (12 sniffs)
 -----------------
 - PSR12.Classes.AnonClassDeclaration
 - PSR12.Classes.ClassInstantiation
@@ -175,7 +177,6 @@ PSR12 (13 sniffs)
 - PSR12.Functions.NullableTypeDeclaration
 - PSR12.Functions.ReturnTypeDeclaration
 - PSR12.Namespaces.CompoundNamespaceDepth
-- PSR12.Operators.OperatorSpacing
 - PSR12.Properties.ConstantVisibility
 - PSR12.Traits.UseDeclaration
 
