@@ -593,9 +593,10 @@ class ArrayDeclarationSniff implements Sniff
                 }
             }
 
+            $assocModeWithAssociative = $this->multiLineIndentationMode === 'assoc' && $hasAssociative;
             if ($this->multiLineIndentationMode === 'all') {
                 $shouldProcess = true;
-            } elseif ($this->multiLineIndentationMode === 'assoc' && $hasAssociative) {
+            } elseif ($assocModeWithAssociative) {
                 // In 'assoc' mode with associative items
                 $shouldProcess = true;
             } elseif ($this->maxNonAssocItemsPerLine > 0 && $nonAssocCount > $this->maxNonAssocItemsPerLine) {
@@ -613,7 +614,7 @@ class ArrayDeclarationSniff implements Sniff
 
                 if ($this->multiLineIndentationMode === 'all') {
                     $shouldFlag = true;
-                } elseif ($this->multiLineIndentationMode === 'assoc' && $hasAssociative) {
+                } elseif ($assocModeWithAssociative) {
                     // In 'assoc' mode with mixed items, only skip non-associative if no limit exceeded
                     if ($pair['is_associative'] || ($this->maxNonAssocItemsPerLine > 0 && $nonAssocCount > $this->maxNonAssocItemsPerLine)) {
                         $shouldFlag = true;
