@@ -510,8 +510,8 @@ class DisallowArrayTypeHintSyntaxSniff implements Sniff
      */
     protected function isArrayTypeNode(TypeNode $typeNode): bool
     {
-        return $typeNode instanceof ArrayTypeNode &&
-            ($typeNode->type instanceof IdentifierTypeNode || $typeNode->type instanceof ArrayTypeNode);
+        return $typeNode instanceof ArrayTypeNode
+            && ($typeNode->type instanceof IdentifierTypeNode || $typeNode->type instanceof ArrayTypeNode);
     }
 
     /**

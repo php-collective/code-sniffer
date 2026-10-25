@@ -102,9 +102,9 @@ class AutoloadabilityInspectorsFactory
         ?string $basePath,
         string $composerJsonPath,
     ): string {
-        return $basePath === null ?
-            $composerJsonPath :
-            $basePath . '/' . $composerJsonPath;
+        return $basePath === null
+            ? $composerJsonPath
+            : $basePath . '/' . $composerJsonPath;
     }
 
     /**

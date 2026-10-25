@@ -296,6 +296,7 @@
     <rule ref="Universal.Attributes.TrailingComma"/>
     <rule ref="Universal.ControlStructures.DisallowAlternativeSyntax"/>
     <rule ref="Universal.Operators.ConcatPosition"/>
+    <rule ref="PhpCollective.Operators.OperatorPosition"/>
     <rule ref="Universal.Operators.TypeSeparatorSpacing"/>
     <rule ref="Universal.UseStatements.NoUselessAliases"/>
     <rule ref="Universal.CodeAnalysis.NoEchoSprintf"/>

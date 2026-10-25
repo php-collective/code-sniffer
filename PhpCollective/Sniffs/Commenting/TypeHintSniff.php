@@ -120,8 +120,8 @@ class TypeHintSniff extends AbstractSniff
 
         foreach ($tokens[$stackPtr]['comment_tags'] as $tag) {
             if (
-                $tokens[$tag + 2]['code'] !== T_DOC_COMMENT_STRING ||
-                !in_array($tokens[$tag]['content'], static::$typeHintTags, true)
+                $tokens[$tag + 2]['code'] !== T_DOC_COMMENT_STRING
+                || !in_array($tokens[$tag]['content'], static::$typeHintTags, true)
             ) {
                 continue;
             }
@@ -199,8 +199,8 @@ class TypeHintSniff extends AbstractSniff
 
         foreach ($tokens[$stackPtr]['comment_tags'] as $key => $tag) {
             if (
-                $tokens[$tag + 2]['code'] !== T_DOC_COMMENT_STRING ||
-                !in_array($tokens[$tag]['content'], static::$typeHintTags, true)
+                $tokens[$tag + 2]['code'] !== T_DOC_COMMENT_STRING
+                || !in_array($tokens[$tag]['content'], static::$typeHintTags, true)
             ) {
                 continue;
             }
@@ -278,9 +278,9 @@ class TypeHintSniff extends AbstractSniff
 
         $methodProperties = $phpcsFile->getMethodProperties($stackPtr);
         if (
-            $methodProperties['return_type'] === '' ||
-            $methodProperties['return_type_token'] === false ||
-            $methodProperties['return_type_end_token'] === false
+            $methodProperties['return_type'] === ''
+            || $methodProperties['return_type_token'] === false
+            || $methodProperties['return_type_end_token'] === false
         ) {
             return;
         }
@@ -359,8 +359,8 @@ class TypeHintSniff extends AbstractSniff
                     $sortName = 'array';
                 }
             } elseif (
-                $type instanceof ArrayShapeNode ||
-                ($type instanceof GenericTypeNode && $type->type->name === 'array')
+                $type instanceof ArrayShapeNode
+                || ($type instanceof GenericTypeNode && $type->type->name === 'array')
             ) {
                 $sortName = 'array';
             }
